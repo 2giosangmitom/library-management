@@ -1,0 +1,101 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MEMBER
+  LIBRARIAN
+}
+
+model User {
+  user_id       String   @id @db.Uuid()
+  name          String   @db.VarChar(50)
+  email         String   @db.VarChar(100)
+  password_hash String   @db.VarChar(255)
+  salt          String   @db.VarChar(255)
+  role          Role     @default(MEMBER)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  loans Loan[]
+}
+
+model Author {
+  author_id     String    @id @db.Uuid()
+  name          String    @db.VarChar(100)
+  biography     String    @db.Text()
+  date_of_birth DateTime?
+  date_of_death DateTime?
+  nationality   String    @db.VarChar(100)
+  slug          String    @db.VarChar(50)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  books Book_Author[]
+}
+
+model Category {
+  category_id String   @id @db.Uuid()
+  name        String   @db.VarChar(100)
+  slug        String   @db.VarChar(50)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  books Book_Category[]
+}
+
+model Book {
+  book_id          String   @id @db.Uuid()
+  title            String   @db.VarChar(255)
+  description      String   @db.Text()
+  total_copies     Int      @db.Integer()
+  available_copies Int      @db.Integer()
+  created_at       DateTime @default(now())
+  updated_at       DateTime @updatedAt
+
+  loans      Loan[]
+  authors    Book_Author[]
+  categories Book_Category[]
+}
+
+model Book_Author {
+  book_id   String @db.Uuid()
+  author_id String @db.Uuid()
+
+  book   Book   @relation(fields: [book_id], references: [book_id])
+  author Author @relation(fields: [author_id], references: [author_id])
+
+  @@id([book_id, author_id])
+}
+
+model Book_Category {
+  book_id     String @db.Uuid()
+  category_id String @db.Uuid()
+
+  book     Book     @relation(fields: [book_id], references: [book_id])
+  category Category @relation(fields: [category_id], references: [category_id])
+
+  @@id([book_id, category_id])
+}
+
+enum LoanStatus {
+  BORROWED
+  RETURNED
+  OVERDUE
+}
+
+model Loan {
+  loan_id     String     @id @db.Uuid()
+  user_id     String     @db.Uuid()
+  book_id     String     @db.Uuid()
+  loan_date   DateTime   @db.Date()
+  due_date    DateTime   @db.Date()
+  return_date DateTime?  @db.Date()
+  status      LoanStatus @default(BORROWED)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  user User @relation(fields: [user_id], references: [user_id])
+  book Book @relation(fields: [book_id], references: [book_id])
+}
