@@ -1,32 +1,31 @@
-import { fastifySwagger } from "@fastify/swagger";
-import { fastifySwaggerUi } from "@fastify/swagger-ui";
+import { fastifySwagger } from '@fastify/swagger';
+import { fastifySwaggerUi } from '@fastify/swagger-ui';
 
 export default async function swaggerPlugin(fastify: FastifyTypeBox) {
-  fastify.log.debug("Registering Swagger plugin");
+  fastify.log.debug('Registering Swagger plugin');
 
   await fastify.register(fastifySwagger, {
     openapi: {
       info: {
-        title: "BookWise API",
-        description:
-          "API documentation for BookWise - a library management system",
-        version: "1.0.0",
+        title: 'BookWise API',
+        description: 'API documentation for BookWise - a library management system',
+        version: '1.0.0'
       },
       tags: [
-        { name: "Auth", description: "Authentication related endpoints" },
-        { name: "User", description: "User management endpoints" },
-        { name: "Book", description: "Book management endpoints" },
-        { name: "Loan", description: "Book loan management endpoints" },
-        { name: "Author", description: "Author management endpoints" },
-        { name: "Category", description: "Book category management endpoints" },
-      ],
-    },
+        { name: 'Auth', description: 'Authentication related endpoints' },
+        { name: 'User', description: 'User management endpoints' },
+        { name: 'Book', description: 'Book management endpoints' },
+        { name: 'Loan', description: 'Book loan management endpoints' },
+        { name: 'Author', description: 'Author management endpoints' },
+        { name: 'Category', description: 'Book category management endpoints' }
+      ]
+    }
   });
 
   await fastify.register(fastifySwaggerUi, {
-    routePrefix: "/docs",
+    routePrefix: '/docs',
     uiConfig: {
-      docExpansion: "list",
-    },
+      docExpansion: 'list'
+    }
   });
 }

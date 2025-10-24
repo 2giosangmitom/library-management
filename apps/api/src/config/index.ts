@@ -1,5 +1,5 @@
-import { fastifyEnv } from "@fastify/env";
-import { envSchema, envType } from "./env-schema";
+import { fastifyEnv } from '@fastify/env';
+import { envSchema, envType } from './env-schema';
 
 export default class ConfigService {
   private fastify: FastifyTypeBox;
@@ -11,7 +11,7 @@ export default class ConfigService {
   public async registerPlugin() {
     await this.fastify.register(fastifyEnv, {
       dotenv: true,
-      schema: envSchema,
+      schema: envSchema
     });
   }
 

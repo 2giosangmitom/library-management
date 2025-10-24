@@ -1,5 +1,5 @@
-import { buildApp } from "./app";
-import closeWithGrace from "close-with-grace";
+import { buildApp } from './app';
+import closeWithGrace from 'close-with-grace';
 
 async function main() {
   const app = await buildApp();
@@ -7,7 +7,7 @@ async function main() {
   // Close server gracefully
   closeWithGrace(async ({ err, signal }) => {
     if (err) {
-      app.log.error({ err }, "Server closing with error");
+      app.log.error({ err }, 'Server closing with error');
     } else {
       app.log.info(`${signal} received, server closing`);
     }
@@ -15,13 +15,13 @@ async function main() {
   });
 
   app.ready(() => {
-    app.log.debug("App routes:\n%s", app.printRoutes());
-    app.log.debug("App plugins:\n%s", app.printPlugins());
+    app.log.debug('App routes:\n%s', app.printRoutes());
+    app.log.debug('App plugins:\n%s', app.printPlugins());
   });
 
   app.listen({
-    port: parseInt(process.env.FASTIFY_PORT ?? "3000"),
-    host: process.env.FASTIFY_HOST ?? "127.0.0.1",
+    port: parseInt(process.env.FASTIFY_PORT ?? '3000'),
+    host: process.env.FASTIFY_HOST ?? '127.0.0.1'
   });
 }
 

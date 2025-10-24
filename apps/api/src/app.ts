@@ -1,16 +1,13 @@
-import { fastify } from "fastify";
-import { fastifyAutoload } from "@fastify/autoload";
-import {
-  TypeBoxTypeProvider,
-  TypeBoxValidatorCompiler,
-} from "@fastify/type-provider-typebox";
-import ConfigService from "./config";
+import { fastify } from 'fastify';
+import { fastifyAutoload } from '@fastify/autoload';
+import { TypeBoxTypeProvider, TypeBoxValidatorCompiler } from '@fastify/type-provider-typebox';
+import ConfigService from './config';
 
 async function buildApp() {
   const app = fastify({
     logger: {
-      level: process.env.NODE_ENV === "production" ? "info" : "debug",
-    },
+      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
+    }
   })
     .withTypeProvider<TypeBoxTypeProvider>()
     .setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -24,7 +21,7 @@ async function buildApp() {
   await app.register(fastifyAutoload, {
     dir: `${__dirname}/plugins`,
     options: config,
-    encapsulate: false,
+    encapsulate: false
   });
 
   // Load all modules from the modules directory
@@ -34,7 +31,7 @@ async function buildApp() {
     ignorePattern: /.*.(ts|js)/,
     indexPattern: /.*.routes.(ts|js)/,
     autoHooks: true,
-    autoHooksPattern: /.*.hooks.(ts|js)/,
+    autoHooksPattern: /.*.hooks.(ts|js)/
   });
 
   return app;

@@ -1,5 +1,5 @@
-import crypto from "node:crypto";
-import util from "node:util";
+import crypto from 'node:crypto';
+import util from 'node:util';
 
 // Promisify pbkdf2 for easier async/await usage
 const pbkdf2 = util.promisify(crypto.pbkdf2);
@@ -10,9 +10,9 @@ const pbkdf2 = util.promisify(crypto.pbkdf2);
  * @returns An object containing the salt and the hash
  */
 export async function generateHash(password: string) {
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = await pbkdf2(password, salt, 1000, 64, "sha256");
-  return { hash: hash.toString("hex"), salt };
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = await pbkdf2(password, salt, 1000, 64, 'sha256');
+  return { hash: hash.toString('hex'), salt };
 }
 
 /**
@@ -23,6 +23,6 @@ export async function generateHash(password: string) {
  * @returns True if the password is valid, false otherwise
  */
 export async function verifyHash(password: string, hash: string, salt: string) {
-  const hashToVerify = await pbkdf2(password, salt, 1000, 64, "sha256");
-  return hashToVerify.toString("hex") === hash;
+  const hashToVerify = await pbkdf2(password, salt, 1000, 64, 'sha256');
+  return hashToVerify.toString('hex') === hash;
 }
