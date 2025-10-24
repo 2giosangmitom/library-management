@@ -25,10 +25,12 @@
     "moduleDetection": "force",
     "skipLibCheck": true,
     "paths": {
-      "@src/*": ["./src/*"],
-      "@schemas/*": ["./src/schemas/*"]
+      "@config/*": ["src/config/*"],
+      "@utils/*": ["src/utils/*"],
+      "@modules/*": ["src/modules/*"],
+      "@plugins/*": ["src/plugins/*"]
     }
   },
-  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "include": ["src/**/*.ts", "tests/**/*.ts", "types/**/*.ts"],
   "exclude": ["node_modules", "dist"]
 }

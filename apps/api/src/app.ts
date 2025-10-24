@@ -1,34 +1,40 @@
 import { fastify } from "fastify";
-import { fastifyEnv } from "@fastify/env";
-import { fastifyCors } from "@fastify/cors";
 import { fastifyAutoload } from "@fastify/autoload";
-import { envSchema, envType } from "@schemas/env-schema";
+import {
+  TypeBoxTypeProvider,
+  TypeBoxValidatorCompiler,
+} from "@fastify/type-provider-typebox";
+import ConfigService from "./config";
 
 async function buildApp() {
   const app = fastify({
     logger: {
       level: process.env.NODE_ENV === "production" ? "info" : "debug",
     },
-  });
+  })
+    .withTypeProvider<TypeBoxTypeProvider>()
+    .setValidatorCompiler(TypeBoxValidatorCompiler);
 
-  // Register @fastify/env plugin to manage environment variables
-  await app.register(fastifyEnv, {
-    dotenv: true,
-    schema: envSchema,
-  });
+  const configService = new ConfigService(app);
+  await configService.registerPlugin();
 
-  // Register @fastify/autoload plugin to load all plugins and routes automatically
+  const config = configService.env;
+
+  // Load all plugins from the plugins directory
   await app.register(fastifyAutoload, {
     dir: `${__dirname}/plugins`,
+    options: config,
+    encapsulate: false,
   });
 
-  // Get environment variables
-  const config = app.getEnvs<envType>();
-
-  // Register @fastify/cors plugin
-  await app.register(fastifyCors, {
-    origin: config.CORS_ORIGINS?.split(",") ?? [],
-    methods: config.CORS_METHODS?.split(",") ?? [],
+  // Load all modules from the modules directory
+  await app.register(fastifyAutoload, {
+    dir: `${__dirname}/modules`,
+    encapsulate: true,
+    ignorePattern: /.*.(ts|js)/,
+    indexPattern: /.*.routes.(ts|js)/,
+    autoHooks: true,
+    autoHooksPattern: /.*.hooks.(ts|js)/,
   });
 
   return app;
