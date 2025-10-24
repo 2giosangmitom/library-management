@@ -9,7 +9,8 @@
     "module": "nodenext",
     "target": "esnext",
     "lib": ["esnext"],
-    "types": ["node"],
+    "types": ["node", "vitest/globals"],
+    "noEmit": true,
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
