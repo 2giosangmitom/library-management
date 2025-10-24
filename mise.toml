@@ -9,7 +9,7 @@ run = "docker compose -f compose.yml -f compose.dev.yml up postgres redis -d"
 
 [tasks.compose-down]
 description = "Stop Docker Compose services"
-run = "docker compose down"
+run = "docker compose -f compose.yml -f compose.dev.yml down"
 
 [tasks.format]
 description = "Format code using Prettier"
