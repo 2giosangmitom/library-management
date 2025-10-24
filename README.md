@@ -9,7 +9,7 @@ erDiagram
   USER {
     UUID user_id PK
     VARCHAR(50) name
-    VARCHAR(100) email
+    VARCHAR(100) email UNIQUE
     VARCHAR(255) password_hash
     VARCHAR(255) salt
     ENUM role "MEMBER, LIBRARIAN"

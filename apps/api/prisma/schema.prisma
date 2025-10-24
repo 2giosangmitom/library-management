@@ -13,9 +13,9 @@ enum Role {
 }
 
 model User {
-  user_id       String   @id @db.Uuid()
+  user_id       String   @id @default(uuid()) @db.Uuid()
   name          String   @db.VarChar(50)
-  email         String   @db.VarChar(100)
+  email         String   @unique() @db.VarChar(100)
   password_hash String   @db.VarChar(255)
   salt          String   @db.VarChar(255)
   role          Role     @default(MEMBER)
@@ -26,7 +26,7 @@ model User {
 }
 
 model Author {
-  author_id     String    @id @db.Uuid()
+  author_id     String    @id @default(uuid()) @db.Uuid()
   name          String    @db.VarChar(100)
   biography     String    @db.Text()
   date_of_birth DateTime?
@@ -40,7 +40,7 @@ model Author {
 }
 
 model Category {
-  category_id String   @id @db.Uuid()
+  category_id String   @id @default(uuid()) @db.Uuid()
   name        String   @db.VarChar(100)
   slug        String   @db.VarChar(50)
   created_at  DateTime @default(now())
@@ -50,7 +50,7 @@ model Category {
 }
 
 model Book {
-  book_id          String   @id @db.Uuid()
+  book_id          String   @id @default(uuid()) @db.Uuid()
   title            String   @db.VarChar(255)
   description      String   @db.Text()
   total_copies     Int      @db.Integer()
@@ -90,7 +90,7 @@ enum LoanStatus {
 }
 
 model Loan {
-  loan_id     String     @id @db.Uuid()
+  loan_id     String     @id @default(uuid()) @db.Uuid()
   user_id     String     @db.Uuid()
   book_id     String     @db.Uuid()
   loan_date   DateTime   @db.Date()
