@@ -2,18 +2,16 @@ import { generateHash } from '@utils/hash';
 import { AuthModel } from './auth.model';
 
 export class AuthService {
-  private fastify: FastifyTypeBox;
   private static instance: AuthService | null = null;
   private authModel: AuthModel;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-    this.authModel = AuthModel.getInstance(this.fastify);
+  private constructor(authModel: AuthModel) {
+    this.authModel = authModel;
   }
 
-  public static getInstance(fastify: FastifyTypeBox) {
+  public static getInstance(fastify: FastifyTypeBox, authModel = AuthModel.getInstance(fastify)) {
     if (!AuthService.instance) {
-      AuthService.instance = new AuthService(fastify);
+      AuthService.instance = new AuthService(authModel);
     }
     return AuthService.instance;
   }

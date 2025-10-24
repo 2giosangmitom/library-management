@@ -3,18 +3,16 @@ import { signUpSchema } from './auth.schema';
 import { AuthService } from './auth.service';
 
 export class AuthController {
-  private fastify: FastifyTypeBox;
   private static instance: AuthController | null = null;
   private authService: AuthService;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-    this.authService = AuthService.getInstance(this.fastify);
+  private constructor(authService: AuthService) {
+    this.authService = authService;
   }
 
-  public static getInstance(fastify: FastifyTypeBox) {
+  public static getInstance(fastify: FastifyTypeBox, authService = AuthService.getInstance(fastify)) {
     if (!AuthController.instance) {
-      AuthController.instance = new AuthController(fastify);
+      AuthController.instance = new AuthController(authService);
     }
     return AuthController.instance;
   }
