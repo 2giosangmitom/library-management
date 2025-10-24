@@ -1,7 +1,7 @@
 import { envType } from "@config/env-schema";
 import { PrismaClient } from "@prisma/client";
 
-export default async function (fastify: FastifyTypeBox, _opts: envType) {
+export default async function prismaPlugin(fastify: FastifyTypeBox, _opts: envType) {
   fastify.log.debug("Registering Prisma plugin");
 
   const prisma = new PrismaClient();
