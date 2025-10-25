@@ -2,5 +2,15 @@
   "name": "fastify-ts-template",
   "version": "1.0.0",
   "description": "A minimal Fastify template using TypeScript and Vue for front-end",
-  "private": true
+  "private": true,
+  "scripts": {
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@eslint/js": "^9.38.0",
+    "eslint": "^9.38.0",
+    "eslint-plugin-vue": "^10.5.1",
+    "globals": "^16.4.0",
+    "typescript-eslint": "^8.46.2"
+  }
 }

@@ -20,6 +20,21 @@ jobs:
       - name: Check code formatting
         run: mise check-format
 
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v3
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run linter
+        run: pnpm lint
+
   typecheck:
     runs-on: ubuntu-latest
     steps:

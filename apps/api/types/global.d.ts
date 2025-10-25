@@ -1,5 +1,4 @@
 import type { TypeBoxTypeProvider } from '@fastify/type-provider-typebox';
-import { Type } from '@fastify/type-provider-typebox';
 import type {
   ContextConfigDefault,
   FastifyBaseLogger,
