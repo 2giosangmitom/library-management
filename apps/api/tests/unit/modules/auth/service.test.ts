@@ -1,20 +1,20 @@
-import { AuthModel } from '@modules/auth/auth.model';
+import { UserModel } from '@modules/user/user.model';
 import { AuthService } from '@modules/auth/auth.service';
 import { fastify } from 'fastify';
 import * as hashUtils from '@utils/hash';
 
 describe('auth service', () => {
   const app = fastify();
-  const authModel = AuthModel.getInstance(app);
-  const authService = AuthService.getInstance(app, authModel);
+  const userModel = UserModel.getInstance(app);
+  const authService = AuthService.getInstance(app, userModel);
 
   describe('sign up', () => {
     beforeEach(() => {
-      authModel.createUser = vi.fn();
+      userModel.createUser = vi.fn();
     });
 
     it('should return user data if sign up is successful', async () => {
-      vi.spyOn(authModel, 'createUser').mockResolvedValueOnce({
+      vi.spyOn(userModel, 'createUser').mockResolvedValueOnce({
         user_id: 'some-uuid',
         email: 'test@example.com',
         name: 'Test User',
@@ -51,8 +51,8 @@ describe('auth service', () => {
 
       expect(hashSpy).toHaveBeenCalledOnce();
       expect(hashSpy).toHaveBeenCalledWith(password);
-      expect(authModel.createUser).toHaveBeenCalledOnce();
-      expect(authModel.createUser).toHaveBeenCalledWith({
+      expect(userModel.createUser).toHaveBeenCalledOnce();
+      expect(userModel.createUser).toHaveBeenCalledWith({
         email: 'test@example.com',
         password_hash: 'hashedPassword',
         name: 'Test User',
@@ -61,7 +61,7 @@ describe('auth service', () => {
     });
 
     it('should throw error if createUser fails', async () => {
-      vi.spyOn(authModel, 'createUser').mockRejectedValueOnce(new Error('Database error'));
+      vi.spyOn(userModel, 'createUser').mockRejectedValueOnce(new Error('Database error'));
 
       await expect(
         authService.signUp({
@@ -75,7 +75,7 @@ describe('auth service', () => {
 
   describe('sign in', () => {
     it('should return false if provide wrong email', async () => {
-      vi.spyOn(authModel, 'findUserByEmail').mockResolvedValueOnce(null);
+      vi.spyOn(userModel, 'findUserByEmail').mockResolvedValueOnce(null);
 
       await expect(authService.signIn({ email: 'test@example.com', password: 'password123' })).resolves.toEqual({
         verifyResult: false,
@@ -84,7 +84,7 @@ describe('auth service', () => {
     });
 
     it('should return false if provide wrong password', async () => {
-      vi.spyOn(authModel, 'findUserByEmail').mockResolvedValueOnce({
+      vi.spyOn(userModel, 'findUserByEmail').mockResolvedValueOnce({
         user_id: 'sample-uuid',
         password_hash: 'mock-hash',
         salt: 'mock-salt',
@@ -101,7 +101,7 @@ describe('auth service', () => {
     });
 
     it('should return true and user_id if password is correct', async () => {
-      vi.spyOn(authModel, 'findUserByEmail').mockResolvedValueOnce({
+      vi.spyOn(userModel, 'findUserByEmail').mockResolvedValueOnce({
         user_id: 'sample-uuid',
         password_hash: 'mock-hash',
         salt: 'mock-salt',
