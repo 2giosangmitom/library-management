@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { signUpSchema } from './auth.schema';
+import { signInSchema, signUpSchema } from './auth.schema';
 import { AuthService } from './auth.service';
 
 export class AuthController {
@@ -42,5 +42,28 @@ export class AuthController {
       }
       throw error;
     }
+  }
+
+  /**
+   * Route handler for signing in a user
+   * @param req Fastify request object
+   * @param reply Fastify reply object
+   */
+  public async signIn(
+    req: FastifyRequestTypeBox<typeof signInSchema>,
+    reply: FastifyReplyTypeBox<typeof signInSchema>
+  ) {
+    const { email, password } = req.body;
+
+    const { verifyResult, user_id } = await this.authService.signIn({ email, password });
+    if (!verifyResult) {
+      return reply.status(401).send({ message: 'Invalid email or password' });
+    }
+
+    const jwt = await reply.jwtSign({
+      sub: user_id
+    });
+
+    return reply.send({ jwt });
   }
 }
