@@ -46,6 +46,9 @@ importers:
       fastify-plugin:
         specifier: ^5.1.0
         version: 5.1.0
+      nanoid:
+        specifier: ^5.1.6
+        version: 5.1.6
       typebox:
         specifier: ^1.0.43
         version: 1.0.43
