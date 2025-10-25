@@ -1,4 +1,4 @@
-import { generateHash } from '@utils/hash';
+import { generateHash, verifyHash } from '@utils/hash';
 import { AuthModel } from './auth.model';
 
 export class AuthService {
@@ -30,5 +30,23 @@ export class AuthService {
       salt,
       name
     });
+  }
+
+  /**
+   * Sign in with email and password
+   * @param param0 The email and password for signing in
+   * @returns True and the user ID if the credentials are correct, otherwise false and null
+   */
+  public async signIn({ email, password }: { email: string; password: string }) {
+    const user = await this.authModel.findUserByEmail(email);
+
+    // Fails if email not exists
+    if (!user) {
+      return { verifyResult: false, user_id: null };
+    }
+
+    const verifyResult = await verifyHash(password, user.password_hash, user.salt);
+
+    return { verifyResult, user_id: verifyResult ? user.user_id : null };
   }
 }

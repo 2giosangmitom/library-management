@@ -44,4 +44,25 @@ export class AuthModel {
       }
     });
   }
+
+  /**
+   * Find a user by email
+   * @param email The email address to find
+   * @returns The user data
+   */
+  public findUserByEmail(email: string) {
+    return this.fastify.prisma.user.findUnique({
+      select: {
+        user_id: true,
+        password_hash: true,
+        salt: true,
+        name: true,
+        email: true,
+        role: true
+      },
+      where: {
+        email
+      }
+    });
+  }
 }
