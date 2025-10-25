@@ -20,6 +20,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Generate Prisma client
+        run: pnpm --filter api prisma:generate
+
       - name: Run type checking for API
         run: pnpm --filter api typecheck
 
