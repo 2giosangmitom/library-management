@@ -1,0 +1,24 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v3
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Run API tests
+        run: pnpm --filter api test
