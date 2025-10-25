@@ -1,16 +1,16 @@
-export class AuthModel {
+export class UserModel {
   private fastify: FastifyTypeBox;
-  private static instance: AuthModel | null = null;
+  private static instance: UserModel | null = null;
 
   private constructor(fastify: FastifyTypeBox) {
     this.fastify = fastify;
   }
 
   public static getInstance(fastify: FastifyTypeBox) {
-    if (!AuthModel.instance) {
-      AuthModel.instance = new AuthModel(fastify);
+    if (!UserModel.instance) {
+      UserModel.instance = new UserModel(fastify);
     }
-    return AuthModel.instance;
+    return UserModel.instance;
   }
 
   /**

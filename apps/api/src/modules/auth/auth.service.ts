@@ -1,17 +1,17 @@
 import { generateHash, verifyHash } from '@utils/hash';
-import { AuthModel } from './auth.model';
+import { UserModel } from '@modules/user/user.model';
 
 export class AuthService {
   private static instance: AuthService | null = null;
-  private authModel: AuthModel;
+  private userModel: UserModel;
 
-  private constructor(authModel: AuthModel) {
-    this.authModel = authModel;
+  private constructor(userModel: UserModel) {
+    this.userModel = userModel;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, authModel = AuthModel.getInstance(fastify)) {
+  public static getInstance(fastify: FastifyTypeBox, userModel = UserModel.getInstance(fastify)) {
     if (!AuthService.instance) {
-      AuthService.instance = new AuthService(authModel);
+      AuthService.instance = new AuthService(userModel);
     }
     return AuthService.instance;
   }
@@ -24,7 +24,7 @@ export class AuthService {
   public async signUp({ email, password, name }: { email: string; password: string; name: string }) {
     const { hash, salt } = await generateHash(password);
 
-    return this.authModel.createUser({
+    return this.userModel.createUser({
       email,
       password_hash: hash,
       salt,
@@ -38,7 +38,7 @@ export class AuthService {
    * @returns True and the user ID if the credentials are correct, otherwise false and null
    */
   public async signIn({ email, password }: { email: string; password: string }) {
-    const user = await this.authModel.findUserByEmail(email);
+    const user = await this.userModel.findUserByEmail(email);
 
     // Fails if email not exists
     if (!user) {
