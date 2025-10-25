@@ -10,7 +10,6 @@ export default class ConfigService {
 
   public async registerPlugin() {
     await this.fastify.register(fastifyEnv, {
-      dotenv: true,
       schema: envSchema
     });
   }
