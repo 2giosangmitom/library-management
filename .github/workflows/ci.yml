@@ -8,6 +8,18 @@ on:
       - master
 
 jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v3
+
+      - name: Check code formatting
+        run: mise check-format
+
   typecheck:
     runs-on: ubuntu-latest
     steps:

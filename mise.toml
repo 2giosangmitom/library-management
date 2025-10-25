@@ -14,3 +14,7 @@ run = "docker compose -f compose.yml -f compose.dev.yml down"
 [tasks.format]
 description = "Format code using Prettier"
 run = "prettier --write ."
+
+[tasks.check-format]
+description = "Check code formatting using Prettier"
+run = "prettier --check ."
