@@ -23,8 +23,8 @@ export async function build() {
   await app.register(jwtPlugin, config);
 
   // Register auth module
-  await app.register(authRoutes, { prefix: '/auth' });
   await app.register(authHooks, { prefix: '/auth' });
+  await app.register(authRoutes, { prefix: '/auth' });
 
   return app;
 }
