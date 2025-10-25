@@ -20,5 +20,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Setup containers
+        run: mise compose-up-dev
+
       - name: Run API tests
         run: pnpm --filter api test
