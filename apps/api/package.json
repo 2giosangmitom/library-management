@@ -3,15 +3,17 @@
   "version": "1.0.0",
   "description": "API service for Fastify TypeScript template",
   "scripts": {
-    "dev": "NODE_ENV=development tsx --watch src/server.ts | pino-pretty",
+    "dev": "NODE_ENV=development tsx --env-file .env --watch src/server.ts | pino-pretty",
     "build": "esbuild 'src/**/*.ts' --outdir=dist --platform=node --format=cjs --minify && tsc-alias -p tsconfig.json",
     "start": "NODE_ENV=production node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "typecheck": "tsc",
-    "test": "vitest run",
-    "test:dev": "vitest dev",
-    "test:coverage": "vitest run --coverage"
+    "prisma:migrate:test": "dotenv -e .env.test -- prisma migrate dev",
+    "prisma:migrate:reset:test": "dotenv -e .env.test -- prisma migrate reset --force",
+    "pretest": "pnpm prisma:migrate:test && pnpm prisma:migrate:reset:test",
+    "test": "dotenv -e .env.test -- vitest run",
+    "test:coverage": "dotenv -e .env.test -- vitest run --coverage"
   },
   "dependencies": {
     "@fastify/autoload": "^6.3.1",
@@ -25,12 +27,14 @@
     "@prisma/client": "^6.18.0",
     "close-with-grace": "^2.3.0",
     "fastify": "^5.6.1",
+    "fastify-plugin": "^5.1.0",
     "typebox": "^1.0.43",
     "typescript": "~5.9.3"
   },
   "devDependencies": {
     "@types/node": "^22.18.12",
     "@vitest/coverage-v8": "^4.0.2",
+    "dotenv-cli": "^10.0.0",
     "esbuild": "^0.25.11",
     "pino-pretty": "^13.1.2",
     "prisma": "^6.18.0",

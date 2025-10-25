@@ -1,4 +1,4 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { Prisma } from '@prisma/client';
 import { signUpSchema } from './auth.schema';
 import { AuthService } from './auth.service';
 
@@ -35,7 +35,7 @@ export class AuthController {
         created_at: newUser.created_at.toISOString()
       });
     } catch (error) {
-      if (error instanceof PrismaClientKnownRequestError) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           return reply.status(409).send({ message: 'Email already exists' });
         }

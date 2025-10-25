@@ -43,6 +43,9 @@ importers:
       fastify:
         specifier: ^5.6.1
         version: 5.6.1
+      fastify-plugin:
+        specifier: ^5.1.0
+        version: 5.1.0
       typebox:
         specifier: ^1.0.43
         version: 1.0.43
@@ -56,6 +59,9 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^4.0.2
         version: 4.0.2(vitest@4.0.2(@types/node@22.18.12)(jiti@2.6.1)(tsx@4.20.6)(yaml@2.8.1))
+      dotenv-cli:
+        specifier: ^10.0.0
+        version: 10.0.0
       esbuild:
         specifier: ^0.25.11
         version: 0.25.11
@@ -1094,8 +1100,16 @@ packages:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
 
+  dotenv-cli@10.0.0:
+    resolution: {integrity: sha512-lnOnttzfrzkRx2echxJHQRB6vOAMSCzzZg79IxpC00tU42wZPuZkQxNNrrwVAxaQZIIh001l4PxVlCrBxngBzA==}
+    hasBin: true
+
   dotenv-expand@10.0.0:
     resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
+    engines: {node: '>=12'}
+
+  dotenv-expand@11.0.7:
+    resolution: {integrity: sha512-zIHwmZPRshsCdpMDyVsqGmgyP0yT8GAgXUnkdAoJisxvf33k7yO6OuoKmcTGuXPWSsm8Oh88nZicRLA9Y0rUeA==}
     engines: {node: '>=12'}
 
   dotenv@16.6.1:
@@ -3120,7 +3134,18 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
+  dotenv-cli@10.0.0:
+    dependencies:
+      cross-spawn: 7.0.6
+      dotenv: 17.2.3
+      dotenv-expand: 11.0.7
+      minimist: 1.2.8
+
   dotenv-expand@10.0.0: {}
+
+  dotenv-expand@11.0.7:
+    dependencies:
+      dotenv: 16.6.1
 
   dotenv@16.6.1: {}
 

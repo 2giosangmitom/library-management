@@ -29,7 +29,9 @@
       "@config/*": ["src/config/*"],
       "@utils/*": ["src/utils/*"],
       "@modules/*": ["src/modules/*"],
-      "@plugins/*": ["src/plugins/*"]
+      "@plugins/*": ["src/plugins/*"],
+      "@src/*": ["src/*"],
+      "@tests/*": ["tests/*"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "types/**/*.ts"],
