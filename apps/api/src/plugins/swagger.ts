@@ -20,7 +20,18 @@ export default fp(
           { name: 'Loan', description: 'Book loan management endpoints' },
           { name: 'Author', description: 'Author management endpoints' },
           { name: 'Category', description: 'Book category management endpoints' }
-        ]
+        ],
+        components: {
+          securitySchemes: {
+            JWT: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+              summary: 'JWT based authentication',
+              description: 'Enter your JWT token to authorize requests'
+            }
+          }
+        }
       }
     });
 
