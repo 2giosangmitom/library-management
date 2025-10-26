@@ -21,7 +21,7 @@ describe('RedisTokenUtils', () => {
   it('should get a token with correct key', async () => {
     redisClient.get = vi.fn();
 
-    const tokenType = 'reset-password';
+    const tokenType = 'jwt';
     const token = 'reset-token';
 
     await redisTokenUtils.getToken(tokenType, token);
@@ -32,7 +32,7 @@ describe('RedisTokenUtils', () => {
   it('should delete a token with correct key', async () => {
     redisClient.del = vi.fn();
 
-    const tokenType = 'email-verification';
+    const tokenType = 'jwt';
     const token = 'verify-token';
 
     await redisTokenUtils.deleteToken(tokenType, token);

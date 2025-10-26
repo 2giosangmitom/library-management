@@ -1,6 +1,6 @@
 import { FastifyRedis } from '@fastify/redis';
 
-type TokenType = 'jwt' | 'reset-password' | 'email-verification';
+type TokenType = 'jwt';
 
 export class RedisTokenUtils {
   private static instance: RedisTokenUtils | null = null;
