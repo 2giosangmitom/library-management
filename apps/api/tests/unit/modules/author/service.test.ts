@@ -17,6 +17,7 @@ describe('author service', () => {
         author_id: 'author-uuid',
         name: 'Author Name',
         biography: 'Author biography',
+        short_biography: 'Ok phe',
         nationality: 'Some Nationality',
         slug: 'author-name',
         created_at: new Date()
@@ -26,6 +27,7 @@ describe('author service', () => {
         authorService.createAuthor({
           name: 'Author Name',
           biography: 'Author biography',
+          short_biography: 'Ok phe',
           nationality: 'Some Nationality',
           slug: 'author-name'
         })
@@ -33,6 +35,7 @@ describe('author service', () => {
         author_id: 'author-uuid',
         name: 'Author Name',
         biography: 'Author biography',
+        short_biography: 'Ok phe',
         nationality: 'Some Nationality',
         slug: 'author-name',
         created_at: expect.any(Date)
@@ -43,6 +46,7 @@ describe('author service', () => {
       const authorData = {
         name: 'Author Name',
         biography: 'Author biography',
+        short_biography: 'Author short bio',
         nationality: 'Some Nationality',
         slug: 'author-name'
       };

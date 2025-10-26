@@ -19,7 +19,13 @@ export class AuthorService {
    * Service method to create a new author
    * @param data Author data
    */
-  public createAuthor(data: { name: string; biography: string; nationality: string; slug: string }) {
+  public createAuthor(data: {
+    name: string;
+    short_biography: string;
+    biography: string;
+    nationality: string;
+    slug: string;
+  }) {
     return this.authorModel.createAuthor(data);
   }
 }

@@ -67,6 +67,7 @@ describe('create author', async () => {
       body: {
         name: 'Author Name',
         biography: 'Author biography',
+        short_biography: 'Author short bio',
         nationality: 'Some Nationality',
         slug: 'author-name'
       }
@@ -79,7 +80,8 @@ describe('create author', async () => {
       nationality: 'Some Nationality',
       slug: 'author-name',
       created_at: expect.any(String),
-      biography: 'Author biography'
+      biography: 'Author biography',
+      short_biography: 'Author short bio'
     });
   });
 });

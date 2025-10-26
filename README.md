@@ -29,10 +29,11 @@ erDiagram
     UUID author_id PK
     VARCHAR(100) name
     TEXT biography
+    VARCHAR(255) short_biography
     DATE date_of_birth "NULLABLE"
     DATE date_of_death "NULLABLE"
     VARCHAR(100) nationality
-    VARCHAR(50) slug
+    VARCHAR(50) slug "UNIQUE"
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }

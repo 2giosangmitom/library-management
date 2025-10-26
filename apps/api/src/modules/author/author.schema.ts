@@ -7,6 +7,7 @@ export const createAuthorSchema = {
   body: Type.Object({
     name: Type.String({ minLength: 1, maxLength: 100 }),
     biography: Type.String({ minLength: 1 }),
+    short_biography: Type.String({ minLength: 1 }),
     nationality: Type.String({ minLength: 1, maxLength: 100 }),
     slug: Type.String({ minLength: 1, maxLength: 50 })
   }),
@@ -15,6 +16,7 @@ export const createAuthorSchema = {
       {
         author_id: Type.String(),
         name: Type.String(),
+        short_biography: Type.String(),
         biography: Type.String(),
         nationality: Type.String(),
         slug: Type.String(),

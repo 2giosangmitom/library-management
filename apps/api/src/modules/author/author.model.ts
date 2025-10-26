@@ -17,12 +17,19 @@ export class AuthorModel {
    * Model method to create a new author in the database
    * @param data Author data
    */
-  public createAuthor(data: { name: string; biography: string; nationality: string; slug: string }) {
+  public createAuthor(data: {
+    name: string;
+    short_biography: string;
+    biography: string;
+    nationality: string;
+    slug: string;
+  }) {
     return this.fastify.prisma.author.create({
       select: {
         author_id: true,
         name: true,
         biography: true,
+        short_biography: true,
         nationality: true,
         slug: true,
         created_at: true

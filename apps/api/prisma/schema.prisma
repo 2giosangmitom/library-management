@@ -26,15 +26,16 @@ model User {
 }
 
 model Author {
-  author_id     String    @id @default(uuid()) @db.Uuid()
-  name          String    @db.VarChar(100)
-  biography     String    @db.Text()
-  date_of_birth DateTime?
-  date_of_death DateTime?
-  nationality   String    @db.VarChar(100)
-  slug          String    @db.VarChar(50)
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
+  author_id       String    @id @default(uuid()) @db.Uuid()
+  name            String    @db.VarChar(100)
+  short_biography String    @db.VarChar(255)
+  biography       String    @db.Text()
+  date_of_birth   DateTime?
+  date_of_death   DateTime?
+  nationality     String    @db.VarChar(100)
+  slug            String    @unique @db.VarChar(50)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
 
   books Book_Author[]
 }
