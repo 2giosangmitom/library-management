@@ -11,6 +11,7 @@ import type {
 } from 'fastify';
 import type { RouteGenericInterface } from 'fastify/types/route';
 import type { FastifySchema } from 'fastify/types/schema';
+import { Role } from '@prisma/client';
 
 export {};
 
@@ -40,4 +41,9 @@ declare global {
     TSchema,
     TypeBoxTypeProvider
   >;
+
+  type JWTPayload = {
+    sub: string;
+    role: Role;
+  };
 }
