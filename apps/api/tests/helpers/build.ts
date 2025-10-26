@@ -6,6 +6,8 @@ import redisPlugin from '@plugins/redis';
 import jwtPlugin from '@plugins/jwt';
 import authRoutes from '@modules/auth/auth.routes';
 import authHooks from '@modules/auth/auth.hooks';
+import authorHooks from '@modules/author/author.hooks';
+import authorRoutes from '@modules/author/author.routes';
 
 export async function build() {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -25,6 +27,10 @@ export async function build() {
   // Register auth module
   await app.register(authHooks, { prefix: '/auth' });
   await app.register(authRoutes, { prefix: '/auth' });
+
+  // Register author module
+  await app.register(authorHooks, { prefix: '/author' });
+  await app.register(authorRoutes, { prefix: '/author' });
 
   return app;
 }
