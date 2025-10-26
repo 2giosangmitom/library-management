@@ -28,4 +28,19 @@ export class AuthorService {
   }) {
     return this.authorModel.createAuthor(data);
   }
+
+  /**
+   * Service method to get all authors
+   */
+  public getAllAuthors(page = 1, limit = 10) {
+    return this.authorModel.getAllAuthors(page, limit);
+  }
+
+  /**
+   * Service method to get author details
+   * @param author_slug Author slug
+   */
+  public getAuthorDetails(author_slug: string) {
+    return this.authorModel.getAuthorBySlug(author_slug);
+  }
 }
