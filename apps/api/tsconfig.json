@@ -31,7 +31,8 @@
       "@modules/*": ["src/modules/*"],
       "@plugins/*": ["src/plugins/*"],
       "@src/*": ["src/*"],
-      "@tests/*": ["tests/*"]
+      "@tests/*": ["tests/*"],
+      "@middlewares/*": ["src/middlewares/*"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "types/**/*.ts"],
