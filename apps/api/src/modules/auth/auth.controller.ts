@@ -55,13 +55,14 @@ export class AuthController {
   ) {
     const { email, password } = req.body;
 
-    const { verifyResult, user_id } = await this.authService.signIn({ email, password });
+    const { verifyResult, user_id, role } = await this.authService.signIn({ email, password });
     if (!verifyResult) {
       return reply.status(401).send({ message: 'Invalid email or password' });
     }
 
     const jwt = await reply.jwtSign({
-      sub: user_id
+      sub: user_id,
+      role
     });
 
     return reply.send({ jwt });

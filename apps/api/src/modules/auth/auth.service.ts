@@ -42,11 +42,11 @@ export class AuthService {
 
     // Fails if email not exists
     if (!user) {
-      return { verifyResult: false, user_id: null };
+      return { verifyResult: false, user_id: null, role: null };
     }
 
     const verifyResult = await verifyHash(password, user.password_hash, user.salt);
 
-    return { verifyResult, user_id: verifyResult ? user.user_id : null };
+    return { verifyResult, user_id: verifyResult ? user.user_id : null, role: verifyResult ? user.role : null };
   }
 }

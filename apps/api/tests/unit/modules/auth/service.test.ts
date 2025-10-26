@@ -79,7 +79,8 @@ describe('auth service', () => {
 
       await expect(authService.signIn({ email: 'test@example.com', password: 'password123' })).resolves.toEqual({
         verifyResult: false,
-        user_id: null
+        user_id: null,
+        role: null
       });
     });
 
@@ -96,7 +97,8 @@ describe('auth service', () => {
 
       await expect(authService.signIn({ email: 'test@example.com', password: 'password123' })).resolves.toEqual({
         verifyResult: false,
-        user_id: null
+        user_id: null,
+        role: null
       });
     });
 
@@ -113,7 +115,8 @@ describe('auth service', () => {
 
       await expect(authService.signIn({ email: 'test@example.com', password: 'password123' })).resolves.toEqual({
         verifyResult: true,
-        user_id: 'sample-uuid'
+        user_id: 'sample-uuid',
+        role: 'MEMBER'
       });
     });
   });
