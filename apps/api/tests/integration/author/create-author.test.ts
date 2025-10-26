@@ -69,7 +69,7 @@ describe('create author', async () => {
         biography: 'Author biography',
         short_biography: 'Author short bio',
         nationality: 'Some Nationality',
-        slug: 'author-name'
+        slug: 'test-create-author'
       }
     });
 
@@ -78,7 +78,7 @@ describe('create author', async () => {
       author_id: expect.any(String),
       name: 'Author Name',
       nationality: 'Some Nationality',
-      slug: 'author-name',
+      slug: 'test-create-author',
       created_at: expect.any(String),
       biography: 'Author biography',
       short_biography: 'Author short bio'

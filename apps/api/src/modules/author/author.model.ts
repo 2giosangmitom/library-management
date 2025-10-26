@@ -37,4 +37,39 @@ export class AuthorModel {
       data
     });
   }
+
+  /**
+   * Model method to get all authors from the database
+   */
+  public getAllAuthors(page: number, limit: number) {
+    return this.fastify.prisma.author.findMany({
+      select: {
+        name: true,
+        short_biography: true,
+        slug: true
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        name: 'asc'
+      }
+    });
+  }
+
+  /**
+   * Model method to get an author by slug from the database
+   * @param author_slug Author slug
+   */
+  public getAuthorBySlug(author_slug: string) {
+    return this.fastify.prisma.author.findUnique({
+      where: { slug: author_slug },
+      select: {
+        name: true,
+        short_biography: true,
+        biography: true,
+        nationality: true,
+        slug: true
+      }
+    });
+  }
 }

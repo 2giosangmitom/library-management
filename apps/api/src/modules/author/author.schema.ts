@@ -28,3 +28,56 @@ export const createAuthorSchema = {
     )
   }
 } as const satisfies FastifySchema;
+
+export const getAllAuthorsSchema = {
+  summary: 'Get all authors',
+  description: 'Endpoint to retrieve all authors in the system',
+  querystring: Type.Partial(
+    Type.Object({
+      page: Type.Number({ minimum: 1 }),
+      limit: Type.Number({ minimum: 1, maximum: 100 })
+    })
+  ),
+  response: {
+    200: Type.Array(
+      Type.Object({
+        name: Type.String(),
+        slug: Type.String(),
+        short_biography: Type.String()
+      }),
+      {
+        description: 'List of authors retrieved successfully'
+      }
+    )
+  }
+} as const satisfies FastifySchema;
+
+export const getAuthorDetailsSchema = {
+  summary: 'Get author details by slug',
+  description: 'Endpoint to retrieve author details by slug',
+  params: Type.Object({
+    author_slug: Type.String({ minLength: 1, maxLength: 50 })
+  }),
+  response: {
+    200: Type.Object(
+      {
+        name: Type.String(),
+        short_biography: Type.String(),
+        biography: Type.String(),
+        nationality: Type.String(),
+        slug: Type.String()
+      },
+      {
+        description: 'Author details retrieved successfully'
+      }
+    ),
+    404: Type.Object(
+      {
+        message: Type.String()
+      },
+      {
+        description: 'Author not found'
+      }
+    )
+  }
+} as const satisfies FastifySchema;
