@@ -19,8 +19,6 @@ export class AuthController {
 
   /**
    * Route handler for signing up a new user
-   * @param req Fastify request object
-   * @param reply Fastify reply object
    */
   public async signUp(
     req: FastifyRequestTypeBox<typeof signUpSchema>,
@@ -46,8 +44,6 @@ export class AuthController {
 
   /**
    * Route handler for signing in a user
-   * @param req Fastify request object
-   * @param reply Fastify reply object
    */
   public async signIn(
     req: FastifyRequestTypeBox<typeof signInSchema>,

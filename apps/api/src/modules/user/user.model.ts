@@ -15,20 +15,10 @@ export class UserModel {
 
   /**
    * Create a new user
-   * @param param0 User data for creating a new user
+   * @param data User data for creating a new user
    * @returns The created user
    */
-  public createUser({
-    email,
-    password_hash,
-    salt,
-    name
-  }: {
-    email: string;
-    password_hash: string;
-    salt: string;
-    name: string;
-  }) {
+  public createUser(data: { email: string; password_hash: string; salt: string; name: string }) {
     return this.fastify.prisma.user.create({
       select: {
         user_id: true,
@@ -36,12 +26,7 @@ export class UserModel {
         name: true,
         created_at: true
       },
-      data: {
-        email,
-        password_hash,
-        salt,
-        name
-      }
+      data
     });
   }
 

@@ -18,34 +18,34 @@ export class AuthService {
 
   /**
    * Sign up a new user
-   * @param param0 User data for signing up
+   * @param data User data for signing up
    * @returns The created user
    */
-  public async signUp({ email, password, name }: { email: string; password: string; name: string }) {
-    const { hash, salt } = await generateHash(password);
+  public async signUp(data: { email: string; password: string; name: string }) {
+    const { hash, salt } = await generateHash(data.password);
 
     return this.userModel.createUser({
-      email,
+      email: data.email,
       password_hash: hash,
       salt,
-      name
+      name: data.name
     });
   }
 
   /**
    * Sign in with email and password
-   * @param param0 The email and password for signing in
+   * @param data The email and password for signing in
    * @returns True and the user ID if the credentials are correct, otherwise false and null
    */
-  public async signIn({ email, password }: { email: string; password: string }) {
-    const user = await this.userModel.findUserByEmail(email);
+  public async signIn(data: { email: string; password: string }) {
+    const user = await this.userModel.findUserByEmail(data.email);
 
     // Fails if email not exists
     if (!user) {
       return { verifyResult: false, user_id: null, role: null };
     }
 
-    const verifyResult = await verifyHash(password, user.password_hash, user.salt);
+    const verifyResult = await verifyHash(data.password, user.password_hash, user.salt);
 
     return { verifyResult, user_id: verifyResult ? user.user_id : null, role: verifyResult ? user.role : null };
   }
