@@ -72,4 +72,14 @@ export class AuthorModel {
       }
     });
   }
+
+  /**
+   * Model method to delete an author by ID from the database
+   * @param author_id Author ID
+   */
+  public deleteAuthor(author_id: string) {
+    return this.fastify.prisma.author.delete({
+      where: { author_id }
+    });
+  }
 }

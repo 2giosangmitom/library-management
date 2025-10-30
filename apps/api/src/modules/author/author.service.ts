@@ -1,4 +1,5 @@
 import { AuthorModel } from './author.model';
+import { Prisma } from '@prisma/client';
 
 export class AuthorService {
   private static instance: AuthorService;
@@ -42,5 +43,21 @@ export class AuthorService {
    */
   public getAuthorDetails(author_slug: string) {
     return this.authorModel.getAuthorBySlug(author_slug);
+  }
+
+  /**
+   * Service method to delete an author
+   * @param author_id Author ID
+   */
+  public async deleteAuthor(author_id: string) {
+    try {
+      await this.authorModel.deleteAuthor(author_id);
+      return true;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        return false;
+      }
+      throw error;
+    }
   }
 }
