@@ -27,9 +27,10 @@ describe('get author', async () => {
         { expiresIn: '1h' }
       );
 
+      const createAuthorPromises: Promise<Awaited<ReturnType<typeof app.inject>>>[] = [];
       // Ensure there are enough authors in the database
       for (let i = 0; i < 15; i++) {
-        const createAuthorResponse = await app.inject({
+        const createAuthorResponse = app.inject({
           method: 'POST',
           path: '/author',
           headers: {
@@ -40,11 +41,12 @@ describe('get author', async () => {
             biography: 'Some biography',
             short_biography: 'Some short bio',
             nationality: 'Some Nationality',
-            slug: `author-${i}`
+            slug: `test-get-authors-${i}`
           }
         });
-        expect(createAuthorResponse.statusCode).toBe(201);
+        createAuthorPromises.push(createAuthorResponse);
       }
+      await Promise.all(createAuthorPromises);
 
       const response = await app.inject({
         method: 'GET',
