@@ -18,7 +18,7 @@ describe('author service', () => {
         author_id: 'author-uuid',
         name: 'Author Name',
         biography: 'Author biography',
-        short_biography: 'Ok phe',
+        short_biography: 'Short biography',
         nationality: 'Some Nationality',
         slug: 'author-name',
         created_at: new Date()
@@ -28,7 +28,7 @@ describe('author service', () => {
         authorService.createAuthor({
           name: 'Author Name',
           biography: 'Author biography',
-          short_biography: 'Ok phe',
+          short_biography: 'Short biography',
           nationality: 'Some Nationality',
           slug: 'author-name'
         })
@@ -36,7 +36,7 @@ describe('author service', () => {
         author_id: 'author-uuid',
         name: 'Author Name',
         biography: 'Author biography',
-        short_biography: 'Ok phe',
+        short_biography: 'Short biography',
         nationality: 'Some Nationality',
         slug: 'author-name',
         created_at: expect.any(Date)
@@ -113,7 +113,7 @@ describe('author service', () => {
       vi.spyOn(authorModel, 'getAuthorBySlug').mockResolvedValueOnce({
         name: 'Author Name',
         biography: 'Author biography',
-        short_biography: 'Ok phe',
+        short_biography: 'Short biography',
         nationality: 'Some Nationality',
         slug: 'author-name'
       });
@@ -121,7 +121,7 @@ describe('author service', () => {
       await expect(authorService.getAuthorDetails('author-name')).resolves.toEqual({
         name: 'Author Name',
         biography: 'Author biography',
-        short_biography: 'Ok phe',
+        short_biography: 'Short biography',
         nationality: 'Some Nationality',
         slug: 'author-name'
       });
@@ -152,7 +152,7 @@ describe('author service', () => {
         author_id: 'author-uuid',
         name: 'Author Name',
         biography: 'Author biography',
-        short_biography: 'Ok phe',
+        short_biography: 'Short biography',
         date_of_birth: null,
         date_of_death: null,
         nationality: 'Some Nationality',
