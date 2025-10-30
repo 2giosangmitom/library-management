@@ -1,4 +1,4 @@
-import { createAuthorSchema, getAllAuthorsSchema, getAuthorDetailsSchema } from './author.schema';
+import { createAuthorSchema, deleteAuthorSchema, getAllAuthorsSchema, getAuthorDetailsSchema } from './author.schema';
 import { AuthorService } from './author.service';
 
 export class AuthorController {
@@ -60,5 +60,22 @@ export class AuthorController {
     }
 
     return reply.send(author);
+  }
+
+  /**
+   * Route handler to delete an author
+   */
+  public async deleteAuthor(
+    req: FastifyRequestTypeBox<typeof deleteAuthorSchema>,
+    reply: FastifyReplyTypeBox<typeof deleteAuthorSchema>
+  ) {
+    const { author_id } = req.params;
+    const success = await this.authorService.deleteAuthor(author_id);
+
+    if (!success) {
+      return reply.status(404).send({ message: 'Author not found' });
+    }
+
+    return reply.status(204).send();
   }
 }

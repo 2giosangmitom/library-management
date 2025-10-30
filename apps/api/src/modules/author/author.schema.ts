@@ -81,3 +81,24 @@ export const getAuthorDetailsSchema = {
     )
   }
 } as const satisfies FastifySchema;
+
+export const deleteAuthorSchema = {
+  summary: 'Delete an author by ID',
+  description: 'Endpoint to delete an author by their ID.',
+  params: Type.Object({
+    author_id: Type.String({ format: 'uuid' })
+  }),
+  response: {
+    204: Type.Null({
+      description: 'Author deleted successfully'
+    }),
+    404: Type.Object(
+      {
+        message: Type.String()
+      },
+      {
+        description: 'Author not found'
+      }
+    )
+  }
+} as const satisfies FastifySchema;
