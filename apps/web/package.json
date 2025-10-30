@@ -1,7 +1,7 @@
 {
-  "name": "@fastify-ts-template/web",
+  "name": "@book-wise/web",
   "version": "1.0.0",
-  "description": "Web service for Fastify TypeScript template",
+  "description": "Web service for BookWise application",
   "type": "module",
   "engines": {
     "node": "^22.12.0"

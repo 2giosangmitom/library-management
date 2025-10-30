@@ -1,7 +1,7 @@
 {
-  "name": "fastify-ts-template",
+  "name": "book-wise",
   "version": "1.0.0",
-  "description": "A minimal Fastify template using TypeScript and Vue for front-end",
+  "description": "Monorepo for BookWise application",
   "private": true,
   "scripts": {
     "lint": "eslint ."

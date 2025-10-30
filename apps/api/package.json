@@ -1,7 +1,7 @@
 {
-  "name": "@fastify-ts-template/api",
+  "name": "@book-wise/api",
   "version": "1.0.0",
-  "description": "API service for Fastify TypeScript template",
+  "description": "API service for BookWise application",
   "scripts": {
     "dev": "NODE_ENV=development tsx --env-file .env --watch src/server.ts | pino-pretty",
     "build": "esbuild 'src/**/*.ts' --outdir=dist --platform=node --format=cjs --minify && tsc-alias -p tsconfig.json",
