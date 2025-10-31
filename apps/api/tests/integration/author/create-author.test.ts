@@ -2,9 +2,67 @@ import { build } from '@tests/helpers/build';
 
 describe('create author', async () => {
   const app = await build();
+  let memberJwt: string;
+  let librarianJwt: string;
 
   afterAll(async () => {
     await app.close();
+  });
+
+  beforeAll(async () => {
+    // Sign up a LIBRARIAN account for later usage
+    const signupResponse = await app.inject({
+      method: 'POST',
+      path: '/auth/signup',
+      body: {
+        email: 'test-create-author-librarian@test.com',
+        password: 'password123',
+        name: 'Librarian User'
+      }
+    });
+
+    const librarianUser = signupResponse.json();
+
+    // Manually update the user's role to LIBRARIAN in the database
+    await app.prisma.user.update({
+      where: { user_id: librarianUser.user_id },
+      data: { role: 'LIBRARIAN' }
+    });
+
+    // Sign in to librarian account to get JWT token
+    const signinResponse = await app.inject({
+      method: 'POST',
+      path: '/auth/signin',
+      body: {
+        email: 'test-create-author-librarian@test.com',
+        password: 'password123'
+      }
+    });
+
+    librarianJwt = signinResponse.json().jwt;
+
+    // Sign up a MEMBER account for later usage
+    await app.inject({
+      method: 'POST',
+      path: '/auth/signup',
+      body: {
+        email: 'test-create-author-member@test.com',
+        password: 'password123',
+        name: 'Member User'
+      }
+    });
+
+    // Sign in to member account to get JWT token
+    const memberSigninResponse = await app.inject({
+      method: 'POST',
+      path: '/auth/signin',
+      body: {
+        email: 'test-create-author-member@test.com',
+        password: 'password123'
+      }
+    });
+
+    memberJwt = memberSigninResponse.json().jwt;
   });
 
   it('should reject request with 401 if no JWT provided', async () => {
@@ -23,20 +81,11 @@ describe('create author', async () => {
   });
 
   it('should reject request with 403 if user is not LIBRARIAN', async () => {
-    // Create a token for a user with role USER
-    const userToken = app.jwt.sign(
-      {
-        user_id: 'user-uuid',
-        role: 'MEMBER'
-      },
-      { expiresIn: '1h' }
-    );
-
     const response = await app.inject({
       method: 'POST',
       path: '/author',
       headers: {
-        Authorization: `Bearer ${userToken}`
+        Authorization: `Bearer ${memberJwt}`
       },
       body: {
         name: 'Author Name',
@@ -49,20 +98,11 @@ describe('create author', async () => {
   });
 
   it('should create author and return 201 for LIBRARIAN user', async () => {
-    // Create a token for a user with role LIBRARIAN
-    const librarianToken = app.jwt.sign(
-      {
-        user_id: 'librarian-uuid',
-        role: 'LIBRARIAN'
-      },
-      { expiresIn: '1h' }
-    );
-
     const response = await app.inject({
       method: 'POST',
       path: '/author',
       headers: {
-        Authorization: `Bearer ${librarianToken}`
+        Authorization: `Bearer ${librarianJwt}`
       },
       body: {
         name: 'Author Name',

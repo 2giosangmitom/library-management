@@ -2,6 +2,40 @@ import { build } from '@tests/helpers/build';
 
 describe('get author', async () => {
   const app = await build();
+  let librarianJwt: string;
+
+  beforeAll(async () => {
+    // Sign up a LIBRARIAN account for later usage
+    const signupResponse = await app.inject({
+      method: 'POST',
+      path: '/auth/signup',
+      body: {
+        email: 'test-get-author-librarian@test.com',
+        password: 'password123',
+        name: 'Librarian User'
+      }
+    });
+
+    const librarianUser = signupResponse.json();
+
+    // Manually update the user's role to LIBRARIAN in the database
+    await app.prisma.user.update({
+      where: { user_id: librarianUser.user_id },
+      data: { role: 'LIBRARIAN' }
+    });
+
+    // Sign in to librarian account to get JWT token
+    const signinResponse = await app.inject({
+      method: 'POST',
+      path: '/auth/signin',
+      body: {
+        email: 'test-get-author-librarian@test.com',
+        password: 'password123'
+      }
+    });
+
+    librarianJwt = signinResponse.json().jwt;
+  });
 
   afterAll(async () => {
     await app.close();
@@ -19,14 +53,6 @@ describe('get author', async () => {
     });
 
     it('should respect pagination parameters', async () => {
-      const jwt = app.jwt.sign(
-        {
-          user_id: 'librarian-uuid',
-          role: 'LIBRARIAN'
-        },
-        { expiresIn: '1h' }
-      );
-
       const createAuthorPromises: Promise<Awaited<ReturnType<typeof app.inject>>>[] = [];
       // Ensure there are enough authors in the database
       for (let i = 0; i < 15; i++) {
@@ -34,7 +60,7 @@ describe('get author', async () => {
           method: 'POST',
           path: '/author',
           headers: {
-            Authorization: `Bearer ${jwt}`
+            Authorization: `Bearer ${librarianJwt}`
           },
           body: {
             name: `Author ${i}`,
@@ -75,20 +101,11 @@ describe('get author', async () => {
 
   describe('get author by slug', () => {
     it('should return 200 and author data if author exists', async () => {
-      // First, create an author to ensure there is one to fetch
-      const librarianToken = app.jwt.sign(
-        {
-          user_id: 'librarian-uuid',
-          role: 'LIBRARIAN'
-        },
-        { expiresIn: '1h' }
-      );
-
       const createResponse = await app.inject({
         method: 'POST',
         path: '/author',
         headers: {
-          Authorization: `Bearer ${librarianToken}`
+          Authorization: `Bearer ${librarianJwt}`
         },
         body: {
           name: 'Test Author',

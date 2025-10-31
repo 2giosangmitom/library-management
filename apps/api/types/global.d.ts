@@ -45,5 +45,6 @@ declare global {
   type JWTPayload = {
     sub: string;
     role: Role;
+    jti: string;
   };
 }

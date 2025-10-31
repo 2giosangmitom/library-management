@@ -1,16 +1,33 @@
 import { authMiddleware, isLibrarianMiddleware } from '@middlewares/auth';
 import { fastify, FastifyInstance } from 'fastify';
-import fastifyJwt from '@fastify/jwt';
+import jwt from '@plugins/jwt';
+import { RedisTokenUtils } from '@utils/redis';
+import { envType } from '@config/env-schema';
+import fp from 'fastify-plugin';
 
 describe('auth middleware', () => {
   let app: FastifyInstance;
 
   describe('authMiddleware', () => {
+    let redisTokenUtils: RedisTokenUtils;
+
     beforeEach(async () => {
       app = fastify();
-      await app.register(fastifyJwt, {
-        secret: 'supersecret'
-      });
+      redisTokenUtils = RedisTokenUtils.getInstance(app.redis);
+      redisTokenUtils.getToken = vi.fn().mockResolvedValue('some-data');
+
+      // Register Redis plugin (mocked)
+      await app.register(
+        fp(
+          (_fastify, _opts, done) => {
+            done();
+          },
+          { name: 'Redis' }
+        )
+      );
+      await app.register(jwt, {
+        JWT_SECRET: 'supersecret'
+      } as unknown as envType);
 
       app.get(
         '/protected',
@@ -54,14 +71,37 @@ describe('auth middleware', () => {
       });
       expect(response.statusCode).toBe(401);
     });
+
+    it('should reject request with blacklisted token', async () => {
+      vi.spyOn(redisTokenUtils, 'getToken').mockResolvedValueOnce(null);
+
+      const token = app.jwt.sign({ sub: 'user123', role: 'MEMBER' });
+      const response = await app.inject({
+        method: 'GET',
+        url: '/protected',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      expect(response.statusCode).toBe(401);
+    });
   });
 
   describe('isLibrarianMiddleware', () => {
     beforeEach(async () => {
       app = fastify();
-      await app.register(fastifyJwt, {
-        secret: 'supersecret'
-      });
+      // Register Redis plugin (mocked)
+      await app.register(
+        fp(
+          (_fastify, _opts, done) => {
+            done();
+          },
+          { name: 'Redis' }
+        )
+      );
+      await app.register(jwt, {
+        JWT_SECRET: 'supersecret'
+      } as unknown as envType);
 
       app.get(
         '/librarian-only',

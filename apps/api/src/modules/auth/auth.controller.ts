@@ -1,18 +1,22 @@
 import { Prisma } from '@prisma/client';
 import { signInSchema, signUpSchema } from './auth.schema';
 import { AuthService } from './auth.service';
+import { RedisTokenUtils } from '@utils/redis';
+import { nanoid } from 'nanoid';
 
 export class AuthController {
   private static instance: AuthController | null = null;
   private authService: AuthService;
+  private redisTokenUtils: RedisTokenUtils;
 
-  private constructor(authService: AuthService) {
+  private constructor(fastify: FastifyTypeBox, authService: AuthService) {
     this.authService = authService;
+    this.redisTokenUtils = RedisTokenUtils.getInstance(fastify.redis);
   }
 
   public static getInstance(fastify: FastifyTypeBox, authService = AuthService.getInstance(fastify)) {
     if (!AuthController.instance) {
-      AuthController.instance = new AuthController(authService);
+      AuthController.instance = new AuthController(fastify, authService);
     }
     return AuthController.instance;
   }
@@ -52,14 +56,17 @@ export class AuthController {
     const { email, password } = req.body;
 
     const { verifyResult, user_id, role } = await this.authService.signIn({ email, password });
-    if (!verifyResult) {
+    if (!verifyResult || !user_id || !role) {
       return reply.status(401).send({ message: 'Invalid email or password' });
     }
 
+    const jti = nanoid();
     const jwt = await reply.jwtSign({
       sub: user_id,
-      role
+      role,
+      jti
     });
+    await this.redisTokenUtils.setToken('jwt', jti, user_id, 30 * 24 * 60 * 60); // 30 days expiration
 
     return reply.send({ jwt });
   }
