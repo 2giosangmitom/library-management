@@ -18,7 +18,7 @@ export class CategoryService {
   }
 
   /**
-   * Create a new category service
+   * Create a new category
    * @param data - The category data
    */
   public async createCategory(data: { name: string; slug: string }) {
