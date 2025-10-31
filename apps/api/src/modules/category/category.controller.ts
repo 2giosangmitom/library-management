@@ -21,7 +21,10 @@ export class CategoryController {
     return CategoryController.instance;
   }
 
-  async createCategory(
+  /**
+   * Route handler to create a new category
+   */
+  public async createCategory(
     req: FastifyRequestTypeBox<typeof createCategorySchema>,
     reply: FastifyReplyTypeBox<typeof createCategorySchema>
   ) {

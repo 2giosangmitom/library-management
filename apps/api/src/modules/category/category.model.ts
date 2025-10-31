@@ -13,6 +13,10 @@ export class CategoryModel {
     return CategoryModel.instance;
   }
 
+  /**
+   * Create a new category
+   * @param data - The category data
+   */
   public async createCategory(data: { name: string; slug: string }) {
     return this.fastify.prisma.category.create({
       select: {

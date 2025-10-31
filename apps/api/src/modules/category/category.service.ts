@@ -17,6 +17,10 @@ export class CategoryService {
     return CategoryService.instance;
   }
 
+  /**
+   * Create a new category service
+   * @param data - The category data
+   */
   public async createCategory(data: { name: string; slug: string }) {
     return this.categoryModel.createCategory(data);
   }
