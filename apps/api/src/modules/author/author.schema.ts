@@ -102,3 +102,42 @@ export const deleteAuthorSchema = {
     )
   }
 } as const satisfies FastifySchema;
+
+export const updateAuthorSchema = {
+  summary: 'Update an author by ID',
+  description: 'Endpoint to update an author by their ID.',
+  params: Type.Object({
+    author_id: Type.String({ format: 'uuid' })
+  }),
+  body: Type.Object({
+    name: Type.String({ minLength: 1, maxLength: 100 }),
+    biography: Type.String({ minLength: 1 }),
+    short_biography: Type.String({ minLength: 1 }),
+    nationality: Type.String({ minLength: 1, maxLength: 100 }),
+    slug: Type.String({ minLength: 1, maxLength: 50 })
+  }),
+  response: {
+    200: Type.Object(
+      {
+        author_id: Type.String(),
+        name: Type.String(),
+        short_biography: Type.String(),
+        biography: Type.String(),
+        nationality: Type.String(),
+        slug: Type.String(),
+        updated_at: Type.String({ format: 'date-time' })
+      },
+      {
+        description: 'Author updated successfully'
+      }
+    ),
+    404: Type.Object(
+      {
+        message: Type.String()
+      },
+      {
+        description: 'Author not found'
+      }
+    )
+  }
+} as const satisfies FastifySchema;

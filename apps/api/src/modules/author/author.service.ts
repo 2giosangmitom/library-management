@@ -60,4 +60,29 @@ export class AuthorService {
       throw error;
     }
   }
+
+  /**
+   * Service method to update an author
+   * @param author_id Author ID
+   * @param data Author data
+   */
+  public async updateAuthor(
+    author_id: string,
+    data: {
+      name: string;
+      short_biography: string;
+      biography: string;
+      nationality: string;
+      slug: string;
+    }
+  ) {
+    try {
+      return await this.authorModel.updateAuthor(author_id, data);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        return null;
+      }
+      throw error;
+    }
+  }
 }

@@ -1,5 +1,5 @@
 import { AuthorController } from './author.controller';
-import { createAuthorSchema, deleteAuthorSchema } from './author.schema';
+import { createAuthorSchema, deleteAuthorSchema, updateAuthorSchema } from './author.schema';
 import { authMiddleware, isLibrarianMiddleware } from '@middlewares/auth';
 import { getAllAuthorsSchema, getAuthorDetailsSchema } from './author.schema';
 
@@ -28,6 +28,11 @@ export default function authorRoutes(fastify: FastifyTypeBox) {
       '/:author_id',
       { schema: deleteAuthorSchema },
       authorController.deleteAuthor.bind(authorController)
+    );
+    instance.put(
+      '/:author_id',
+      { schema: updateAuthorSchema },
+      authorController.updateAuthor.bind(authorController)
     );
   });
 }

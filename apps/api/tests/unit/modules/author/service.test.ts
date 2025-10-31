@@ -187,4 +187,71 @@ describe('author service', () => {
       await expect(authorService.deleteAuthor('any-uuid')).rejects.toThrow('Something went wrong');
     });
   });
+
+  describe('update author', () => {
+    it('should return null if the author to update is not found', async () => {
+      const authorId = 'non-existent-id';
+
+      const error = new Prisma.PrismaClientKnownRequestError('Record to update not found.', {
+        code: 'P2025',
+        clientVersion: '2.19.0'
+      });
+      vi.spyOn(authorModel, 'updateAuthor').mockRejectedValueOnce(error);
+
+      const result = await authorService.updateAuthor(authorId, {
+        name: 'Updated Name',
+        short_biography: 'Updated Short Bio',
+        biography: 'Updated Bio',
+        nationality: 'Updated Nationality',
+        slug: 'updated-slug'
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should re-throw an error if it is not a P2025 error', async () => {
+      const authorId = '123e4567-e89b-12d3-a456-426614174000';
+
+      const error = new Error('Something went wrong');
+      vi.spyOn(authorModel, 'updateAuthor').mockRejectedValueOnce(error);
+
+      await expect(
+        authorService.updateAuthor(authorId, {
+          name: 'Updated Name',
+          short_biography: 'Updated Short Bio',
+          biography: 'Updated Bio',
+          nationality: 'Updated Nationality',
+          slug: 'updated-slug'
+        })
+      ).rejects.toThrow('Something went wrong');
+    });
+
+    it('should update an author and return the updated data', async () => {
+      const authorId = '123e4567-e89b-12d3-a456-426614174000';
+      const updateData = {
+        name: 'New Name',
+        short_biography: 'Short Bio',
+        biography: 'Bio',
+        nationality: 'American',
+        slug: 'new-name'
+      };
+      const updatedAuthor = {
+        author_id: authorId,
+        name: 'New Name',
+        biography: 'Bio',
+        short_biography: 'Short Bio',
+        nationality: 'American',
+        slug: 'new-name',
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+
+      vi.spyOn(authorModel, 'updateAuthor').mockResolvedValueOnce(updatedAuthor);
+
+      const result = await authorService.updateAuthor(authorId, updateData);
+
+      expect(authorModel.updateAuthor).toHaveBeenCalledWith(authorId, updateData);
+      expect(result).toEqual(updatedAuthor);
+    });
+  });
 });

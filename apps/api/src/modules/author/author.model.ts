@@ -82,4 +82,34 @@ export class AuthorModel {
       where: { author_id }
     });
   }
+
+  /**
+   * Model method to update an author by ID in the database
+   * @param author_id Author ID
+   * @param data Author data
+   */
+  public updateAuthor(
+    author_id: string,
+    data: {
+      name?: string;
+      short_biography?: string;
+      biography?: string;
+      nationality?: string;
+      slug?: string;
+    }
+  ) {
+    return this.fastify.prisma.author.update({
+      where: { author_id },
+      data,
+      select: {
+        author_id: true,
+        name: true,
+        short_biography: true,
+        biography: true,
+        nationality: true,
+        slug: true,
+        updated_at: true
+      }
+    });
+  }
 }

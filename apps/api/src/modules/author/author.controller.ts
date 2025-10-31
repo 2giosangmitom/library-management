@@ -1,4 +1,10 @@
-import { createAuthorSchema, deleteAuthorSchema, getAllAuthorsSchema, getAuthorDetailsSchema } from './author.schema';
+import {
+  createAuthorSchema,
+  deleteAuthorSchema,
+  getAllAuthorsSchema,
+  getAuthorDetailsSchema,
+  updateAuthorSchema
+} from './author.schema';
 import { AuthorService } from './author.service';
 
 export class AuthorController {
@@ -77,5 +83,25 @@ export class AuthorController {
     }
 
     return reply.status(204).send();
+  }
+
+  /**
+   * Route handler to update an author
+   */
+  public async updateAuthor(
+    req: FastifyRequestTypeBox<typeof updateAuthorSchema>,
+    reply: FastifyReplyTypeBox<typeof updateAuthorSchema>
+  ) {
+    const { author_id } = req.params;
+    const updatedAuthor = await this.authorService.updateAuthor(author_id, req.body);
+
+    if (!updatedAuthor) {
+      return reply.status(404).send({ message: 'Author not found' });
+    }
+
+    return reply.send({
+      ...updatedAuthor,
+      updated_at: updatedAuthor.updated_at.toISOString()
+    });
   }
 }
