@@ -30,19 +30,19 @@
     "fastify": "^5.6.1",
     "fastify-plugin": "^5.1.0",
     "nanoid": "^5.1.6",
-    "typebox": "^1.0.43",
+    "typebox": "^1.0.44",
     "typescript": "~5.9.3"
   },
   "devDependencies": {
-    "@types/node": "^22.18.12",
-    "@vitest/coverage-v8": "^4.0.3",
-    "dotenv-cli": "^10.0.0",
+    "@types/node": "^24.9.2",
+    "@vitest/coverage-v8": "^4.0.5",
+    "dotenv-cli": "^11.0.0",
     "esbuild": "^0.25.11",
     "pino-pretty": "^13.1.2",
     "prisma": "^6.18.0",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.6",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.0.3"
+    "vitest": "^4.0.5"
   }
 }
