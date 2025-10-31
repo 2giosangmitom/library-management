@@ -1,5 +1,5 @@
 import { Prisma } from '@prisma/client';
-import { signInSchema, signUpSchema } from './auth.schema';
+import { signInSchema, signOutSchema, signUpSchema } from './auth.schema';
 import { AuthService } from './auth.service';
 import { RedisTokenUtils } from '@utils/redis';
 import { nanoid } from 'nanoid';
@@ -69,5 +69,19 @@ export class AuthController {
     await this.redisTokenUtils.setToken('jwt', jti, user_id, 30 * 24 * 60 * 60); // 30 days expiration
 
     return reply.send({ jwt });
+  }
+
+  /**
+   * Route handler for signing out a user
+   */
+  public async signOut(
+    req: FastifyRequestTypeBox<typeof signOutSchema>,
+    reply: FastifyReplyTypeBox<typeof signOutSchema>
+  ) {
+    const jwtData = req.user as JWTPayload;
+
+    await this.redisTokenUtils.deleteToken('jwt', jwtData.jti);
+
+    return reply.status(204).send();
   }
 }

@@ -58,3 +58,25 @@ export const signInSchema = {
     )
   }
 } as const satisfies FastifySchema;
+
+export const signOutSchema = {
+  summary: 'Sign out',
+  description: 'Endpoint to sign out the user by invalidating the JWT token.',
+  headers: Type.Object({
+    authorization: Type.String()
+  }),
+  security: [{ JWT: [] }],
+  response: {
+    204: Type.Null({
+      description: 'User signed out successfully'
+    }),
+    401: Type.Object(
+      {
+        message: Type.String()
+      },
+      {
+        description: 'Unauthorized - Invalid or missing token'
+      }
+    )
+  }
+} as const satisfies FastifySchema;
