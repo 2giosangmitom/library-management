@@ -1,0 +1,19 @@
+import { authMiddleware, isLibrarianMiddleware } from '@src/middlewares/auth';
+import { CategoryController } from './category.controller';
+import { createCategorySchema } from './category.schema';
+
+export default function categoryRoutes(fastify: FastifyTypeBox) {
+  const categoryController = CategoryController.getInstance(fastify);
+
+  // Librarian protected routes
+  fastify.register(function librarianProtectedRoutes(instance) {
+    instance.addHook('onRoute', (routeOptions) => {
+      routeOptions.schema = routeOptions.schema || {};
+      routeOptions.schema.security = [{ JWT: [] }];
+    });
+    instance.addHook('onRequest', authMiddleware);
+    instance.addHook('onRequest', isLibrarianMiddleware);
+
+    instance.post('/', { schema: createCategorySchema }, categoryController.createCategory.bind(categoryController));
+  });
+}
