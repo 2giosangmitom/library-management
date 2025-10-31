@@ -29,10 +29,6 @@ export default function authorRoutes(fastify: FastifyTypeBox) {
       { schema: deleteAuthorSchema },
       authorController.deleteAuthor.bind(authorController)
     );
-    instance.put(
-      '/:author_id',
-      { schema: updateAuthorSchema },
-      authorController.updateAuthor.bind(authorController)
-    );
+    instance.put('/:author_id', { schema: updateAuthorSchema }, authorController.updateAuthor.bind(authorController));
   });
 }
