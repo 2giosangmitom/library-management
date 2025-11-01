@@ -38,4 +38,22 @@ export class CategoryModel {
       where: { category_id }
     });
   }
+
+  /**
+   * Update a category by ID
+   * @param category_id - The category ID
+   * @param data - The fields to update
+   */
+  public updateCategory(category_id: string, data: { name?: string; slug?: string }) {
+    return this.fastify.prisma.category.update({
+      where: { category_id },
+      data,
+      select: {
+        category_id: true,
+        name: true,
+        slug: true,
+        updated_at: true
+      }
+    });
+  }
 }

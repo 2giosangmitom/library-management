@@ -42,4 +42,21 @@ export class CategoryService {
       throw error;
     }
   }
+
+  /**
+   * Update a category by ID
+   * @param category_id - The category ID
+   * @param data - The category data
+   * @returns Updated category or null if not found
+   */
+  public async updateCategory(category_id: string, data: { name: string; slug: string }) {
+    try {
+      return await this.categoryModel.updateCategory(category_id, data);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        return null;
+      }
+      throw error;
+    }
+  }
 }

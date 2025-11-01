@@ -1,4 +1,4 @@
-import { createCategorySchema, deleteCategorySchema } from './category.schema';
+import { createCategorySchema, deleteCategorySchema, updateCategorySchema } from './category.schema';
 import { CategoryService } from './category.service';
 
 export class CategoryController {
@@ -50,5 +50,25 @@ export class CategoryController {
     }
 
     return reply.status(204).send();
+  }
+
+  /**
+   * Route handler to update a category
+   */
+  public async updateCategory(
+    req: FastifyRequestTypeBox<typeof updateCategorySchema>,
+    reply: FastifyReplyTypeBox<typeof updateCategorySchema>
+  ) {
+    const { category_id } = req.params;
+    const updated = await this.categoryService.updateCategory(category_id, req.body);
+
+    if (!updated) {
+      return reply.status(404).send({ message: 'Category not found' });
+    }
+
+    return reply.send({
+      ...updated,
+      updated_at: updated.updated_at.toISOString()
+    });
   }
 }
