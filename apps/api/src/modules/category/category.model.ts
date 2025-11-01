@@ -33,7 +33,7 @@ export class CategoryModel {
    * Delete a category by ID
    * @param category_id - The category ID
    */
-  public deleteCategory(category_id: string) {
+  public async deleteCategory(category_id: string) {
     return this.fastify.prisma.category.delete({
       where: { category_id }
     });
