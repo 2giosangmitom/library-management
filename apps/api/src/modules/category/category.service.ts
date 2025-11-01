@@ -1,4 +1,5 @@
 import { CategoryModel } from './category.model';
+import { Prisma } from '@prisma/client';
 
 export class CategoryService {
   private static instance: CategoryService;
@@ -23,5 +24,22 @@ export class CategoryService {
    */
   public async createCategory(data: { name: string; slug: string }) {
     return this.categoryModel.createCategory(data);
+  }
+
+  /**
+   * Delete a category by ID
+   * @param category_id - The category ID
+   * @returns true if deleted, false if not found
+   */
+  public async deleteCategory(category_id: string) {
+    try {
+      await this.categoryModel.deleteCategory(category_id);
+      return true;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        return false;
+      }
+      throw error;
+    }
   }
 }
