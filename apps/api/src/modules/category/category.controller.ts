@@ -1,4 +1,10 @@
-import { createCategorySchema, deleteCategorySchema, updateCategorySchema, getAllCategoriesSchema } from './category.schema';
+import {
+  createCategorySchema,
+  deleteCategorySchema,
+  updateCategorySchema,
+  getAllCategoriesSchema,
+  getCategoryDetailsSchema
+} from './category.schema';
 import { CategoryService } from './category.service';
 
 export class CategoryController {
@@ -31,6 +37,23 @@ export class CategoryController {
     const { limit, page } = req.query;
     const categories = await this.categoryService.getAllCategories(page, limit);
     return reply.send(categories);
+  }
+
+  /**
+   * Route handler to get category details by slug
+   */
+  public async getCategoryDetails(
+    req: FastifyRequestTypeBox<typeof getCategoryDetailsSchema>,
+    reply: FastifyReplyTypeBox<typeof getCategoryDetailsSchema>
+  ) {
+    const { category_slug } = req.params;
+    const category = await this.categoryService.getCategoryDetails(category_slug);
+
+    if (!category) {
+      return reply.status(404).send({ message: 'Category not found' });
+    }
+
+    return reply.send(category);
   }
 
   /**

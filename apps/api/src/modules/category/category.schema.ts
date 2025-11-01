@@ -89,3 +89,30 @@ export const getAllCategoriesSchema = {
     )
   }
 } as const satisfies FastifySchema;
+
+export const getCategoryDetailsSchema = {
+  summary: 'Get category details by slug',
+  description: 'Endpoint to retrieve category details by slug',
+  params: Type.Object({
+    category_slug: Type.String({ minLength: 1, maxLength: 50 })
+  }),
+  response: {
+    200: Type.Object(
+      {
+        name: Type.String(),
+        slug: Type.String()
+      },
+      {
+        description: 'Category details retrieved successfully'
+      }
+    ),
+    404: Type.Object(
+      {
+        message: Type.String()
+      },
+      {
+        description: 'Category not found'
+      }
+    )
+  }
+} as const satisfies FastifySchema;

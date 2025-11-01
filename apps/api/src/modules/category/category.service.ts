@@ -66,4 +66,12 @@ export class CategoryService {
   public getAllCategories(page = 1, limit = 10) {
     return this.categoryModel.getAllCategories(page, limit);
   }
+
+  /**
+   * Service method to get category details by slug
+   * @param category_slug - Category slug
+   */
+  public getCategoryDetails(category_slug: string) {
+    return this.categoryModel.getCategoryBySlug(category_slug);
+  }
 }

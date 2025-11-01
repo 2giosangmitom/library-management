@@ -172,4 +172,35 @@ describe('category service', () => {
       await expect(categoryService.updateCategory('some-id', { name: 'A', slug: 'a' })).rejects.toThrow('Unexpected');
     });
   });
+
+  describe('get category by slug', () => {
+    beforeEach(() => {
+      categoryModel.getCategoryBySlug = vi.fn();
+    });
+
+    it('should return category data if found', async () => {
+      vi.spyOn(categoryModel, 'getCategoryBySlug').mockResolvedValueOnce({
+        name: 'Category Name',
+        slug: 'category-name'
+      });
+
+      await expect(categoryService.getCategoryDetails('category-name')).resolves.toEqual({
+        name: 'Category Name',
+        slug: 'category-name'
+      });
+    });
+
+    it('should call getCategoryBySlug with correct slug', async () => {
+      const slug = 'category-name';
+      await categoryService.getCategoryDetails(slug);
+
+      expect(categoryModel.getCategoryBySlug).toHaveBeenCalledWith(slug);
+    });
+
+    it('should return null if category not found', async () => {
+      vi.spyOn(categoryModel, 'getCategoryBySlug').mockResolvedValueOnce(null);
+
+      await expect(categoryService.getCategoryDetails('non-existent-slug')).resolves.toBeNull();
+    });
+  });
 });

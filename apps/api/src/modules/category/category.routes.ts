@@ -4,7 +4,8 @@ import {
   createCategorySchema,
   deleteCategorySchema,
   updateCategorySchema,
-  getAllCategoriesSchema
+  getAllCategoriesSchema,
+  getCategoryDetailsSchema
 } from './category.schema';
 
 export default function categoryRoutes(fastify: FastifyTypeBox) {
@@ -12,6 +13,11 @@ export default function categoryRoutes(fastify: FastifyTypeBox) {
 
   // Public routes
   fastify.get('/', { schema: getAllCategoriesSchema }, categoryController.getAllCategories.bind(categoryController));
+  fastify.get(
+    '/:category_slug',
+    { schema: getCategoryDetailsSchema },
+    categoryController.getCategoryDetails.bind(categoryController)
+  );
 
   // Librarian protected routes
   fastify.register(function librarianProtectedRoutes(instance) {

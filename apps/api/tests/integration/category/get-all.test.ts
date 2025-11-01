@@ -10,7 +10,7 @@ describe('get category', async () => {
       method: 'POST',
       path: '/auth/signup',
       body: {
-        email: 'test-get-category-librarian@test.com',
+        email: 'test-get-category-librarian-2@test.com',
         password: 'password123',
         name: 'Librarian User'
       }
@@ -29,7 +29,7 @@ describe('get category', async () => {
       method: 'POST',
       path: '/auth/signin',
       body: {
-        email: 'test-get-category-librarian@test.com',
+        email: 'test-get-category-librarian-2@test.com',
         password: 'password123'
       }
     });

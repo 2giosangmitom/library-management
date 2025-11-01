@@ -75,4 +75,18 @@ export class CategoryModel {
       }
     });
   }
+
+  /**
+   * Get a category by slug
+   * @param category_slug - The category slug
+   */
+  public getCategoryBySlug(category_slug: string) {
+    return this.fastify.prisma.category.findFirst({
+      where: { slug: category_slug },
+      select: {
+        name: true,
+        slug: true
+      }
+    });
+  }
 }
