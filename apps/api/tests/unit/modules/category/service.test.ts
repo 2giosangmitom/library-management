@@ -99,4 +99,47 @@ describe('category service', () => {
       await expect(categoryService.deleteCategory('any-uuid')).rejects.toThrow('Something went wrong');
     });
   });
+
+  describe('update category', () => {
+    beforeEach(() => {
+      categoryModel.updateCategory = vi.fn();
+    });
+
+    it('should return updated category when successful', async () => {
+      const categoryId = '123e4567-e89b-12d3-a456-426614174000';
+      const updateData = { name: 'New Name', slug: 'new-name' };
+      const updated = {
+        category_id: categoryId,
+        name: 'New Name',
+        slug: 'new-name',
+        updated_at: new Date()
+      };
+
+      vi.spyOn(categoryModel, 'updateCategory').mockResolvedValueOnce(updated);
+
+      const result = await categoryService.updateCategory(categoryId, updateData);
+
+      expect(categoryModel.updateCategory).toHaveBeenCalledWith(categoryId, updateData);
+      expect(result).toEqual(updated);
+    });
+
+    it('should return null if category not found', async () => {
+      const categoryId = 'non-existent-id';
+      const prismaError = new Prisma.PrismaClientKnownRequestError('Record to update not found.', {
+        code: 'P2025',
+        clientVersion: '6.0.0'
+      });
+      vi.spyOn(categoryModel, 'updateCategory').mockRejectedValueOnce(prismaError);
+
+      const result = await categoryService.updateCategory(categoryId, { name: 'A', slug: 'a' });
+      expect(result).toBeNull();
+    });
+
+    it('should rethrow other errors', async () => {
+      const error = new Error('Unexpected');
+      vi.spyOn(categoryModel, 'updateCategory').mockRejectedValueOnce(error);
+
+      await expect(categoryService.updateCategory('some-id', { name: 'A', slug: 'a' })).rejects.toThrow('Unexpected');
+    });
+  });
 });
