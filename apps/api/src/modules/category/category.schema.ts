@@ -43,3 +43,27 @@ export const deleteCategorySchema = {
     )
   }
 } as const satisfies FastifySchema;
+
+export const updateCategorySchema = {
+  summary: 'Update a category by ID',
+  description: 'Endpoint to update a category by its ID.',
+  params: Type.Object({
+    category_id: Type.String({ format: 'uuid' })
+  }),
+  body: Type.Object({
+    name: Type.String({ minLength: 1, maxLength: 100 }),
+    slug: Type.String({ minLength: 1, maxLength: 100 })
+  }),
+  response: {
+    200: Type.Object(
+      {
+        category_id: Type.String(),
+        name: Type.String(),
+        slug: Type.String(),
+        updated_at: Type.String({ format: 'date-time' })
+      },
+      { description: 'Category updated successfully' }
+    ),
+    404: Type.Object({ message: Type.String() }, { description: 'Category not found' })
+  }
+} as const satisfies FastifySchema;
