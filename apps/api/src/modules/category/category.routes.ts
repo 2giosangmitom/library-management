@@ -1,9 +1,17 @@
 import { authMiddleware, isLibrarianMiddleware } from '@src/middlewares/auth';
 import { CategoryController } from './category.controller';
-import { createCategorySchema, deleteCategorySchema, updateCategorySchema } from './category.schema';
+import {
+  createCategorySchema,
+  deleteCategorySchema,
+  updateCategorySchema,
+  getAllCategoriesSchema
+} from './category.schema';
 
 export default function categoryRoutes(fastify: FastifyTypeBox) {
   const categoryController = CategoryController.getInstance(fastify);
+
+  // Public routes
+  fastify.get('/', { schema: getAllCategoriesSchema }, categoryController.getAllCategories.bind(categoryController));
 
   // Librarian protected routes
   fastify.register(function librarianProtectedRoutes(instance) {

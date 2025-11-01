@@ -1,4 +1,4 @@
-import { createCategorySchema, deleteCategorySchema, updateCategorySchema } from './category.schema';
+import { createCategorySchema, deleteCategorySchema, updateCategorySchema, getAllCategoriesSchema } from './category.schema';
 import { CategoryService } from './category.service';
 
 export class CategoryController {
@@ -19,6 +19,18 @@ export class CategoryController {
       CategoryController.instance = new CategoryController(fastify, categoryService);
     }
     return CategoryController.instance;
+  }
+
+  /**
+   * Route handler to get all categories
+   */
+  public async getAllCategories(
+    req: FastifyRequestTypeBox<typeof getAllCategoriesSchema>,
+    reply: FastifyReplyTypeBox<typeof getAllCategoriesSchema>
+  ) {
+    const { limit, page } = req.query;
+    const categories = await this.categoryService.getAllCategories(page, limit);
+    return reply.send(categories);
   }
 
   /**

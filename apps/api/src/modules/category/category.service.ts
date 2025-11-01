@@ -59,4 +59,11 @@ export class CategoryService {
       throw error;
     }
   }
+
+  /**
+   * Service method to get all categories
+   */
+  public getAllCategories(page = 1, limit = 10) {
+    return this.categoryModel.getAllCategories(page, limit);
+  }
 }

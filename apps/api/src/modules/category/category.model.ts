@@ -56,4 +56,23 @@ export class CategoryModel {
       }
     });
   }
+
+  /**
+   * Get all categories with pagination
+   * @param page - Page number (1-based)
+   * @param limit - Items per page
+   */
+  public getAllCategories(page: number, limit: number) {
+    return this.fastify.prisma.category.findMany({
+      select: {
+        name: true,
+        slug: true
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        name: 'asc'
+      }
+    });
+  }
 }

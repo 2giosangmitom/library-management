@@ -59,6 +59,36 @@ describe('category service', () => {
     });
   });
 
+  describe('get all categories', () => {
+    beforeEach(() => {
+      categoryModel.getAllCategories = vi.fn();
+    });
+
+    it('should return a list of categories', async () => {
+      vi.spyOn(categoryModel, 'getAllCategories').mockResolvedValueOnce([
+        { name: 'Category One', slug: 'category-one' },
+        { name: 'Category Two', slug: 'category-two' }
+      ]);
+
+      await expect(categoryService.getAllCategories()).resolves.toEqual([
+        { name: 'Category One', slug: 'category-one' },
+        { name: 'Category Two', slug: 'category-two' }
+      ]);
+    });
+
+    it('should call getAllCategories with default parameters', async () => {
+      await categoryService.getAllCategories();
+
+      expect(categoryModel.getAllCategories).toHaveBeenCalledWith(1, 10);
+    });
+
+    it('should call getAllCategories with provided parameters', async () => {
+      await categoryService.getAllCategories(2, 5);
+
+      expect(categoryModel.getAllCategories).toHaveBeenCalledWith(2, 5);
+    });
+  });
+
   describe('delete category', () => {
     beforeEach(() => {
       categoryModel.deleteCategory = vi.fn();

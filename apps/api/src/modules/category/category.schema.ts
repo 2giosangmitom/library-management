@@ -67,3 +67,25 @@ export const updateCategorySchema = {
     404: Type.Object({ message: Type.String() }, { description: 'Category not found' })
   }
 } as const satisfies FastifySchema;
+
+export const getAllCategoriesSchema = {
+  summary: 'Get all categories',
+  description: 'Endpoint to retrieve all categories in the system',
+  querystring: Type.Partial(
+    Type.Object({
+      page: Type.Number({ minimum: 1 }),
+      limit: Type.Number({ minimum: 1, maximum: 100 })
+    })
+  ),
+  response: {
+    200: Type.Array(
+      Type.Object({
+        name: Type.String(),
+        slug: Type.String()
+      }),
+      {
+        description: 'List of categories retrieved successfully'
+      }
+    )
+  }
+} as const satisfies FastifySchema;
