@@ -1,6 +1,7 @@
 import { CategoryModel } from '@modules/category/category.model';
 import { CategoryService } from '@modules/category/category.service';
 import { fastify } from 'fastify';
+import { Prisma } from '@prisma/client';
 
 describe('category service', () => {
   const app = fastify();
@@ -55,6 +56,47 @@ describe('category service', () => {
           slug: 'category-name'
         })
       ).rejects.toThrow('Creation failed');
+    });
+  });
+
+  describe('delete category', () => {
+    beforeEach(() => {
+      categoryModel.deleteCategory = vi.fn();
+    });
+
+    it('should return true if deletion is successful', async () => {
+      vi.spyOn(categoryModel, 'deleteCategory').mockResolvedValueOnce({
+        category_id: 'category-uuid',
+        name: 'Category Name',
+        slug: 'category-name',
+        created_at: new Date(),
+        updated_at: new Date()
+      } as unknown as never);
+
+      await expect(categoryService.deleteCategory('category-uuid')).resolves.toBe(true);
+    });
+
+    it('should call deleteCategory with correct parameters', async () => {
+      const categoryId = 'category-uuid';
+      await categoryService.deleteCategory(categoryId);
+      expect(categoryModel.deleteCategory).toHaveBeenCalledWith(categoryId);
+    });
+
+    it('should return false if category not found', async () => {
+      const prismaError = new Prisma.PrismaClientKnownRequestError('An error occurred', {
+        code: 'P2025',
+        clientVersion: '6.0.0'
+      });
+      vi.spyOn(categoryModel, 'deleteCategory').mockRejectedValueOnce(prismaError);
+
+      await expect(categoryService.deleteCategory('non-existent-uuid')).resolves.toBe(false);
+    });
+
+    it('should re-throw other errors', async () => {
+      const error = new Error('Something went wrong');
+      vi.spyOn(categoryModel, 'deleteCategory').mockRejectedValueOnce(error);
+
+      await expect(categoryService.deleteCategory('any-uuid')).rejects.toThrow('Something went wrong');
     });
   });
 });

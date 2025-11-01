@@ -1,4 +1,4 @@
-import { createCategorySchema } from './category.schema';
+import { createCategorySchema, deleteCategorySchema } from './category.schema';
 import { CategoryService } from './category.service';
 
 export class CategoryController {
@@ -33,5 +33,22 @@ export class CategoryController {
       ...result,
       created_at: result.created_at.toISOString()
     });
+  }
+
+  /**
+   * Route handler to delete a category
+   */
+  public async deleteCategory(
+    req: FastifyRequestTypeBox<typeof deleteCategorySchema>,
+    reply: FastifyReplyTypeBox<typeof deleteCategorySchema>
+  ) {
+    const { category_id } = req.params;
+    const success = await this.categoryService.deleteCategory(category_id);
+
+    if (!success) {
+      return reply.status(404).send({ message: 'Category not found' });
+    }
+
+    return reply.status(204).send();
   }
 }

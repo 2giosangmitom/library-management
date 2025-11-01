@@ -1,6 +1,6 @@
 import { authMiddleware, isLibrarianMiddleware } from '@src/middlewares/auth';
 import { CategoryController } from './category.controller';
-import { createCategorySchema } from './category.schema';
+import { createCategorySchema, deleteCategorySchema } from './category.schema';
 
 export default function categoryRoutes(fastify: FastifyTypeBox) {
   const categoryController = CategoryController.getInstance(fastify);
@@ -15,5 +15,10 @@ export default function categoryRoutes(fastify: FastifyTypeBox) {
     instance.addHook('onRequest', isLibrarianMiddleware);
 
     instance.post('/', { schema: createCategorySchema }, categoryController.createCategory.bind(categoryController));
+    instance.delete(
+      '/:category_id',
+      { schema: deleteCategorySchema },
+      categoryController.deleteCategory.bind(categoryController)
+    );
   });
 }
