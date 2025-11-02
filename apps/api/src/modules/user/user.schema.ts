@@ -16,3 +16,21 @@ export const getUserInfoSchema = {
     })
   }
 } as const satisfies FastifySchema;
+
+export const updateUserSchema = {
+  summary: 'Update authenticated user name',
+  description: 'Update the name of the authenticated user',
+  body: Type.Object({
+    name: Type.String({ minLength: 1, maxLength: 50 })
+  }),
+  response: {
+    200: Type.Object({
+      user_id: Type.String({ format: 'uuid' }),
+      email: Type.String({ format: 'email' }),
+      name: Type.String(),
+      role: Type.String(),
+      updated_at: Type.String({ format: 'date-time' })
+    }),
+    404: Type.Object({ message: Type.String() })
+  }
+} as const satisfies FastifySchema;

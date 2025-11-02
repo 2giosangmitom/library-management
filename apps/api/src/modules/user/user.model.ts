@@ -71,4 +71,23 @@ export class UserModel {
       }
     });
   }
+
+  /**
+   * Update a user's name by ID
+   * @param user_id The user ID
+   * @param data Fields to update
+   */
+  public updateUser(user_id: string, data: { name?: string }) {
+    return this.fastify.prisma.user.update({
+      where: { user_id },
+      data,
+      select: {
+        user_id: true,
+        email: true,
+        name: true,
+        role: true,
+        updated_at: true
+      }
+    });
+  }
 }
