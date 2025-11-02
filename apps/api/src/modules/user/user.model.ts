@@ -109,4 +109,24 @@ export class UserModel {
       }
     });
   }
+
+  /**
+   * Update a user's password by ID
+   * @param user_id The user ID
+   * @param password_hash The new password hash
+   * @param salt The new salt
+   */
+  public updateUserPassword(user_id: string, password_hash: string, salt: string) {
+    return this.fastify.prisma.user.update({
+      where: { user_id },
+      data: { password_hash, salt },
+      select: {
+        user_id: true,
+        email: true,
+        name: true,
+        role: true,
+        updated_at: true
+      }
+    });
+  }
 }

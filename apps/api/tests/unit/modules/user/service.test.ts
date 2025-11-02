@@ -2,6 +2,7 @@ import { UserModel } from '@modules/user/user.model';
 import { UserService } from '@modules/user/user.service';
 import { Role } from '@prisma/client';
 import { fastify } from 'fastify';
+import * as hashUtils from '@utils/hash';
 import { Prisma } from '@prisma/client';
 
 describe('user service', () => {
@@ -129,6 +130,58 @@ describe('user service', () => {
       vi.spyOn(userModel, 'updateUserEmail').mockRejectedValueOnce(prismaError);
 
       await expect(userService.updateEmail('user-uuid', 'exists@test.com')).rejects.toThrow(prismaError);
+    });
+  });
+
+  describe('change password', () => {
+    beforeEach(() => {
+      userModel.findUserById = vi.fn();
+      userModel.updateUserPassword = vi.fn();
+    });
+
+    it('should change password when current password is valid', async () => {
+      const user = {
+        user_id: 'user-uuid',
+        password_hash: 'old-hash',
+        salt: 'old-salt',
+        name: 'Name',
+        email: 'old@test.com',
+        role: Role.MEMBER
+      };
+
+      vi.spyOn(userModel, 'findUserById').mockResolvedValueOnce(user);
+
+      vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(true);
+      vi.spyOn(hashUtils, 'generateHash').mockResolvedValueOnce({ hash: 'new-hash', salt: 'new-salt' });
+
+      await expect(userService.changePassword('user-uuid', 'current', 'newpass')).resolves.toBe(true);
+
+      expect(userModel.updateUserPassword).toHaveBeenCalledWith('user-uuid', 'new-hash', 'new-salt');
+    });
+
+    it('should return false when current password is invalid', async () => {
+      const user = {
+        user_id: 'user-uuid',
+        password_hash: 'old-hash',
+        salt: 'old-salt',
+        name: 'Name',
+        email: 'old@test.com',
+        role: Role.MEMBER
+      };
+
+      vi.spyOn(userModel, 'findUserById').mockResolvedValueOnce(user);
+
+      vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(false);
+
+      await expect(userService.changePassword('user-uuid', 'wrong', 'newpass')).resolves.toBe(false);
+
+      expect(userModel.updateUserPassword).not.toHaveBeenCalled();
+    });
+
+    it('should return null when user not found', async () => {
+      vi.spyOn(userModel, 'findUserById').mockResolvedValueOnce(null);
+
+      await expect(userService.changePassword('not-found', 'x', 'y')).resolves.toBeNull();
     });
   });
 });

@@ -53,3 +53,17 @@ export const updateUserEmailSchema = {
     409: Type.Object({ message: Type.String() })
   }
 } as const satisfies FastifySchema;
+
+export const updateUserPasswordSchema = {
+  summary: 'Update authenticated user password',
+  description: 'Change the password of the authenticated user. Requires current password.',
+  body: Type.Object({
+    current_password: Type.String({ minLength: 6 }),
+    new_password: Type.String({ minLength: 6 })
+  }),
+  response: {
+    204: Type.Null({ description: 'Password updated successfully' }),
+    401: Type.Object({ message: Type.String() }, { description: 'Invalid current password' }),
+    404: Type.Object({ message: Type.String() }, { description: 'User not found' })
+  }
+} as const satisfies FastifySchema;

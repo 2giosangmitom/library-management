@@ -1,4 +1,4 @@
-import { getUserInfoSchema, updateUserSchema, updateUserEmailSchema } from './user.schema';
+import { getUserInfoSchema, updateUserSchema, updateUserEmailSchema, updateUserPasswordSchema } from './user.schema';
 import { UserService } from './user.service';
 import { Prisma } from '@prisma/client';
 
@@ -86,5 +86,27 @@ export class UserController {
       }
       throw error;
     }
+  }
+
+  /**
+   * Change authenticated user's password
+   */
+  public async changePassword(
+    req: FastifyRequestTypeBox<typeof updateUserPasswordSchema>,
+    reply: FastifyReplyTypeBox<typeof updateUserPasswordSchema>
+  ) {
+    const encoded = req.user as JWTPayload;
+
+    const result = await this.userService.changePassword(encoded.sub, req.body.current_password, req.body.new_password);
+
+    if (result === null) {
+      return reply.status(404).send({ message: 'User not found' });
+    }
+
+    if (result === false) {
+      return reply.status(401).send({ message: 'Invalid current password' });
+    }
+
+    return reply.status(204).send(null);
   }
 }

@@ -1,5 +1,5 @@
 import { UserController } from './user.controller';
-import { getUserInfoSchema, updateUserSchema, updateUserEmailSchema } from './user.schema';
+import { getUserInfoSchema, updateUserSchema, updateUserEmailSchema, updateUserPasswordSchema } from './user.schema';
 
 export default function userRoutes(fastify: FastifyTypeBox) {
   const userController = UserController.getInstance(fastify);
@@ -11,4 +11,7 @@ export default function userRoutes(fastify: FastifyTypeBox) {
 
   // Update authenticated user's email
   fastify.put('/me/email', { schema: updateUserEmailSchema }, userController.updateEmail.bind(userController));
+
+  // Change authenticated user's password
+  fastify.put('/me/password', { schema: updateUserPasswordSchema }, userController.changePassword.bind(userController));
 }

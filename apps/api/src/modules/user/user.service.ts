@@ -1,5 +1,6 @@
 import { UserModel } from './user.model';
 import { Prisma } from '@prisma/client';
+import { generateHash, verifyHash } from '@utils/hash';
 
 export class UserService {
   private static instance: UserService;
@@ -9,7 +10,7 @@ export class UserService {
     this.userModel = userModel;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, userModel = UserModel.getInstance(fastify)) {
+  public static getInstance(fastify: FastifyTypeBox, userModel = UserModel.getInstance(fastify)): UserService {
     if (!UserService.instance) {
       UserService.instance = new UserService(userModel);
     }
@@ -58,5 +59,24 @@ export class UserService {
       // Rethrow other errors
       throw error;
     }
+  }
+
+  /**
+   * Change user's password
+   * @param user_id The user ID
+   * @param currentPassword The current password to verify
+   * @param newPassword The new password to set
+   * @returns true if updated, false if current password invalid, null if user not found
+   */
+  public async changePassword(user_id: string, currentPassword: string, newPassword: string) {
+    const user = await this.userModel.findUserById(user_id);
+    if (!user) return null;
+
+    const valid = await verifyHash(currentPassword, user.password_hash, user.salt);
+    if (!valid) return false;
+
+    const { hash, salt } = await generateHash(newPassword);
+    await this.userModel.updateUserPassword(user_id, hash, salt);
+    return true;
   }
 }
