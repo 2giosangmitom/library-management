@@ -87,4 +87,48 @@ describe('user service', () => {
       await expect(userService.updateUser('id', { name: 'X' })).rejects.toThrow('Boom');
     });
   });
+
+  describe('update email', () => {
+    beforeEach(() => {
+      userModel.updateUserEmail = vi.fn();
+    });
+
+    it('should return updated user when successful', async () => {
+      const updated = {
+        user_id: 'user-uuid',
+        email: 'new@test.com',
+        name: 'Name',
+        role: Role.MEMBER,
+        updated_at: new Date()
+      };
+
+      vi.spyOn(userModel, 'updateUserEmail').mockResolvedValueOnce(updated);
+
+      const result = await userService.updateEmail('user-uuid', 'new@test.com');
+
+      expect(userModel.updateUserEmail).toHaveBeenCalledWith('user-uuid', 'new@test.com');
+      expect(result).toEqual(updated);
+    });
+
+    it('should return null if user not found', async () => {
+      const prismaError = new Prisma.PrismaClientKnownRequestError('Not found', {
+        code: 'P2025',
+        clientVersion: '6.0.0'
+      });
+      vi.spyOn(userModel, 'updateUserEmail').mockRejectedValueOnce(prismaError);
+
+      const result = await userService.updateEmail('non-existent-id', 'x@test.com');
+      expect(result).toBeNull();
+    });
+
+    it('should rethrow unique constraint errors', async () => {
+      const prismaError = new Prisma.PrismaClientKnownRequestError('Unique constraint', {
+        code: 'P2002',
+        clientVersion: '6.0.0'
+      });
+      vi.spyOn(userModel, 'updateUserEmail').mockRejectedValueOnce(prismaError);
+
+      await expect(userService.updateEmail('user-uuid', 'exists@test.com')).rejects.toThrow(prismaError);
+    });
+  });
 });
