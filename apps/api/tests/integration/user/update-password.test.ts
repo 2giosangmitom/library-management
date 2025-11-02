@@ -57,7 +57,7 @@ describe('update user password', async () => {
       method: 'PUT',
       path: '/user/me/password',
       headers: { Authorization: `Bearer ${jwt}` },
-      body: { current_password: 'wrongpw', new_password: 'newpass' }
+      body: { current_password: 'wrongpwd', new_password: 'newpasswd' }
     });
     expect(res.statusCode).toBe(401);
   });
@@ -105,5 +105,15 @@ describe('update user password', async () => {
       body: { current_password: 'password', new_password: 'newpass' }
     });
     expect(res.statusCode).toBe(401);
+  });
+
+  it('should return 400 for new password that is too short', async () => {
+    const res = await app.inject({
+      method: 'PUT',
+      path: '/user/me/password',
+      headers: { Authorization: `Bearer ${jwt}` },
+      body: { current_password: 'password', new_password: 'short' }
+    });
+    expect(res.statusCode).toBe(400);
   });
 });

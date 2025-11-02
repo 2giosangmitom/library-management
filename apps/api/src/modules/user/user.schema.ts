@@ -58,8 +58,8 @@ export const updateUserPasswordSchema = {
   summary: 'Update authenticated user password',
   description: 'Change the password of the authenticated user. Requires current password.',
   body: Type.Object({
-    current_password: Type.String({ minLength: 6 }),
-    new_password: Type.String({ minLength: 6 })
+    current_password: Type.String({ minLength: 8 }),
+    new_password: Type.String({ minLength: 8 })
   }),
   response: {
     204: Type.Null({ description: 'Password updated successfully' }),
