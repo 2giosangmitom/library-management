@@ -18,7 +18,7 @@ export class UserModel {
    * @param data User data for creating a new user
    * @returns The created user
    */
-  public createUser(data: { email: string; password_hash: string; salt: string; name: string }) {
+  public async createUser(data: { email: string; password_hash: string; salt: string; name: string }) {
     return this.fastify.prisma.user.create({
       select: {
         user_id: true,
@@ -35,7 +35,7 @@ export class UserModel {
    * @param email The email address to find
    * @returns The user data
    */
-  public findUserByEmail(email: string) {
+  public async findUserByEmail(email: string) {
     return this.fastify.prisma.user.findUnique({
       select: {
         user_id: true,
@@ -47,6 +47,27 @@ export class UserModel {
       },
       where: {
         email
+      }
+    });
+  }
+
+  /**
+   * Find a user by user ID
+   * @param user_id The user ID to find
+   * @returns The user data
+   */
+  public async findUserById(user_id: string) {
+    return this.fastify.prisma.user.findUnique({
+      select: {
+        user_id: true,
+        password_hash: true,
+        salt: true,
+        name: true,
+        email: true,
+        role: true
+      },
+      where: {
+        user_id
       }
     });
   }
