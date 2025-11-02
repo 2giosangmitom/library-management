@@ -12,6 +12,8 @@ import categoryHooks from '@modules/category/category.hooks';
 import categoryRoutes from '@modules/category/category.routes';
 import userHooks from '@modules/user/user.hooks';
 import userRoutes from '@modules/user/user.routes';
+import bookHooks from '@modules/book/book.hooks';
+import bookRoutes from '@modules/book/book.routes';
 import fp from 'fastify-plugin';
 
 export async function build() {
@@ -65,6 +67,15 @@ export async function build() {
       instance.register(fp(userRoutes));
     },
     { prefix: '/user' }
+  );
+
+  // Register book module
+  await app.register(
+    function bookModule(instance) {
+      instance.register(fp(bookHooks));
+      instance.register(fp(bookRoutes));
+    },
+    { prefix: '/book' }
   );
 
   return app;
