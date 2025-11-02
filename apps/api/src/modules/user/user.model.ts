@@ -90,4 +90,23 @@ export class UserModel {
       }
     });
   }
+
+  /**
+   * Update a user's email by ID
+   * @param user_id The user ID
+   * @param email The new email
+   */
+  public updateUserEmail(user_id: string, email: string) {
+    return this.fastify.prisma.user.update({
+      where: { user_id },
+      data: { email },
+      select: {
+        user_id: true,
+        email: true,
+        name: true,
+        role: true,
+        updated_at: true
+      }
+    });
+  }
 }

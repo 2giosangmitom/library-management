@@ -1,6 +1,6 @@
-import { getUserInfoSchema } from './user.schema';
+import { getUserInfoSchema, updateUserSchema, updateUserEmailSchema } from './user.schema';
 import { UserService } from './user.service';
-import { updateUserSchema } from './user.schema';
+import { Prisma } from '@prisma/client';
 
 export class UserController {
   private static instance: UserController;
@@ -58,5 +58,33 @@ export class UserController {
       ...updated,
       updated_at: updated.updated_at.toISOString()
     });
+  }
+
+  /**
+   * Update authenticated user's email
+   */
+  public async updateEmail(
+    req: FastifyRequestTypeBox<typeof updateUserEmailSchema>,
+    reply: FastifyReplyTypeBox<typeof updateUserEmailSchema>
+  ) {
+    const encoded = req.user as JWTPayload;
+
+    try {
+      const updated = await this.userService.updateEmail(encoded.sub, req.body.email);
+
+      if (!updated) {
+        return reply.status(404).send({ message: 'User not found' });
+      }
+
+      return reply.send({
+        ...updated,
+        updated_at: updated.updated_at.toISOString()
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        return reply.status(409).send({ message: 'Email already exists' });
+      }
+      throw error;
+    }
   }
 }

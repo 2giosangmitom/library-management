@@ -41,4 +41,22 @@ export class UserService {
       throw error;
     }
   }
+
+  /**
+   * Update user's email
+   * @param user_id The user ID
+   * @param email The new email
+   */
+  public async updateEmail(user_id: string, email: string) {
+    try {
+      return await this.userModel.updateUserEmail(user_id, email);
+    } catch (error) {
+      // If user not found, Prisma throws P2025
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        return null;
+      }
+      // Rethrow other errors
+      throw error;
+    }
+  }
 }
