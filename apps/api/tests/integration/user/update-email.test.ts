@@ -80,4 +80,24 @@ describe('update user email', async () => {
     });
     expect(res.statusCode).toBe(404);
   });
+
+  it('should return 400 for invalid email format', async () => {
+    const res = await app.inject({
+      method: 'PUT',
+      path: '/user/me/email',
+      headers: { Authorization: `Bearer ${jwt}` },
+      body: { email: 'invalid-email-format' }
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it('should return 401 if not authenticated', async () => {
+    const res = await app.inject({
+      method: 'PUT',
+      path: '/user/me/email',
+      headers: { Authorization: `Bearer invalid-token` },
+      body: { email: 'x@test.com' }
+    });
+    expect(res.statusCode).toBe(401);
+  });
 });
