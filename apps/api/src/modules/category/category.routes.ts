@@ -1,4 +1,4 @@
-import { authMiddleware, isLibrarianMiddleware } from '@src/middlewares/auth';
+import { authHook, isLibrarianHook } from '@hooks/auth';
 import { CategoryController } from './category.controller';
 import {
   createCategorySchema,
@@ -25,8 +25,8 @@ export default function categoryRoutes(fastify: FastifyTypeBox) {
       routeOptions.schema = routeOptions.schema || {};
       routeOptions.schema.security = [{ JWT: [] }];
     });
-    instance.addHook('onRequest', authMiddleware);
-    instance.addHook('onRequest', isLibrarianMiddleware);
+    instance.addHook('onRequest', authHook);
+    instance.addHook('onRequest', isLibrarianHook);
 
     instance.post('/', { schema: createCategorySchema }, categoryController.createCategory.bind(categoryController));
     instance.delete(

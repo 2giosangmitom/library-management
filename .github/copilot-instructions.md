@@ -53,7 +53,7 @@ The API follows a modular structure. Each module (e.g., `auth`, `author`) in `ap
 - `*.schema.ts`: Defines the `TypeBox` schemas for request and response validation.
 - `*.routes.ts`: Defines the routes for the module and plugs them into the Fastify app.
 
-Authentication is handled using JWT. The `auth` middleware in `apps/api/src/middlewares/auth.ts` protects routes.
+Authentication is handled using JWT. The `auth` hook in `apps/api/src/hooks/auth.ts` protects routes.
 
 ## Testing
 

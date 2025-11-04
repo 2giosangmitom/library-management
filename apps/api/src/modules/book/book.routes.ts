@@ -1,4 +1,4 @@
-import { authMiddleware, isLibrarianMiddleware } from '@src/middlewares/auth';
+import { authHook, isLibrarianHook } from '@hooks/auth';
 import { BookController } from './book.controller';
 import { createBookSchema } from './book.schema';
 
@@ -11,8 +11,8 @@ export default function bookRoutes(fastify: FastifyTypeBox) {
       routeOptions.schema = routeOptions.schema || {};
       routeOptions.schema.security = [{ JWT: [] }];
     });
-    instance.addHook('onRequest', authMiddleware);
-    instance.addHook('onRequest', isLibrarianMiddleware);
+    instance.addHook('onRequest', authHook);
+    instance.addHook('onRequest', isLibrarianHook);
 
     instance.post('/', { schema: createBookSchema }, bookController.createBook.bind(bookController));
   });

@@ -1,6 +1,6 @@
 import { AuthorController } from './author.controller';
 import { createAuthorSchema, deleteAuthorSchema, updateAuthorSchema } from './author.schema';
-import { authMiddleware, isLibrarianMiddleware } from '@middlewares/auth';
+import { authHook, isLibrarianHook } from '@hooks/auth';
 import { getAllAuthorsSchema, getAuthorDetailsSchema } from './author.schema';
 
 export default function authorRoutes(fastify: FastifyTypeBox) {
@@ -16,8 +16,8 @@ export default function authorRoutes(fastify: FastifyTypeBox) {
 
   // Librarian only routes
   fastify.register(function librarianProtectedRoutes(instance) {
-    instance.addHook('onRequest', authMiddleware);
-    instance.addHook('onRequest', isLibrarianMiddleware);
+    instance.addHook('onRequest', authHook);
+    instance.addHook('onRequest', isLibrarianHook);
     instance.addHook('onRoute', (routeOptions) => {
       routeOptions.schema = routeOptions.schema || {};
       routeOptions.schema.security = [{ JWT: [] }];

@@ -32,7 +32,7 @@
       "@plugins/*": ["src/plugins/*"],
       "@src/*": ["src/*"],
       "@tests/*": ["tests/*"],
-      "@middlewares/*": ["src/middlewares/*"]
+      "@hooks/*": ["src/hooks/*"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "types/**/*.ts"],

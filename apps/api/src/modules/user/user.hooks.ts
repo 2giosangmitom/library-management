@@ -1,4 +1,4 @@
-import { authMiddleware } from '@src/middlewares/auth';
+import { authHook } from '@hooks/auth';
 
 export default function userHooks(fastify: FastifyTypeBox) {
   fastify.addHook('onRoute', (routeOptions) => {
@@ -7,5 +7,5 @@ export default function userHooks(fastify: FastifyTypeBox) {
     routeOptions.schema.security = [{ JWT: [] }];
   });
 
-  fastify.addHook('onRequest', authMiddleware);
+  fastify.addHook('onRequest', authHook);
 }

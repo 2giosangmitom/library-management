@@ -1,14 +1,14 @@
-import { authMiddleware, isLibrarianMiddleware } from '@middlewares/auth';
+import { authHook, isLibrarianHook } from '@src/hooks/auth';
 import { fastify, FastifyInstance } from 'fastify';
 import jwt from '@plugins/jwt';
 import { RedisTokenUtils } from '@utils/redis';
 import { envType } from '@config/env-schema';
 import fp from 'fastify-plugin';
 
-describe('auth middleware', () => {
+describe('auth hooks', () => {
   let app: FastifyInstance;
 
-  describe('authMiddleware', () => {
+  describe('authHook', () => {
     let redisTokenUtils: RedisTokenUtils;
 
     beforeEach(async () => {
@@ -32,7 +32,7 @@ describe('auth middleware', () => {
       app.get(
         '/protected',
         {
-          onRequest: [authMiddleware]
+          onRequest: [authHook]
         },
         async () => {
           return { message: 'Access granted' };
@@ -87,7 +87,7 @@ describe('auth middleware', () => {
     });
   });
 
-  describe('isLibrarianMiddleware', () => {
+  describe('isLibrarianHook', () => {
     beforeEach(async () => {
       app = fastify();
       // Register Redis plugin (mocked)
@@ -106,7 +106,7 @@ describe('auth middleware', () => {
       app.get(
         '/librarian-only',
         {
-          onRequest: [authMiddleware, isLibrarianMiddleware]
+          onRequest: [authHook, isLibrarianHook]
         },
         async () => {
           return { message: 'Librarian access granted' };
