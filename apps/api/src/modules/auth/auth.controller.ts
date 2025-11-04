@@ -5,7 +5,7 @@ import { RedisTokenUtils } from '@utils/redis';
 import { nanoid } from 'nanoid';
 
 export class AuthController {
-  private static instance: AuthController | null = null;
+  private static instance: AuthController;
   private authService: AuthService;
   private redisTokenUtils: RedisTokenUtils;
 
@@ -66,7 +66,7 @@ export class AuthController {
       role,
       jti
     });
-    await this.redisTokenUtils.setToken('jwt', jti, user_id, 30 * 24 * 60 * 60); // 30 days expiration
+    await this.redisTokenUtils.addJWT(jti, user_id, 30 * 24 * 60 * 60); // 30 days expiration
 
     return reply.send({ jwt });
   }
@@ -80,7 +80,7 @@ export class AuthController {
   ) {
     const jwtData = req.user as JWTPayload;
 
-    await this.redisTokenUtils.deleteToken('jwt', jwtData.jti);
+    await this.redisTokenUtils.deleteJWT(jwtData.jti);
 
     return reply.status(204).send();
   }

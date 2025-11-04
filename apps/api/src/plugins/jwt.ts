@@ -15,7 +15,7 @@ export default fp(
         expiresIn: '30d'
       },
       trusted: async (_, decodedToken) => {
-        const token = await redisTokenUtils.getToken('jwt', decodedToken.jti);
+        const token = await redisTokenUtils.getJWT(decodedToken.jti);
         return !!token;
       }
     });

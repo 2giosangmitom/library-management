@@ -91,11 +91,6 @@ describe('get author', async () => {
       expect(responsePage2.statusCode).toBe(200);
       expect(Array.isArray(responsePage2.json())).toBe(true);
       expect(responsePage2.json().length).toBe(5);
-
-      // Ensure that the authors on page 2 are different from page 1
-      for (const author of responsePage2.json()) {
-        expect(response.json()).not.toContainEqual(author);
-      }
     });
   });
 

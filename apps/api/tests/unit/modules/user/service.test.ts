@@ -4,6 +4,8 @@ import { Role } from '@prisma/client';
 import { fastify } from 'fastify';
 import * as hashUtils from '@utils/hash';
 import { Prisma } from '@prisma/client';
+import { FastifyRedis } from '@fastify/redis';
+import { RedisTokenUtils } from '@utils/redis';
 
 describe('user service', () => {
   const app = fastify();
@@ -134,9 +136,14 @@ describe('user service', () => {
   });
 
   describe('change password', () => {
+    let redisTokenUtils: RedisTokenUtils;
+
     beforeEach(() => {
       userModel.findUserById = vi.fn();
       userModel.updateUserPassword = vi.fn();
+      const redisClient = {} as FastifyRedis;
+      redisTokenUtils = RedisTokenUtils.getInstance(redisClient);
+      redisTokenUtils.revokeAllJWTs = vi.fn();
     });
 
     it('should change password when current password is valid', async () => {
@@ -154,7 +161,7 @@ describe('user service', () => {
       vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(true);
       vi.spyOn(hashUtils, 'generateHash').mockResolvedValueOnce({ hash: 'new-hash', salt: 'new-salt' });
 
-      await expect(userService.changePassword('user-uuid', 'current', 'newpass')).resolves.toBe(true);
+      await expect(userService.changePassword('user-uuid', 'current', 'newpass', 'current-jwt')).resolves.toBe(true);
 
       expect(userModel.updateUserPassword).toHaveBeenCalledWith('user-uuid', 'new-hash', 'new-salt');
     });
@@ -173,7 +180,7 @@ describe('user service', () => {
 
       vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(false);
 
-      await expect(userService.changePassword('user-uuid', 'wrong', 'newpass')).resolves.toBe(false);
+      await expect(userService.changePassword('user-uuid', 'wrong', 'newpass', 'current-jwt')).resolves.toBe(false);
 
       expect(userModel.updateUserPassword).not.toHaveBeenCalled();
     });
@@ -181,7 +188,27 @@ describe('user service', () => {
     it('should return null when user not found', async () => {
       vi.spyOn(userModel, 'findUserById').mockResolvedValueOnce(null);
 
-      await expect(userService.changePassword('not-found', 'x', 'y')).resolves.toBeNull();
+      await expect(userService.changePassword('not-found', 'x', 'y', 'current-jwt')).resolves.toBeNull();
+    });
+
+    it('should sign out other sessions after password change', async () => {
+      const user = {
+        user_id: 'user-uuid',
+        password_hash: 'old-hash',
+        salt: 'old-salt',
+        name: 'Name',
+        email: 'old@test.com',
+        role: Role.MEMBER
+      };
+
+      vi.spyOn(userModel, 'findUserById').mockResolvedValueOnce(user);
+      vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(true);
+      vi.spyOn(hashUtils, 'generateHash').mockResolvedValueOnce({ hash: 'new-hash', salt: 'new-salt' });
+      userModel.updateUserPassword = vi.fn();
+
+      await expect(userService.changePassword('user-uuid', 'current', 'newpass', 'current-jwt')).resolves.toBe(true);
+
+      expect(redisTokenUtils.revokeAllJWTs).toHaveBeenCalledWith('user-uuid', 'current-jwt');
     });
   });
 });

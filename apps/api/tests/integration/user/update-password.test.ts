@@ -165,4 +165,41 @@ describe('update user password', async () => {
     });
     expect(res.statusCode).toBe(400);
   });
+
+  it('should sign out other sessions after password change', async () => {
+    // Sign in to create a second session
+    const signin2 = await app.inject({
+      method: 'POST',
+      path: '/auth/signin',
+      body: {
+        email: 'test-update-password@test.com',
+        password: 'password'
+      }
+    });
+    const jwt2 = signin2.json().jwt;
+
+    // Change password
+    await app.inject({
+      method: 'PUT',
+      path: '/user/me/password',
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      },
+      body: {
+        current_password: 'password',
+        new_password: 'newpassword'
+      }
+    });
+
+    // Verify that the second session is invalidated
+    const protectedResponse = await app.inject({
+      method: 'POST',
+      path: '/auth/signout',
+      headers: {
+        Authorization: `Bearer ${jwt2}`
+      }
+    });
+
+    expect(protectedResponse.statusCode).toBe(401);
+  });
 });

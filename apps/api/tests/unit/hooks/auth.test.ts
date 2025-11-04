@@ -14,7 +14,7 @@ describe('auth hooks', () => {
     beforeEach(async () => {
       app = fastify();
       redisTokenUtils = RedisTokenUtils.getInstance(app.redis);
-      redisTokenUtils.getToken = vi.fn().mockResolvedValue('some-data');
+      redisTokenUtils.getJWT = vi.fn().mockResolvedValue('some-data');
 
       // Register Redis plugin (mocked)
       await app.register(
@@ -73,7 +73,7 @@ describe('auth hooks', () => {
     });
 
     it('should reject request with blacklisted token', async () => {
-      vi.spyOn(redisTokenUtils, 'getToken').mockResolvedValueOnce(null);
+      vi.spyOn(redisTokenUtils, 'getJWT').mockResolvedValueOnce(null);
 
       const token = app.jwt.sign({ sub: 'user123', role: 'MEMBER' });
       const response = await app.inject({

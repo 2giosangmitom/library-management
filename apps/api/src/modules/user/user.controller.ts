@@ -97,7 +97,12 @@ export class UserController {
   ) {
     const encoded = req.user as JWTPayload;
 
-    const result = await this.userService.changePassword(encoded.sub, req.body.current_password, req.body.new_password);
+    const result = await this.userService.changePassword(
+      encoded.sub,
+      req.body.current_password,
+      req.body.new_password,
+      encoded.jti
+    );
 
     if (result === null) {
       return reply.status(404).send({ message: 'User not found' });

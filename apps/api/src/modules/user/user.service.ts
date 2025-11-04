@@ -1,18 +1,23 @@
 import { UserModel } from './user.model';
 import { Prisma } from '@prisma/client';
 import { generateHash, verifyHash } from '@utils/hash';
+import { RedisTokenUtils } from '@utils/redis';
 
 export class UserService {
   private static instance: UserService;
   private userModel: UserModel;
+  private fastify: FastifyTypeBox;
+  private redisTokenUtils: RedisTokenUtils;
 
-  private constructor(userModel: UserModel) {
+  private constructor(fastify: FastifyTypeBox, userModel: UserModel) {
     this.userModel = userModel;
+    this.redisTokenUtils = RedisTokenUtils.getInstance(fastify.redis);
+    this.fastify = fastify;
   }
 
   public static getInstance(fastify: FastifyTypeBox, userModel = UserModel.getInstance(fastify)): UserService {
     if (!UserService.instance) {
-      UserService.instance = new UserService(userModel);
+      UserService.instance = new UserService(fastify, userModel);
     }
     return UserService.instance;
   }
@@ -66,9 +71,10 @@ export class UserService {
    * @param user_id The user ID
    * @param currentPassword The current password to verify
    * @param newPassword The new password to set
+   * @param currentJWT The current JWT to exclude from revocation
    * @returns true if updated, false if current password invalid, null if user not found
    */
-  public async changePassword(user_id: string, currentPassword: string, newPassword: string) {
+  public async changePassword(user_id: string, currentPassword: string, newPassword: string, currentJWT: string) {
     const user = await this.userModel.findUserById(user_id);
     if (!user) return null;
 
@@ -77,6 +83,10 @@ export class UserService {
 
     const { hash, salt } = await generateHash(newPassword);
     await this.userModel.updateUserPassword(user_id, hash, salt);
+
+    // Sign out other sessions
+    await this.redisTokenUtils.revokeAllJWTs(user_id, currentJWT);
+
     return true;
   }
 }

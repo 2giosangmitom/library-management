@@ -73,7 +73,7 @@ describe('sign in', async () => {
   });
 
   it('should store the jwt in redis with proper expiration', async () => {
-    const redisTokenUtilsSpy = vi.spyOn(redisTokenUtils, 'setToken');
+    const redisTokenUtilsSpy = vi.spyOn(redisTokenUtils, 'addJWT');
 
     const response = await app.inject({
       method: 'POST',
@@ -87,7 +87,7 @@ describe('sign in', async () => {
     const { jwt } = response.json();
     const decoded = app.jwt.decode<JWTPayload>(jwt);
     assert.isNotNull(decoded);
-    await expect(redisTokenUtils.getToken('jwt', decoded.jti)).resolves.toBeDefined();
-    expect(redisTokenUtilsSpy).toHaveBeenCalledWith('jwt', decoded.jti, decoded.sub, 30 * 24 * 60 * 60);
+    await expect(redisTokenUtils.getJWT(decoded.jti)).resolves.toBeDefined();
+    expect(redisTokenUtilsSpy).toHaveBeenCalledWith(decoded.jti, decoded.sub, 30 * 24 * 60 * 60);
   });
 });
