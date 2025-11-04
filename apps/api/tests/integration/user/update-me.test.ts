@@ -8,14 +8,21 @@ describe('update user me', async () => {
     const signup = await app.inject({
       method: 'POST',
       path: '/auth/signup',
-      body: { email: 'test-update-me@test.com', password: 'password', name: 'Old Name' }
+      body: {
+        email: 'test-update-me@test.com',
+        password: 'password',
+        name: 'Old Name'
+      }
     });
     expect(signup.statusCode).toBe(201);
 
     const signin = await app.inject({
       method: 'POST',
       path: '/auth/signin',
-      body: { email: 'test-update-me@test.com', password: 'password' }
+      body: {
+        email: 'test-update-me@test.com',
+        password: 'password'
+      }
     });
     jwt = signin.json().jwt;
   });
@@ -28,8 +35,12 @@ describe('update user me', async () => {
     const response = await app.inject({
       method: 'PUT',
       path: '/user/me',
-      headers: { Authorization: `Bearer ${jwt}` },
-      body: { name: 'New Name' }
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      },
+      body: {
+        name: 'New Name'
+      }
     });
 
     expect(response.statusCode).toBe(200);
@@ -44,13 +55,20 @@ describe('update user me', async () => {
     const signup = await app.inject({
       method: 'POST',
       path: '/auth/signup',
-      body: { email: 'test-update-me-delete@test.com', password: 'password', name: 'To Delete' }
+      body: {
+        email: 'test-update-me-delete@test.com',
+        password: 'password',
+        name: 'To Delete'
+      }
     });
     const user = signup.json();
     const signin = await app.inject({
       method: 'POST',
       path: '/auth/signin',
-      body: { email: 'test-update-me-delete@test.com', password: 'password' }
+      body: {
+        email: 'test-update-me-delete@test.com',
+        password: 'password'
+      }
     });
     const jwt2 = signin.json().jwt;
 
@@ -60,8 +78,12 @@ describe('update user me', async () => {
     const response = await app.inject({
       method: 'PUT',
       path: '/user/me',
-      headers: { Authorization: `Bearer ${jwt2}` },
-      body: { name: 'X' }
+      headers: {
+        Authorization: `Bearer ${jwt2}`
+      },
+      body: {
+        name: 'X'
+      }
     });
     expect(response.statusCode).toBe(404);
   });

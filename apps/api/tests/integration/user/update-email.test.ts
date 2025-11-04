@@ -8,14 +8,21 @@ describe('update user email', async () => {
     const signup = await app.inject({
       method: 'POST',
       path: '/auth/signup',
-      body: { email: 'test-update-email@test.com', password: 'password', name: 'User' }
+      body: {
+        email: 'test-update-email@test.com',
+        password: 'password',
+        name: 'User'
+      }
     });
     expect(signup.statusCode).toBe(201);
 
     const signin = await app.inject({
       method: 'POST',
       path: '/auth/signin',
-      body: { email: 'test-update-email@test.com', password: 'password' }
+      body: {
+        email: 'test-update-email@test.com',
+        password: 'password'
+      }
     });
     jwt = signin.json().jwt;
   });
@@ -28,8 +35,12 @@ describe('update user email', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/email',
-      headers: { Authorization: `Bearer ${jwt}` },
-      body: { email: 'test-update-email-changed@test.com' }
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      },
+      body: {
+        email: 'test-update-email-changed@test.com'
+      }
     });
     expect(res.statusCode).toBe(200);
     const body = res.json();
@@ -42,7 +53,11 @@ describe('update user email', async () => {
     const signup = await app.inject({
       method: 'POST',
       path: '/auth/signup',
-      body: { email: 'test-update-email-exists@test.com', password: 'password', name: 'Other' }
+      body: {
+        email: 'test-update-email-exists@test.com',
+        password: 'password',
+        name: 'Other'
+      }
     });
     expect(signup.statusCode).toBe(201);
 
@@ -50,7 +65,9 @@ describe('update user email', async () => {
       method: 'PUT',
       path: '/user/me/email',
       headers: { Authorization: `Bearer ${jwt}` },
-      body: { email: 'test-update-email-exists@test.com' }
+      body: {
+        email: 'test-update-email-exists@test.com'
+      }
     });
     expect(res.statusCode).toBe(409);
   });
@@ -60,13 +77,20 @@ describe('update user email', async () => {
     const signup = await app.inject({
       method: 'POST',
       path: '/auth/signup',
-      body: { email: 'test-update-email-to-delete@test.com', password: 'password', name: 'Del' }
+      body: {
+        email: 'test-update-email-to-delete@test.com',
+        password: 'password',
+        name: 'Del'
+      }
     });
     const user = signup.json();
     const signin = await app.inject({
       method: 'POST',
       path: '/auth/signin',
-      body: { email: 'test-update-email-to-delete@test.com', password: 'password' }
+      body: {
+        email: 'test-update-email-to-delete@test.com',
+        password: 'password'
+      }
     });
     const jwt2 = signin.json().jwt;
 
@@ -75,8 +99,12 @@ describe('update user email', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/email',
-      headers: { Authorization: `Bearer ${jwt2}` },
-      body: { email: 'x@test.com' }
+      headers: {
+        Authorization: `Bearer ${jwt2}`
+      },
+      body: {
+        email: 'x@test.com'
+      }
     });
     expect(res.statusCode).toBe(404);
   });
@@ -85,8 +113,12 @@ describe('update user email', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/email',
-      headers: { Authorization: `Bearer ${jwt}` },
-      body: { email: 'invalid-email-format' }
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      },
+      body: {
+        email: 'invalid-email-format'
+      }
     });
     expect(res.statusCode).toBe(400);
   });
@@ -95,8 +127,12 @@ describe('update user email', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/email',
-      headers: { Authorization: `Bearer invalid-token` },
-      body: { email: 'x@test.com' }
+      headers: {
+        Authorization: `Bearer invalid-token`
+      },
+      body: {
+        email: 'x@test.com'
+      }
     });
     expect(res.statusCode).toBe(401);
   });

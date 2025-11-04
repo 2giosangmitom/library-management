@@ -8,14 +8,21 @@ describe('update user password', async () => {
     const signup = await app.inject({
       method: 'POST',
       path: '/auth/signup',
-      body: { email: 'test-update-password@test.com', password: 'password', name: 'User' }
+      body: {
+        email: 'test-update-password@test.com',
+        password: 'password',
+        name: 'User'
+      }
     });
     expect(signup.statusCode).toBe(201);
 
     const signin = await app.inject({
       method: 'POST',
       path: '/auth/signin',
-      body: { email: 'test-update-password@test.com', password: 'password' }
+      body: {
+        email: 'test-update-password@test.com',
+        password: 'password'
+      }
     });
     jwt = signin.json().jwt;
   });
@@ -28,8 +35,13 @@ describe('update user password', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/password',
-      headers: { Authorization: `Bearer ${jwt}` },
-      body: { current_password: 'password', new_password: 'newpassword' }
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      },
+      body: {
+        current_password: 'password',
+        new_password: 'newpassword'
+      }
     });
     expect(res.statusCode).toBe(204);
 
@@ -37,15 +49,20 @@ describe('update user password', async () => {
     const oldSignin = await app.inject({
       method: 'POST',
       path: '/auth/signin',
-      body: { email: 'test-update-password@test.com', password: 'password' }
+      body: {
+        email: 'test-update-password@test.com',
+        password: 'password'
+      }
     });
     expect(oldSignin.statusCode).toBe(401);
-    // Note: depending on implementation tokens might still validate; ensure new signin succeeds
 
     const newSignin = await app.inject({
       method: 'POST',
       path: '/auth/signin',
-      body: { email: 'test-update-password@test.com', password: 'newpassword' }
+      body: {
+        email: 'test-update-password@test.com',
+        password: 'newpassword'
+      }
     });
 
     expect(newSignin.statusCode).toBe(200);
@@ -56,8 +73,13 @@ describe('update user password', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/password',
-      headers: { Authorization: `Bearer ${jwt}` },
-      body: { current_password: 'wrongpwd', new_password: 'newpasswd' }
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      },
+      body: {
+        current_password: 'wrongpwd',
+        new_password: 'newpasswd'
+      }
     });
     expect(res.statusCode).toBe(401);
   });
@@ -66,13 +88,20 @@ describe('update user password', async () => {
     const signup = await app.inject({
       method: 'POST',
       path: '/auth/signup',
-      body: { email: 'test-update-password-to-delete@test.com', password: 'password', name: 'Del' }
+      body: {
+        email: 'test-update-password-to-delete@test.com',
+        password: 'password',
+        name: 'Del'
+      }
     });
     const user = signup.json();
     const signin = await app.inject({
       method: 'POST',
       path: '/auth/signin',
-      body: { email: 'test-update-password-to-delete@test.com', password: 'password' }
+      body: {
+        email: 'test-update-password-to-delete@test.com',
+        password: 'password'
+      }
     });
     const jwt2 = signin.json().jwt;
 
@@ -81,8 +110,13 @@ describe('update user password', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/password',
-      headers: { Authorization: `Bearer ${jwt2}` },
-      body: { current_password: 'password', new_password: 'whatever' }
+      headers: {
+        Authorization: `Bearer ${jwt2}`
+      },
+      body: {
+        current_password: 'password',
+        new_password: 'whatever'
+      }
     });
     expect(res.statusCode).toBe(404);
   });
@@ -91,8 +125,13 @@ describe('update user password', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/password',
-      headers: { Authorization: `Bearer ${jwt}` },
-      body: { current_password: 'short', new_password: 'x' }
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      },
+      body: {
+        current_password: 'short',
+        new_password: 'x'
+      }
     });
     expect(res.statusCode).toBe(400);
   });
@@ -101,8 +140,13 @@ describe('update user password', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/password',
-      headers: { Authorization: `Bearer invalid-token` },
-      body: { current_password: 'password', new_password: 'newpass' }
+      headers: {
+        Authorization: `Bearer invalid-token`
+      },
+      body: {
+        current_password: 'password',
+        new_password: 'newpass'
+      }
     });
     expect(res.statusCode).toBe(401);
   });
@@ -111,8 +155,13 @@ describe('update user password', async () => {
     const res = await app.inject({
       method: 'PUT',
       path: '/user/me/password',
-      headers: { Authorization: `Bearer ${jwt}` },
-      body: { current_password: 'password', new_password: 'short' }
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      },
+      body: {
+        current_password: 'password',
+        new_password: 'short'
+      }
     });
     expect(res.statusCode).toBe(400);
   });

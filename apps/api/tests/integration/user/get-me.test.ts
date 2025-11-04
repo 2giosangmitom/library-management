@@ -36,7 +36,9 @@ describe('get user me', async () => {
     const me = await app.inject({
       method: 'GET',
       path: '/user/me',
-      headers: { Authorization: `Bearer ${jwt}` }
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      }
     });
 
     expect(me.statusCode).toBe(200);
@@ -64,7 +66,10 @@ describe('get user me', async () => {
     const signin = await app.inject({
       method: 'POST',
       path: '/auth/signin',
-      body: { email: 'test-user-me-delete@test.com', password: 'password123' }
+      body: {
+        email: 'test-user-me-delete@test.com',
+        password: 'password123'
+      }
     });
     const jwt = signin.json().jwt;
 
@@ -74,7 +79,9 @@ describe('get user me', async () => {
     const response = await app.inject({
       method: 'GET',
       path: '/user/me',
-      headers: { Authorization: `Bearer ${jwt}` }
+      headers: {
+        Authorization: `Bearer ${jwt}`
+      }
     });
 
     expect(response.statusCode).toBe(404);
