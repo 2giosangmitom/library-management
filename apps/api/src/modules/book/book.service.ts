@@ -1,4 +1,5 @@
 import { BookModel } from './book.model';
+import { Prisma } from '@prisma/client';
 
 export class BookService {
   private static instance: BookService;
@@ -32,5 +33,21 @@ export class BookService {
       author_ids: data.author_ids,
       category_ids: data.category_ids
     });
+  }
+
+  /**
+   * Delete a book by ID
+   * @param book_id The book ID
+   */
+  public async deleteBook(book_id: string) {
+    try {
+      await this.bookModel.deleteBook(book_id);
+      return true;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        return false;
+      }
+      throw error;
+    }
   }
 }

@@ -53,4 +53,16 @@ export class BookModel {
       }
     });
   }
+
+  /**
+   * Delete a book by ID
+   * @param book_id The book ID
+   */
+  public deleteBook(book_id: string) {
+    return this.fastify.prisma.$transaction(async (tx) => {
+      await tx.book_Author.deleteMany({ where: { book_id } });
+      await tx.book_Category.deleteMany({ where: { book_id } });
+      return tx.book.delete({ where: { book_id } });
+    });
+  }
 }

@@ -26,3 +26,15 @@ export const createBookSchema = {
     403: Type.Object({ message: Type.String() })
   }
 } as const satisfies FastifySchema;
+
+export const deleteBookSchema = {
+  summary: 'Delete a book by ID',
+  description: 'Delete a book by its ID',
+  params: Type.Object({
+    book_id: Type.String({ format: 'uuid' })
+  }),
+  response: {
+    204: Type.Null({ description: 'Book deleted successfully' }),
+    404: Type.Object({ message: Type.String() })
+  }
+} as const satisfies FastifySchema;

@@ -1,4 +1,4 @@
-import { createBookSchema } from './book.schema';
+import { createBookSchema, deleteBookSchema } from './book.schema';
 import { BookService } from './book.service';
 
 export class BookController {
@@ -30,5 +30,28 @@ export class BookController {
       ...created,
       created_at: created.created_at.toISOString()
     });
+  }
+
+  /**
+   * Delete a book by ID
+   */
+  public async deleteBook(
+    req: FastifyRequestTypeBox<typeof deleteBookSchema>,
+    reply: FastifyReplyTypeBox<typeof deleteBookSchema>
+  ) {
+    const { book_id } = req.params;
+
+    try {
+      const result = await this.bookService.deleteBook(book_id);
+
+      if (!result) {
+        return reply.status(404).send({ message: 'Book not found' });
+      }
+
+      return reply.status(204).send(null);
+    } catch (err) {
+      this.fastify.log.error({ err }, 'Error deleting book');
+      throw err;
+    }
   }
 }
