@@ -1,6 +1,7 @@
 import { BookModel } from '@modules/book/book.model';
 import { BookService } from '@modules/book/book.service';
 import { fastify } from 'fastify';
+import { Prisma } from '@prisma/client';
 
 describe('book service', () => {
   const app = fastify();
@@ -84,6 +85,78 @@ describe('book service', () => {
         author_ids: ['author-uuid-2'],
         category_ids: ['category-uuid-2']
       });
+    });
+  });
+
+  describe('delete book', () => {
+    beforeEach(() => {
+      bookModel.deleteBook = vi.fn();
+    });
+
+    it('should return true when deletion succeeds', async () => {
+      bookModel.deleteBook = vi.fn();
+
+      await expect(bookService.deleteBook('book-uuid')).resolves.toBe(true);
+      expect(bookModel.deleteBook).toHaveBeenCalledWith('book-uuid');
+    });
+
+    it('should return false when book not found', async () => {
+      const prismaError = new Prisma.PrismaClientKnownRequestError('Not found', {
+        code: 'P2025',
+        clientVersion: '6.0.0'
+      });
+      vi.spyOn(bookModel, 'deleteBook').mockRejectedValueOnce(prismaError);
+
+      await expect(bookService.deleteBook('missing-id')).resolves.toBe(false);
+    });
+
+    it('should rethrow other errors', async () => {
+      const error = new Error('boom');
+      vi.spyOn(bookModel, 'deleteBook').mockRejectedValueOnce(error);
+
+      await expect(bookService.deleteBook('id')).rejects.toThrow('boom');
+    });
+  });
+
+  describe('update book', () => {
+    beforeEach(() => {
+      bookModel.updateBook = vi.fn();
+    });
+
+    it('should return updated book when successful', async () => {
+      const updated = {
+        book_id: 'book-uuid',
+        title: 'New',
+        description: 'D',
+        total_copies: 2,
+        available_copies: 2,
+        updated_at: new Date()
+      };
+
+      vi.spyOn(bookModel, 'updateBook').mockResolvedValueOnce(updated);
+
+      const result = await bookService.updateBook('book-uuid', { title: 'New' });
+
+      expect(bookModel.updateBook).toHaveBeenCalledWith('book-uuid', { title: 'New' });
+      expect(result).toEqual(updated);
+    });
+
+    it('should return null when book not found', async () => {
+      const prismaError = new Prisma.PrismaClientKnownRequestError('Not found', {
+        code: 'P2025',
+        clientVersion: '6.0.0'
+      });
+      vi.spyOn(bookModel, 'updateBook').mockRejectedValueOnce(prismaError);
+
+      const result = await bookService.updateBook('missing', { title: 'x' });
+      expect(result).toBeNull();
+    });
+
+    it('should rethrow other errors', async () => {
+      const error = new Error('boom');
+      vi.spyOn(bookModel, 'updateBook').mockRejectedValueOnce(error);
+
+      await expect(bookService.updateBook('id', { title: 'x' })).rejects.toThrow('boom');
     });
   });
 });
