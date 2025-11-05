@@ -50,4 +50,29 @@ export class BookService {
       throw error;
     }
   }
+
+  /**
+   * Update a book by ID
+   * @returns updated book or null if not found
+   */
+  public async updateBook(
+    book_id: string,
+    data: {
+      title?: string;
+      description?: string;
+      total_copies?: number;
+      available_copies?: number;
+      author_ids?: string[];
+      category_ids?: string[];
+    }
+  ) {
+    try {
+      return await this.bookModel.updateBook(book_id, data);
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        return null;
+      }
+      throw error;
+    }
+  }
 }

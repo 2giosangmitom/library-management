@@ -90,8 +90,10 @@ describe('get category', async () => {
       expect(responsePage2.json().length).toBe(5);
 
       // Ensure that the categories on page 2 are different from page 1
-      for (const category of responsePage2.json()) {
-        expect(response.json()).not.toContainEqual(category);
+      const page1Slugs = (response.json() as { slug: string }[]).map((c) => c.slug);
+      const page2Slugs = (responsePage2.json() as { slug: string }[]).map((c) => c.slug);
+      for (const slug of page2Slugs) {
+        expect(page1Slugs).not.toContain(slug);
       }
     });
   });

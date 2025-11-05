@@ -38,3 +38,31 @@ export const deleteBookSchema = {
     404: Type.Object({ message: Type.String() })
   }
 } as const satisfies FastifySchema;
+
+export const updateBookSchema = {
+  summary: 'Update a book by ID',
+  description: 'Update book fields and optionally replace authors/categories',
+  params: Type.Object({ book_id: Type.String({ format: 'uuid' }) }),
+  body: Type.Partial(
+    Type.Object({
+      title: Type.String({ minLength: 1, maxLength: 255 }),
+      description: Type.String(),
+      total_copies: Type.Integer({ minimum: 0 }),
+      available_copies: Type.Integer({ minimum: 0 }),
+      author_ids: Type.Array(Type.String({ format: 'uuid' })),
+      category_ids: Type.Array(Type.String({ format: 'uuid' }))
+    })
+  ),
+  response: {
+    200: Type.Object({
+      book_id: Type.String({ format: 'uuid' }),
+      title: Type.String(),
+      description: Type.String(),
+      total_copies: Type.Integer(),
+      available_copies: Type.Integer(),
+      updated_at: Type.String({ format: 'date-time' })
+    }),
+    400: Type.Object({ message: Type.String() }),
+    404: Type.Object({ message: Type.String() })
+  }
+} as const satisfies FastifySchema;

@@ -1,6 +1,6 @@
 import { authHook, isLibrarianHook } from '@hooks/auth';
 import { BookController } from './book.controller';
-import { createBookSchema, deleteBookSchema } from './book.schema';
+import { createBookSchema, deleteBookSchema, updateBookSchema } from './book.schema';
 
 export default function bookRoutes(fastify: FastifyTypeBox) {
   const bookController = BookController.getInstance(fastify);
@@ -15,6 +15,7 @@ export default function bookRoutes(fastify: FastifyTypeBox) {
     instance.addHook('onRequest', isLibrarianHook);
 
     instance.post('/', { schema: createBookSchema }, bookController.createBook.bind(bookController));
+    instance.put('/:book_id', { schema: updateBookSchema }, bookController.updateBook.bind(bookController));
     instance.delete('/:book_id', { schema: deleteBookSchema }, bookController.deleteBook.bind(bookController));
   });
 }
