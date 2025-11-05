@@ -48,7 +48,7 @@ export class BookController {
         return reply.status(404).send({ message: 'Book not found' });
       }
 
-      return reply.status(204).send(null);
+      return reply.status(204).send();
     } catch (err) {
       this.fastify.log.error({ err }, 'Error deleting book');
       throw err;
