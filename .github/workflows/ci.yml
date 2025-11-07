@@ -53,7 +53,7 @@ jobs:
       - name: Run type checking for API
         run: pnpm --filter api typecheck
 
-  test:
+  test-unit:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -68,7 +68,32 @@ jobs:
       - name: Setup containers
         run: mise compose-up-dev
 
-      - name: Run API tests
-        run: |
-          pnpm --filter api test:integration
-          pnpm --filter api test:unit
+      - name: Generate Prisma client
+        run: pnpm --filter api prisma:generate
+
+      - name: Run API unit tests
+        run: pnpm --filter api test:unit
+
+  test-integration:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v3
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup containers
+        run: mise compose-up-dev
+
+      - name: Generate Prisma client
+        run: pnpm --filter api prisma:generate
+
+      - name: Run database migrations
+        run: pnpm --filter api prisma:migrate:test
+
+      - name: Run API integration tests
+        run: pnpm --filter api test:integration
