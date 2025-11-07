@@ -70,5 +70,5 @@ jobs:
 
       - name: Run API tests
         run: |
-          pnpm --filter api test:unit
           pnpm --filter api test:integration
+          pnpm --filter api test:unit
