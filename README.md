@@ -42,6 +42,7 @@ erDiagram
 
   BOOK {
     UUID book_id PK
+    UUID publisher_id FK "NULLABLE"
     VARCHAR(255) title
     TEXT description
     INT total_copies
@@ -60,6 +61,14 @@ erDiagram
     UUID category_id PK, FK
   }
 
+  PUBLISHER {
+    UUID publisher_id PK
+    VARCHAR(100) name
+    VARCHAR(100) website
+    TIMESTAMP created_at
+    TIMESTAMP updated_at
+  }
+
   LOAN {
     UUID loan_id PK
     UUID user_id FK
@@ -75,6 +84,7 @@ erDiagram
   USER ||--o{ LOAN: "borrows"
   BOOK ||--o{ LOAN: "is loaned in"
   BOOK ||--o{ BOOK_AUTHOR: "has"
+  BOOK ||--o| PUBLISHER: "published by"
   AUTHOR ||--o{ BOOK_AUTHOR: "writes"
   BOOK ||--o{ BOOK_CATEGORY: "belongs to"
   CATEGORY ||--o{ BOOK_CATEGORY: "includes"

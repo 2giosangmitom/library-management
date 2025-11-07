@@ -52,6 +52,7 @@ model Category {
 
 model Book {
   book_id          String   @id @default(uuid()) @db.Uuid()
+  publisher_id     String?  @db.Uuid()
   title            String   @db.VarChar(255)
   description      String   @db.Text()
   total_copies     Int      @db.Integer()
@@ -62,6 +63,7 @@ model Book {
   loans      Loan[]
   authors    Book_Author[]
   categories Book_Category[]
+  publisher  Publisher?      @relation(fields: [publisher_id], references: [publisher_id])
 }
 
 model Book_Author {
@@ -82,6 +84,16 @@ model Book_Category {
   category Category @relation(fields: [category_id], references: [category_id])
 
   @@id([book_id, category_id])
+}
+
+model Publisher {
+  publisher_id String   @id @default(uuid()) @db.Uuid()
+  name         String   @db.VarChar(100)
+  website      String   @db.VarChar(100)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  books Book[]
 }
 
 enum LoanStatus {
