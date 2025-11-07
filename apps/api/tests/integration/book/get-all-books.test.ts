@@ -93,23 +93,27 @@ describe('get all books', async () => {
 
   it('should respect pagination when getting all books', async () => {
     // Add multiple books as LIBRARIAN
-    for (let i = 0; i < 15; i++) {
-      await app.inject({
-        method: 'POST',
-        path: '/book',
-        headers: {
-          Authorization: `Bearer ${librarianJwt}`
-        },
-        body: {
-          title: `Test Book ${i + 1}`,
-          description: `Test Description ${i + 1}`,
-          total_copies: 5,
-          available_copies: 5,
-          author_ids: [],
-          category_ids: []
-        }
-      });
+    const createBookPromises: Promise<Awaited<ReturnType<typeof app.inject>>>[] = [];
+    for (let i = 0; i < 20; i++) {
+      createBookPromises.push(
+        app.inject({
+          method: 'POST',
+          path: '/book',
+          headers: {
+            Authorization: `Bearer ${librarianJwt}`
+          },
+          body: {
+            title: `Test Book ${i + 1}`,
+            description: `Test Description ${i + 1}`,
+            total_copies: 5,
+            available_copies: 5,
+            author_ids: [],
+            category_ids: []
+          }
+        })
+      );
     }
+    await Promise.all(createBookPromises);
 
     // Get all books with pagination
     const getAllBooksRes = await app.inject({
@@ -118,7 +122,7 @@ describe('get all books', async () => {
     });
     expect(getAllBooksRes.statusCode).toBe(200);
     const books = getAllBooksRes.json();
-    expect(books.length).toBeLessThanOrEqual(10);
+    expect(books).toHaveLength(10);
 
     // Get second page
     const getSecondPageRes = await app.inject({
@@ -127,7 +131,7 @@ describe('get all books', async () => {
     });
     expect(getSecondPageRes.statusCode).toBe(200);
     const secondPageBooks = getSecondPageRes.json();
-    expect(secondPageBooks.length).toBeLessThanOrEqual(10);
+    expect(secondPageBooks).toHaveLength(10);
 
     // Ensure no overlap between first and second page
     const firstPageBookIds = books.map((b: { book_id: string }) => b.book_id);
