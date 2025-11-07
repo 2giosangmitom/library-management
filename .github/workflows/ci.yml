@@ -97,3 +97,32 @@ jobs:
 
       - name: Run API integration tests
         run: pnpm --filter api test:integration
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v3
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Setup containers
+        run: mise compose-up-dev
+
+      - name: Generate Prisma client
+        run: pnpm --filter api prisma:generate
+
+      - name: Run database migrations
+        run: pnpm --filter api prisma:migrate:test
+
+      - name: Run coverage report
+        run: pnpm --filter api test:coverage
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
