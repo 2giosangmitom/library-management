@@ -31,7 +31,10 @@ async function buildApp() {
     ignorePattern: /.*.(ts|js)/,
     indexPattern: /.*.routes.(ts|js)/,
     autoHooks: true,
-    autoHooksPattern: /.*.hooks.(ts|js)/
+    autoHooksPattern: /.*.hooks.(ts|js)/,
+    options: {
+      prefix: '/api'
+    }
   });
 
   return app;
