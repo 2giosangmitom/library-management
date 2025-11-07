@@ -2,6 +2,8 @@
 
 BookWise is a library management system.
 
+[![codecov](https://codecov.io/github/2giosangmitom/library-management/graph/badge.svg?token=WBOXSQ1ZNM)](https://codecov.io/github/2giosangmitom/library-management)
+
 ## ER Diagram
 
 ```mermaid
