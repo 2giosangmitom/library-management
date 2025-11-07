@@ -159,4 +159,120 @@ describe('book service', () => {
       await expect(bookService.updateBook('id', { title: 'x' })).rejects.toThrow('boom');
     });
   });
+
+  describe('get all books', () => {
+    beforeEach(() => {
+      bookModel.getAllBooks = vi.fn();
+    });
+
+    it('should return list of books', async () => {
+      const books = [
+        {
+          book_id: 'book-1',
+          title: 'Book One',
+          description: 'Desc 1',
+          total_copies: 3,
+          available_copies: 2,
+          authors: [],
+          categories: [],
+          created_at: new Date(),
+          updated_at: new Date()
+        },
+        {
+          book_id: 'book-2',
+          title: 'Book Two',
+          description: 'Desc 2',
+          total_copies: 5,
+          available_copies: 5,
+          authors: [],
+          categories: [],
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ];
+
+      vi.spyOn(bookModel, 'getAllBooks').mockResolvedValueOnce(books);
+
+      const result = await bookService.getAllBooks();
+
+      expect(Array.isArray(result)).toBe(true);
+      expect(result).toHaveLength(books.length);
+    });
+
+    it('should call getAllBooks with correct parameters', async () => {
+      bookModel.getAllBooks = vi.fn().mockResolvedValueOnce([]);
+
+      await bookService.getAllBooks(2, 5);
+
+      expect(bookModel.getAllBooks).toHaveBeenCalledWith(2, 5);
+    });
+
+    it('should use default pagination if none provided', async () => {
+      bookModel.getAllBooks = vi.fn().mockResolvedValueOnce([]);
+
+      await bookService.getAllBooks();
+
+      expect(bookModel.getAllBooks).toHaveBeenCalledWith(1, 10);
+    });
+
+    it('should return formatted results', async () => {
+      const fakeDate = new Date('2024-01-01T00:00:00Z');
+
+      const books = [
+        {
+          book_id: 'book-1',
+          title: 'Book One',
+          description: 'Desc 1',
+          total_copies: 3,
+          available_copies: 2,
+          authors: [
+            {
+              author: {
+                author_id: 'author-1',
+                name: 'Author One'
+              }
+            }
+          ],
+          categories: [
+            {
+              category: {
+                category_id: 'category-1',
+                name: 'Category One'
+              }
+            }
+          ],
+          created_at: fakeDate,
+          updated_at: fakeDate
+        }
+      ];
+
+      vi.spyOn(bookModel, 'getAllBooks').mockResolvedValueOnce(books);
+
+      const result = await bookService.getAllBooks();
+
+      expect(result).toEqual([
+        {
+          book_id: 'book-1',
+          title: 'Book One',
+          description: 'Desc 1',
+          total_copies: 3,
+          available_copies: 2,
+          authors: [
+            {
+              author_id: 'author-1',
+              name: 'Author One'
+            }
+          ],
+          categories: [
+            {
+              category_id: 'category-1',
+              name: 'Category One'
+            }
+          ],
+          created_at: fakeDate.toISOString(),
+          updated_at: fakeDate.toISOString()
+        }
+      ]);
+    });
+  });
 });

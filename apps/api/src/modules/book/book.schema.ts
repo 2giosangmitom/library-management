@@ -66,3 +66,39 @@ export const updateBookSchema = {
     404: Type.Object({ message: Type.String() })
   }
 } as const satisfies FastifySchema;
+
+export const getAllBooksSchema = {
+  summary: 'Get all books',
+  description: 'Retrieve a list of all books in the library',
+  querystring: Type.Partial(
+    Type.Object({
+      page: Type.Integer({ minimum: 1 }),
+      limit: Type.Integer({ minimum: 1, maximum: 100 })
+    })
+  ),
+  response: {
+    200: Type.Array(
+      Type.Object({
+        book_id: Type.String({ format: 'uuid' }),
+        title: Type.String(),
+        description: Type.String(),
+        total_copies: Type.Integer(),
+        available_copies: Type.Integer(),
+        authors: Type.Array(
+          Type.Object({
+            author_id: Type.String({ format: 'uuid' }),
+            name: Type.String()
+          })
+        ),
+        categories: Type.Array(
+          Type.Object({
+            category_id: Type.String({ format: 'uuid' }),
+            name: Type.String()
+          })
+        ),
+        created_at: Type.String({ format: 'date-time' }),
+        updated_at: Type.String({ format: 'date-time' })
+      })
+    )
+  }
+} as const satisfies FastifySchema;

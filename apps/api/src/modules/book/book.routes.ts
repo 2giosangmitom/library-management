@@ -1,9 +1,11 @@
 import { authHook, isLibrarianHook } from '@hooks/auth';
 import { BookController } from './book.controller';
-import { createBookSchema, deleteBookSchema, updateBookSchema } from './book.schema';
+import { createBookSchema, deleteBookSchema, getAllBooksSchema, updateBookSchema } from './book.schema';
 
 export default function bookRoutes(fastify: FastifyTypeBox) {
   const bookController = BookController.getInstance(fastify);
+
+  fastify.get('/', { schema: getAllBooksSchema }, bookController.getAllBooks.bind(bookController));
 
   // Librarian protected routes
   fastify.register(function librarianProtectedRoutes(instance) {

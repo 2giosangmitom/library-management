@@ -118,4 +118,46 @@ export class BookModel {
       });
     });
   }
+
+  /**
+   * Get all books with their authors and categories
+   */
+  public async getAllBooks(page: number, limit: number) {
+    return this.fastify.prisma.book.findMany({
+      select: {
+        book_id: true,
+        title: true,
+        description: true,
+        total_copies: true,
+        available_copies: true,
+        created_at: true,
+        updated_at: true,
+        authors: {
+          select: {
+            author: {
+              select: {
+                author_id: true,
+                name: true
+              }
+            }
+          }
+        },
+        categories: {
+          select: {
+            category: {
+              select: {
+                category_id: true,
+                name: true
+              }
+            }
+          }
+        }
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: {
+        title: 'asc'
+      }
+    });
+  }
 }

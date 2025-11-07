@@ -75,4 +75,29 @@ export class BookService {
       throw error;
     }
   }
+
+  /**
+   * Get all books with their authors and categories
+   */
+  public async getAllBooks(page = 1, limit = 10) {
+    const books = await this.bookModel.getAllBooks(page, limit);
+
+    return books.map((book) => ({
+      ...book,
+      authors: book.authors.map((ba) => {
+        return {
+          author_id: ba.author.author_id,
+          name: ba.author.name
+        };
+      }),
+      categories: book.categories.map((bc) => {
+        return {
+          category_id: bc.category.category_id,
+          name: bc.category.name
+        };
+      }),
+      created_at: book.created_at.toISOString(),
+      updated_at: book.updated_at.toISOString()
+    }));
+  }
 }

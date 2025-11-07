@@ -1,4 +1,4 @@
-import { createBookSchema, deleteBookSchema, updateBookSchema } from './book.schema';
+import { createBookSchema, deleteBookSchema, getAllBooksSchema, updateBookSchema } from './book.schema';
 import { BookService } from './book.service';
 
 export class BookController {
@@ -70,5 +70,19 @@ export class BookController {
     }
 
     return reply.send({ ...updated, updated_at: updated.updated_at.toISOString() });
+  }
+
+  /**
+   * Get all books
+   */
+  public async getAllBooks(
+    req: FastifyRequestTypeBox<typeof getAllBooksSchema>,
+    reply: FastifyReplyTypeBox<typeof getAllBooksSchema>
+  ) {
+    const { limit, page } = req.query;
+
+    const books = await this.bookService.getAllBooks(page, limit);
+
+    return reply.send(books);
   }
 }
