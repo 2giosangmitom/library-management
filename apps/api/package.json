@@ -5,10 +5,9 @@
   "scripts": {
     "dev": "NODE_ENV=development tsx --env-file .env --watch src/server.ts | pino-pretty",
     "build": "esbuild 'src/**/*.ts' --outdir=dist --platform=node --format=cjs --minify && tsc-alias -p tsconfig.json",
-    "start": "NODE_ENV=production node --env-file=.env dist/server.js",
+    "typecheck": "tsc",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "typecheck": "tsc",
     "prisma:migrate:test": "dotenv -e .env.test -- prisma migrate dev",
     "prisma:migrate:reset:test": "dotenv -e .env.test -- prisma migrate reset --force",
     "pretest:integration": "pnpm prisma:migrate:reset:test",
