@@ -275,4 +275,107 @@ describe('book service', () => {
       ]);
     });
   });
+
+  describe('get book by id', () => {
+    beforeEach(() => {
+      bookModel.getBookById = vi.fn();
+    });
+
+    it('should return book data when found', async () => {
+      const book = {
+        book_id: 'book-uuid',
+        title: 'Some Book',
+        description: 'Some Desc',
+        total_copies: 4,
+        available_copies: 4,
+        authors: [],
+        categories: [],
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+
+      vi.spyOn(bookModel, 'getBookById').mockResolvedValueOnce(book);
+
+      const result = await bookService.getBookById('book-uuid');
+
+      expect(bookModel.getBookById).toHaveBeenCalledWith('book-uuid');
+      expect(result).toEqual({
+        ...book,
+        created_at: book.created_at.toISOString(),
+        updated_at: book.updated_at.toISOString()
+      });
+    });
+
+    it('should return null when book not found', async () => {
+      vi.spyOn(bookModel, 'getBookById').mockResolvedValueOnce(null);
+
+      const result = await bookService.getBookById('missing-uuid');
+
+      expect(result).toBeNull();
+    });
+
+    it('should format authors and categories correctly', async () => {
+      const book = {
+        book_id: 'book-uuid',
+        title: 'Formatted Book',
+        description: 'Formatted Desc',
+        total_copies: 6,
+        available_copies: 5,
+        authors: [
+          {
+            author: {
+              author_id: 'author-uuid',
+              name: 'Author Name'
+            }
+          },
+          {
+            author: {
+              author_id: 'author-uuid-2',
+              name: 'Author Name 2'
+            }
+          }
+        ],
+        categories: [
+          {
+            category: {
+              category_id: 'category-uuid',
+              name: 'Category Name'
+            }
+          }
+        ],
+        created_at: new Date(),
+        updated_at: new Date()
+      };
+
+      vi.spyOn(bookModel, 'getBookById').mockResolvedValueOnce(book);
+
+      const result = await bookService.getBookById('book-uuid');
+
+      expect(result).toEqual({
+        book_id: 'book-uuid',
+        title: 'Formatted Book',
+        description: 'Formatted Desc',
+        total_copies: 6,
+        available_copies: 5,
+        authors: [
+          {
+            author_id: 'author-uuid',
+            name: 'Author Name'
+          },
+          {
+            author_id: 'author-uuid-2',
+            name: 'Author Name 2'
+          }
+        ],
+        categories: [
+          {
+            category_id: 'category-uuid',
+            name: 'Category Name'
+          }
+        ],
+        created_at: book.created_at.toISOString(),
+        updated_at: book.updated_at.toISOString()
+      });
+    });
+  });
 });

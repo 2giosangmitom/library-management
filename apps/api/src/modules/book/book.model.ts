@@ -160,4 +160,42 @@ export class BookModel {
       }
     });
   }
+
+  /**
+   * Get a book by ID with its authors and categories
+   */
+  public async getBookById(book_id: string) {
+    return this.fastify.prisma.book.findUnique({
+      where: { book_id },
+      select: {
+        book_id: true,
+        title: true,
+        description: true,
+        total_copies: true,
+        available_copies: true,
+        created_at: true,
+        updated_at: true,
+        authors: {
+          select: {
+            author: {
+              select: {
+                author_id: true,
+                name: true
+              }
+            }
+          }
+        },
+        categories: {
+          select: {
+            category: {
+              select: {
+                category_id: true,
+                name: true
+              }
+            }
+          }
+        }
+      }
+    });
+  }
 }

@@ -1,4 +1,10 @@
-import { createBookSchema, deleteBookSchema, getAllBooksSchema, updateBookSchema } from './book.schema';
+import {
+  createBookSchema,
+  deleteBookSchema,
+  getAllBooksSchema,
+  getBookByIdSchema,
+  updateBookSchema
+} from './book.schema';
 import { BookService } from './book.service';
 
 export class BookController {
@@ -84,5 +90,23 @@ export class BookController {
     const books = await this.bookService.getAllBooks(page, limit);
 
     return reply.send(books);
+  }
+
+  /**
+   * Get a book by ID
+   */
+  public async getBookById(
+    req: FastifyRequestTypeBox<typeof getBookByIdSchema>,
+    reply: FastifyReplyTypeBox<typeof getBookByIdSchema>
+  ) {
+    const { book_id } = req.params;
+
+    const book = await this.bookService.getBookById(book_id);
+
+    if (!book) {
+      return reply.status(404).send({ message: 'Book not found' });
+    }
+
+    return reply.send(book);
   }
 }

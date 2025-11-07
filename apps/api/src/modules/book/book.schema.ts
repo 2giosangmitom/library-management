@@ -102,3 +102,35 @@ export const getAllBooksSchema = {
     )
   }
 } as const satisfies FastifySchema;
+
+export const getBookByIdSchema = {
+  summary: 'Get a book by ID',
+  description: 'Retrieve a book by its ID',
+  params: Type.Object({
+    book_id: Type.String({ format: 'uuid' })
+  }),
+  response: {
+    200: Type.Object({
+      book_id: Type.String({ format: 'uuid' }),
+      title: Type.String(),
+      description: Type.String(),
+      total_copies: Type.Integer(),
+      available_copies: Type.Integer(),
+      authors: Type.Array(
+        Type.Object({
+          author_id: Type.String({ format: 'uuid' }),
+          name: Type.String()
+        })
+      ),
+      categories: Type.Array(
+        Type.Object({
+          category_id: Type.String({ format: 'uuid' }),
+          name: Type.String()
+        })
+      ),
+      created_at: Type.String({ format: 'date-time' }),
+      updated_at: Type.String({ format: 'date-time' })
+    }),
+    404: Type.Object({ message: Type.String() })
+  }
+} as const satisfies FastifySchema;

@@ -100,4 +100,29 @@ export class BookService {
       updated_at: book.updated_at.toISOString()
     }));
   }
+
+  /**
+   * Get a book by ID
+   */
+  public async getBookById(book_id: string) {
+    const book = await this.bookModel.getBookById(book_id);
+
+    if (!book) {
+      return null;
+    }
+
+    return {
+      ...book,
+      authors: book.authors.map((ba) => ({
+        author_id: ba.author.author_id,
+        name: ba.author.name
+      })),
+      categories: book.categories.map((bc) => ({
+        category_id: bc.category.category_id,
+        name: bc.category.name
+      })),
+      created_at: book.created_at.toISOString(),
+      updated_at: book.updated_at.toISOString()
+    };
+  }
 }
