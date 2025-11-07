@@ -3,7 +3,6 @@
     // File Layout
     "baseUrl": ".",
     "rootDir": ".",
-    "outDir": "./dist",
 
     // Environment Settings
     "module": "nodenext",
