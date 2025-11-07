@@ -69,4 +69,6 @@ jobs:
         run: mise compose-up-dev
 
       - name: Run API tests
-        run: pnpm --filter api test
+        run: |
+          pnpm --filter api test:unit
+          pnpm --filter api test:integration
