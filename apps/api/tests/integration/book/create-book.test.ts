@@ -1,4 +1,4 @@
-import { build } from '@tests/helpers/build';
+import { build } from '@tests/helpers/fastify';
 
 describe('create book', async () => {
   const app = await build();

@@ -1,4 +1,4 @@
-import { build } from '@tests/helpers/build';
+import { build } from '@tests/helpers/fastify';
 
 describe('get category by slug', async () => {
   const app = await build();

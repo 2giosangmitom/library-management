@@ -1,7 +1,11 @@
-import { build } from '@tests/helpers/build';
+import { build } from '@tests/helpers/fastify';
+import { createUser } from '@tests/helpers/user';
 
-describe('sign out', async () => {
+const ENDPOINT = '/auth/signout';
+
+describe(`POST ${ENDPOINT}`, async () => {
   const app = await build();
+  let signedUpUser: Awaited<ReturnType<typeof createUser>>;
 
   afterAll(async () => {
     await app.close();
@@ -9,15 +13,7 @@ describe('sign out', async () => {
 
   beforeAll(async () => {
     // Sign up an account for later usage
-    await app.inject({
-      method: 'POST',
-      path: '/auth/signup',
-      body: {
-        email: 'test-signout@test.com',
-        password: 'password123',
-        name: 'Test sign out'
-      }
-    });
+    signedUpUser = await createUser(app, 'Test sign out', 'password123');
   });
 
   it('should sign out successfully and invalidate the JWT', async () => {
@@ -26,44 +22,54 @@ describe('sign out', async () => {
       method: 'POST',
       path: '/auth/signin',
       body: {
-        email: 'test-signout@test.com',
+        email: signedUpUser.email,
         password: 'password123'
       }
     });
 
     expect(signInResponse.statusCode).toBe(200);
     const { jwt } = signInResponse.json();
-    expect(jwt).toBeDefined();
+    assert.isString(jwt);
 
     // Sign out using the obtained JWT
     const signOutResponse = await app.inject({
       method: 'POST',
-      path: '/auth/signout',
+      path: ENDPOINT,
       headers: {
         Authorization: `Bearer ${jwt}`
       }
     });
 
-    expect(signOutResponse.statusCode).toBe(204);
+    assert.equal(signOutResponse.statusCode, 204);
 
     // Try to access a protected route with the same JWT to verify it's invalidated
     const protectedResponse = await app.inject({
       method: 'POST',
-      path: '/auth/signout',
+      path: ENDPOINT,
       headers: {
         Authorization: `Bearer ${jwt}`
       }
     });
 
     expect(protectedResponse.statusCode).toBe(401);
+    expect(protectedResponse.json()).toMatchInlineSnapshot(`
+      {
+        "message": "Untrusted authorization token",
+      }
+    `);
   });
 
   it('should return 401 if no JWT provided', async () => {
     const response = await app.inject({
       method: 'POST',
-      path: '/auth/signout'
+      path: ENDPOINT
     });
 
     expect(response.statusCode).toBe(401);
+    expect(response.json()).toMatchInlineSnapshot(`
+      {
+        "message": "No Authorization was found in request.headers",
+      }
+    `);
   });
 });

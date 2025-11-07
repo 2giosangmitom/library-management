@@ -1,4 +1,4 @@
-import { build } from '@tests/helpers/build';
+import { build } from '@tests/helpers/fastify';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 
 describe('update author', async () => {
