@@ -6,8 +6,9 @@ import * as hashUtils from '@utils/hash';
 import { Prisma } from '@prisma/client';
 import { FastifyRedis } from '@fastify/redis';
 import { RedisTokenUtils } from '@utils/redis';
+import { faker } from '@faker-js/faker';
 
-describe('user service', () => {
+describe('UserService', () => {
   const app = fastify();
   const userModel = UserModel.getInstance(app);
   const userService = UserService.getInstance(app, userModel);
@@ -23,21 +24,24 @@ describe('user service', () => {
 
     it('should return user data if found', async () => {
       const user = {
-        user_id: 'user-uuid',
-        email: 'user@test.com',
-        name: 'Test User',
+        user_id: faker.string.uuid(),
+        email: faker.internet.email(),
+        name: faker.person.fullName(),
         role: Role.MEMBER,
-        password_hash: 'hashedpassword',
-        salt: 'randomsalt'
+        password_hash: faker.string.hexadecimal({ length: 64 }),
+        salt: faker.string.hexadecimal({ length: 16 })
       };
 
       vi.spyOn(userModel, 'findUserById').mockResolvedValueOnce(user);
 
-      await expect(userService.getUserInfo('user-uuid')).resolves.toEqual(user);
+      const result = await userService.getUserInfo(user.user_id);
+
+      expect(result).toEqual(user);
     });
 
     it('should call findUserById with correct id', async () => {
-      const id = 'user-uuid-2';
+      const id = faker.string.uuid();
+
       await userService.getUserInfo(id);
 
       expect(userModel.findUserById).toHaveBeenCalledWith(id);
@@ -46,7 +50,7 @@ describe('user service', () => {
     it('should return null if user not found', async () => {
       vi.spyOn(userModel, 'findUserById').mockResolvedValueOnce(null);
 
-      await expect(userService.getUserInfo('non-existent-id')).resolves.toBeNull();
+      await expect(userService.getUserInfo(faker.string.uuid())).resolves.toBeNull();
     });
   });
 
