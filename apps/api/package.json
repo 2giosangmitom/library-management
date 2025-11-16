@@ -8,6 +8,7 @@
     "typecheck": "tsc",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:reset": "prisma migrate reset --force",
     "prisma:migrate:test": "dotenv -e .env.test -- prisma migrate dev",
     "prisma:migrate:reset:test": "dotenv -e .env.test -- prisma migrate reset --force",
     "pretest:integration": "pnpm prisma:migrate:reset:test",
@@ -16,12 +17,14 @@
     "test:coverage": "dotenv -e .env.test -- vitest run --coverage"
   },
   "dependencies": {
+    "@fastify/auth": "^5.0.3",
     "@fastify/autoload": "^6.3.1",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
     "@fastify/env": "^5.0.3",
     "@fastify/jwt": "^10.0.0",
     "@fastify/redis": "^7.1.0",
+    "@fastify/sensible": "^6.0.3",
     "@fastify/swagger": "^9.6.0",
     "@fastify/swagger-ui": "^5.2.3",
     "@fastify/type-provider-typebox": "^6.1.0",

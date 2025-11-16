@@ -1,17 +1,17 @@
 import { Prisma } from '@prisma/client';
 import { signInSchema, signOutSchema, signUpSchema } from './auth.schema';
 import { AuthService } from './auth.service';
-import { RedisTokenUtils } from '@utils/redis';
+import { JWTUtils } from '@utils/jwt';
 import { nanoid } from 'nanoid';
 
 export class AuthController {
   private static instance: AuthController;
   private authService: AuthService;
-  private redisTokenUtils: RedisTokenUtils;
+  private redisTokenUtils: JWTUtils;
 
   private constructor(fastify: FastifyTypeBox, authService: AuthService) {
     this.authService = authService;
-    this.redisTokenUtils = RedisTokenUtils.getInstance(fastify.redis);
+    this.redisTokenUtils = JWTUtils.getInstance(fastify.redis);
   }
 
   public static getInstance(fastify: FastifyTypeBox, authService = AuthService.getInstance(fastify)) {

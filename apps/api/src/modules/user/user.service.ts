@@ -1,17 +1,17 @@
 import { UserModel } from './user.model';
 import { Prisma } from '@prisma/client';
 import { generateHash, verifyHash } from '@utils/hash';
-import { RedisTokenUtils } from '@utils/redis';
+import { JWTUtils } from '@utils/jwt';
 
 export class UserService {
   private static instance: UserService;
   private userModel: UserModel;
   private fastify: FastifyTypeBox;
-  private redisTokenUtils: RedisTokenUtils;
+  private redisTokenUtils: JWTUtils;
 
   private constructor(fastify: FastifyTypeBox, userModel: UserModel) {
     this.userModel = userModel;
-    this.redisTokenUtils = RedisTokenUtils.getInstance(fastify.redis);
+    this.redisTokenUtils = JWTUtils.getInstance(fastify.redis);
     this.fastify = fastify;
   }
 

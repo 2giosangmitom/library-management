@@ -1,21 +1,22 @@
 import { envType } from '@config/env-schema';
 import { fastifyJwt } from '@fastify/jwt';
-import { RedisTokenUtils } from '@utils/redis';
+import { JWTUtils } from '@utils/jwt';
 import fp from 'fastify-plugin';
+import { accessTokenExpiration } from '@src/constants';
 
 export default fp(
   async (fastify: FastifyTypeBox, opts: envType) => {
     fastify.log.debug('Registering JWT plugin');
 
-    const redisTokenUtils = RedisTokenUtils.getInstance(fastify.redis);
+    const redisTokenUtils = JWTUtils.getInstance(fastify.redis);
 
     await fastify.register(fastifyJwt, {
       secret: opts.JWT_SECRET,
       sign: {
-        expiresIn: '10m'
+        expiresIn: accessTokenExpiration
       },
       trusted: async (_, decodedToken) => {
-        const token = await redisTokenUtils.getJWT(decodedToken.jti);
+        const token = await redisTokenUtils.getTokenData('access_token', decodedToken.jti);
         return !!token;
       },
       cookie: {

@@ -8,8 +8,6 @@ BookWise is a library management system.
 
 ```mermaid
 erDiagram
-  direction LR
-
   USER {
     UUID user_id PK
     VARCHAR(50) name

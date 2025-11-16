@@ -20,7 +20,10 @@ export default fp(
           { name: 'Loan', description: 'Book loan management endpoints' },
           { name: 'Author', description: 'Author management endpoints' },
           { name: 'Category', description: 'Book category management endpoints' },
-          { name: 'Rating', description: 'Book rating endpoints' }
+          { name: 'Rating', description: 'Book rating endpoints' },
+          { name: 'Publisher', description: 'Publisher management endpoints' },
+          { name: 'Book Clone', description: 'Book clone management endpoints' },
+          { name: 'Location', description: 'Library location management endpoints' }
         ],
         components: {
           securitySchemes: {
