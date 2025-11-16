@@ -22,7 +22,8 @@ model User {
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 
-  loans Loan[]
+  loans   Loan[]
+  ratings Rating[]
 }
 
 model Author {
@@ -64,6 +65,7 @@ model Book {
   authors    Book_Author[]
   categories Book_Category[]
   publisher  Publisher?      @relation(fields: [publisher_id], references: [publisher_id])
+  ratings    Rating[]
 }
 
 model Book_Author {
@@ -112,6 +114,19 @@ model Loan {
   status      LoanStatus @default(BORROWED)
   created_at  DateTime   @default(now())
   updated_at  DateTime   @updatedAt
+
+  user User @relation(fields: [user_id], references: [user_id])
+  book Book @relation(fields: [book_id], references: [book_id])
+}
+
+model Rating {
+  rating_id  String   @id @default(uuid()) @db.Uuid()
+  book_id    String   @db.Uuid()
+  user_id    String   @db.Uuid()
+  rate       Int      @db.SmallInt()
+  comment    String   @db.Text()
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   user User @relation(fields: [user_id], references: [user_id])
   book Book @relation(fields: [book_id], references: [book_id])

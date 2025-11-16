@@ -81,6 +81,16 @@ erDiagram
     TIMESTAMP updated_at
   }
 
+  RATING {
+    UUID rating_id PK
+    UUID book_id FK
+    UUID user_id FK
+    SMALLINT rate
+    TEXT comment
+    TIMESTAMP created_at
+    TIMESTAMP updated_at
+  }
+
   USER ||--o{ LOAN: "borrows"
   BOOK ||--o{ LOAN: "is loaned in"
   BOOK ||--o{ BOOK_AUTHOR: "has"
@@ -88,4 +98,6 @@ erDiagram
   AUTHOR ||--o{ BOOK_AUTHOR: "writes"
   BOOK ||--o{ BOOK_CATEGORY: "belongs to"
   CATEGORY ||--o{ BOOK_CATEGORY: "includes"
+  USER ||--o{ RATING: "belongs to"
+  BOOK ||--o{ RATING: "rated for"
 ```
