@@ -8,6 +8,8 @@ BookWise is a library management system.
 
 ```mermaid
 erDiagram
+  direction LR
+
   USER {
     UUID user_id PK
     VARCHAR(50) name
@@ -30,11 +32,11 @@ erDiagram
   AUTHOR {
     UUID author_id PK
     VARCHAR(100) name
-    TEXT biography
     VARCHAR(255) short_biography
+    TEXT biography
     DATE date_of_birth "NULLABLE"
     DATE date_of_death "NULLABLE"
-    VARCHAR(100) nationality
+    VARCHAR(100) nationality "NULLABLE"
     VARCHAR(50) slug "UNIQUE"
     TIMESTAMP created_at
     TIMESTAMP updated_at
@@ -78,8 +80,8 @@ erDiagram
     TIMESTAMP updated_at
   }
 
-  BOOK_COPY {
-    UUID book_copy_id PK
+  BOOK_CLONE {
+    UUID book_clone_id PK
     UUID book_id FK
     UUID location_id FK
     BOOLEAN is_available
@@ -89,19 +91,10 @@ erDiagram
     TIMESTAMP updated_at
   }
 
-  BOOK_COPY_HISTORY {
-    UUID history_id PK
-    UUID book_copy_id FK
-    ENUM action "MOVE, CONDITION_CHANGE, LOST, REPAIRED"
-    TEXT note
-    TIMESTAMP created_at
-    TIMESTAMP updated_at
-  }
-
   LOAN {
     UUID loan_id PK
     UUID user_id FK
-    UUID book_copy_id FK
+    UUID book_clone_id FK
     DATE loan_date
     DATE due_date
     DATE return_date "NULLABLE"
@@ -114,26 +107,21 @@ erDiagram
     UUID rating_id PK
     UUID book_id FK
     UUID user_id FK
-    TINYINT rate "1-5"
+    SMALLINT rate "1-5"
     TEXT comment
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
 
   USER ||--o{ LOAN: "borrows"
-  BOOK_COPY ||--o| LOAN: "is loaned"
-
+  BOOK_CLONE ||--o| LOAN: "is loaned"
+  BOOK }o--o| PUBLISHER: "published by"
   BOOK ||--o{ BOOK_AUTHOR: "has author"
   AUTHOR ||--o{ BOOK_AUTHOR: "writes"
-
   BOOK ||--o{ BOOK_CATEGORY: "categorized as"
   CATEGORY ||--o{ BOOK_CATEGORY: "contains"
-
   USER ||--o{ RATING: "rates"
   BOOK ||--o{ RATING: "rated by"
-
-  BOOK ||--o{ BOOK_COPY: "has copies"
-  LOCATION ||--o{ BOOK_COPY: "placed at"
-
-  BOOK_COPY ||--o{ BOOK_COPY_HISTORY: "history"
+  BOOK ||--o{ BOOK_CLONE: "has copies"
+  LOCATION ||--o{ BOOK_CLONE: "placed at"
 ```

@@ -14,9 +14,9 @@ enum Role {
 }
 
 model User {
-  user_id       String   @id @default(uuid()) @db.Uuid()
+  user_id       String   @id @default(uuid()) @db.Uuid
   name          String   @db.VarChar(50)
-  email         String   @unique() @db.VarChar(100)
+  email         String   @unique @db.VarChar(100)
   password_hash String   @db.VarChar(255)
   salt          String   @db.VarChar(255)
   role          Role     @default(MEMBER)
@@ -27,23 +27,8 @@ model User {
   ratings Rating[]
 }
 
-model Author {
-  author_id       String    @id @default(uuid()) @db.Uuid()
-  name            String    @db.VarChar(100)
-  short_biography String    @db.VarChar(255)
-  biography       String    @db.Text()
-  date_of_birth   DateTime?
-  date_of_death   DateTime?
-  nationality     String    @db.VarChar(100)
-  slug            String    @unique @db.VarChar(50)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
-
-  books Book_Author[]
-}
-
 model Category {
-  category_id String   @id @default(uuid()) @db.Uuid()
+  category_id String   @id @default(uuid()) @db.Uuid
   name        String   @db.VarChar(100)
   slug        String   @unique @db.VarChar(50)
   created_at  DateTime @default(now())
@@ -52,43 +37,23 @@ model Category {
   books Book_Category[]
 }
 
-model Book {
-  book_id      String   @id @default(uuid()) @db.Uuid()
-  publisher_id String?  @db.Uuid()
-  title        String   @db.VarChar(255)
-  description  String   @db.Text()
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
+model Author {
+  author_id       String    @id @default(uuid()) @db.Uuid
+  name            String    @db.VarChar(100)
+  short_biography String    @db.VarChar(255)
+  biography       String    @db.Text
+  date_of_birth   DateTime?
+  date_of_death   DateTime?
+  nationality     String?   @db.VarChar(100)
+  slug            String    @unique @db.VarChar(50)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
 
-  authors    Book_Author[]
-  categories Book_Category[]
-  publisher  Publisher?      @relation(fields: [publisher_id], references: [publisher_id])
-  ratings    Rating[]
-  bookCopies Book_Copy[]
-}
-
-model Book_Author {
-  book_id   String @db.Uuid()
-  author_id String @db.Uuid()
-
-  book   Book   @relation(fields: [book_id], references: [book_id])
-  author Author @relation(fields: [author_id], references: [author_id])
-
-  @@id([book_id, author_id])
-}
-
-model Book_Category {
-  book_id     String @db.Uuid()
-  category_id String @db.Uuid()
-
-  book     Book     @relation(fields: [book_id], references: [book_id])
-  category Category @relation(fields: [category_id], references: [category_id])
-
-  @@id([book_id, category_id])
+  books Book_Author[]
 }
 
 model Publisher {
-  publisher_id String   @id @default(uuid()) @db.Uuid()
+  publisher_id String   @id @default(uuid()) @db.Uuid
   name         String   @db.VarChar(100)
   website      String   @db.VarChar(100)
   slug         String   @unique @db.VarChar(50)
@@ -98,49 +63,51 @@ model Publisher {
   books Book[]
 }
 
-enum LoanStatus {
-  BORROWED
-  RETURNED
-  OVERDUE
+model Book {
+  book_id      String   @id @default(uuid()) @db.Uuid
+  publisher_id String?  @db.Uuid
+  title        String   @db.VarChar(255)
+  description  String   @db.Text
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  publisher   Publisher?      @relation(fields: [publisher_id], references: [publisher_id])
+  authors     Book_Author[]
+  categories  Book_Category[]
+  ratings     Rating[]
+  book_clones Book_Clone[]
 }
 
-model Loan {
-  loan_id      String     @id @default(uuid()) @db.Uuid()
-  user_id      String     @db.Uuid()
-  book_copy_id String     @unique() @db.Uuid()
-  loan_date    DateTime   @db.Date()
-  due_date     DateTime   @db.Date()
-  return_date  DateTime?  @db.Date()
-  status       LoanStatus @default(BORROWED)
-  created_at   DateTime   @default(now())
-  updated_at   DateTime   @updatedAt
+model Book_Author {
+  book_id   String @db.Uuid
+  author_id String @db.Uuid
 
-  user      User      @relation(fields: [user_id], references: [user_id])
-  book_copy Book_Copy @relation(fields: [book_copy_id], references: [book_copy_id])
+  book   Book   @relation(fields: [book_id], references: [book_id])
+  author Author @relation(fields: [author_id], references: [author_id])
+
+  @@id([book_id, author_id])
 }
 
-model Rating {
-  rating_id  String   @id @default(uuid()) @db.Uuid()
-  book_id    String   @db.Uuid()
-  user_id    String   @db.Uuid()
-  rate       Int      @db.SmallInt()
-  comment    String   @db.Text()
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
+model Book_Category {
+  book_id     String @db.Uuid
+  category_id String @db.Uuid
 
-  user User @relation(fields: [user_id], references: [user_id])
-  book Book @relation(fields: [book_id], references: [book_id])
+  book     Book     @relation(fields: [book_id], references: [book_id])
+  category Category @relation(fields: [category_id], references: [category_id])
+
+  @@id([book_id, category_id])
 }
 
 model Location {
-  location_id String      @id @db.VarChar(50)
-  room        String      @db.VarChar(50)
-  floor       Int         @db.SmallInt()
-  shelf       Int         @db.SmallInt()
-  row         Int         @db.SmallInt()
-  created_at  DateTime    @default(now())
-  updated_at  DateTime    @updatedAt
-  bookCopies  Book_Copy[]
+  location_id String   @id @db.VarChar(50)
+  room        String   @db.VarChar(50)
+  floor       Int      @db.SmallInt()
+  shelf       Int      @db.SmallInt()
+  row         Int      @db.SmallInt()
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  book_clones Book_Clone[]
 }
 
 enum BookCondition {
@@ -151,37 +118,51 @@ enum BookCondition {
   LOST
 }
 
-model Book_Copy {
-  book_copy_id String        @id @default(uuid()) @db.Uuid()
-  book_id      String        @db.Uuid()
-  location_id  String        @db.VarChar(50)
-  is_available Boolean       @default(true)
-  barcode      String        @unique @db.VarChar(50)
-  condition    BookCondition
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
+model Book_Clone {
+  book_clone_id String        @id @default(uuid()) @db.Uuid
+  book_id       String        @db.Uuid
+  location_id   String        @db.VarChar(50)
+  is_available  Boolean       @default(true)
+  barcode       String        @unique @db.VarChar(50)
+  condition     BookCondition
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
 
-  book              Book                @relation(fields: [book_id], references: [book_id])
-  location          Location            @relation(fields: [location_id], references: [location_id])
-  loan              Loan?
-  bookCopyHistories Book_Copy_History[]
-  loanLoan_id       String              @db.Uuid()
+  book     Book     @relation(fields: [book_id], references: [book_id])
+  location Location @relation(fields: [location_id], references: [location_id])
+  loan     Loan?
 }
 
-enum BookCopyAction {
-  MOVE
-  CONDITION_CHANGE
-  LOST
-  REPAIRED
+enum LoanStatus {
+  BORROWED
+  RETURNED
+  OVERDUE
 }
 
-model Book_Copy_History {
-  history_id   String         @id @default(uuid()) @db.Uuid()
-  book_copy_id String         @db.Uuid()
-  action       BookCopyAction
-  note         String         @db.Text()
-  created_at   DateTime       @default(now())
-  updated_at   DateTime       @updatedAt
+model Loan {
+  loan_id       String     @id @default(uuid()) @db.Uuid
+  user_id       String     @db.Uuid
+  book_clone_id String     @unique @db.Uuid
+  loan_date     DateTime   @db.Date
+  due_date      DateTime   @db.Date
+  return_date   DateTime?  @db.Date
+  status        LoanStatus @default(BORROWED)
+  created_at    DateTime   @default(now())
+  updated_at    DateTime   @updatedAt
 
-  book_copy Book_Copy @relation(fields: [book_copy_id], references: [book_copy_id])
+  user       User       @relation(fields: [user_id], references: [user_id])
+  book_clone Book_Clone @relation(fields: [book_clone_id], references: [book_clone_id])
+}
+
+model Rating {
+  rating_id  String   @id @default(uuid()) @db.Uuid
+  book_id    String   @db.Uuid
+  user_id    String   @db.Uuid
+  rate       Int      @db.SmallInt
+  comment    String   @db.Text
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [user_id])
+  book Book @relation(fields: [book_id], references: [book_id])
 }
