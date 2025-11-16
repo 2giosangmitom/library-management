@@ -5,7 +5,8 @@ export const envSchema = Type.Object({
   CORS_METHODS: Type.Optional(Type.String()),
   DATABASE_URL: Type.String(),
   REDIS_URL: Type.String(),
-  JWT_SECRET: Type.String()
+  JWT_SECRET: Type.String(),
+  COOKIE_SECRET: Type.String()
 });
 
 export type envType = Static<typeof envSchema>;
