@@ -12,16 +12,20 @@ export default fp(
     await fastify.register(fastifyJwt, {
       secret: opts.JWT_SECRET,
       sign: {
-        expiresIn: '30d'
+        expiresIn: '10m'
       },
       trusted: async (_, decodedToken) => {
         const token = await redisTokenUtils.getJWT(decodedToken.jti);
         return !!token;
+      },
+      cookie: {
+        cookieName: 'refreshToken',
+        signed: true
       }
     });
   },
   {
     name: 'JWT',
-    dependencies: ['Redis']
+    dependencies: ['Redis', 'Cookie']
   }
 );
