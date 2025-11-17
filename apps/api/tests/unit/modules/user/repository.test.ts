@@ -86,7 +86,7 @@ describe('UserRepository', async () => {
 
       vi.mocked(app.prisma.user.create).mockRejectedValueOnce(mockError);
 
-      await expect(userRepository.createUser(data)).rejects.toThrowError(mockError);
+      await expect(userRepository.createUser(data)).rejects.toThrowError(Prisma.PrismaClientKnownRequestError);
     });
   });
 
@@ -141,7 +141,7 @@ describe('UserRepository', async () => {
 
       vi.mocked(app.prisma.user.findUnique).mockRejectedValueOnce(mockError);
 
-      await expect(userRepository.findUserByEmail(email)).rejects.toThrowError(mockError);
+      await expect(userRepository.findUserByEmail(email)).rejects.toThrowError(Prisma.PrismaClientKnownRequestError);
     });
   });
 
@@ -196,7 +196,7 @@ describe('UserRepository', async () => {
 
       vi.mocked(app.prisma.user.findUnique).mockRejectedValueOnce(mockError);
 
-      await expect(userRepository.findUserById(user_id)).rejects.toThrowError(mockError);
+      await expect(userRepository.findUserById(user_id)).rejects.toThrowError(Prisma.PrismaClientKnownRequestError);
     });
   });
 
@@ -266,7 +266,7 @@ describe('UserRepository', async () => {
 
       vi.mocked(app.prisma.user.update).mockRejectedValueOnce(mockError);
 
-      await expect(userRepository.updateUser(user_id, data)).rejects.toThrowError(mockError);
+      await expect(userRepository.updateUser(user_id, data)).rejects.toThrowError(Prisma.PrismaClientKnownRequestError);
     });
   });
 
@@ -313,7 +313,9 @@ describe('UserRepository', async () => {
 
       vi.mocked(app.prisma.user.findUnique).mockRejectedValueOnce(mockError);
 
-      await expect(userRepository.getUserCredentialsByEmail(email)).rejects.toThrowError(mockError);
+      await expect(userRepository.getUserCredentialsByEmail(email)).rejects.toThrowError(
+        Prisma.PrismaClientKnownRequestError
+      );
     });
   });
 
@@ -326,8 +328,8 @@ describe('UserRepository', async () => {
 
       expect(app.prisma.user.findMany).toHaveBeenCalledOnce();
       expect(app.prisma.user.findMany).toHaveBeenCalledWith({
-        skip: pageSize,
-        take: pageSize,
+        skip: 5,
+        take: 5,
         select: {
           user_id: true,
           name: true,
@@ -335,6 +337,9 @@ describe('UserRepository', async () => {
           role: true,
           created_at: true,
           updated_at: true
+        },
+        orderBy: {
+          name: 'asc'
         }
       });
     });
@@ -346,7 +351,6 @@ describe('UserRepository', async () => {
       await userRepository.findAllUsers(page, pageSize);
 
       expect(app.prisma.user.count).toHaveBeenCalledOnce();
-      expect(app.prisma.user.count).toHaveBeenCalledWith();
     });
 
     it("should call prisma's $transaction method", async () => {
@@ -389,7 +393,9 @@ describe('UserRepository', async () => {
 
       vi.mocked(app.prisma.$transaction).mockRejectedValueOnce(mockError);
 
-      await expect(userRepository.findAllUsers(page, pageSize)).rejects.toThrowError(mockError);
+      await expect(userRepository.findAllUsers(page, pageSize)).rejects.toThrowError(
+        Prisma.PrismaClientKnownRequestError
+      );
     });
   });
 

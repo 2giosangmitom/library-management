@@ -79,6 +79,7 @@ export class UserRepository {
    * Update user information
    * @param user_id The user ID
    * @param data Fields to update
+   * @returns The updated user data
    */
   public async updateUser(
     user_id: string,
@@ -126,7 +127,7 @@ export class UserRepository {
    * Find all users with pagination
    * @param page The page number
    * @param pageSize The number of users per page
-   * @returns List of users
+   * @returns Total count and list of users
    */
   public async findAllUsers(page: number, pageSize: number) {
     const skip = (page - 1) * pageSize;
@@ -142,6 +143,9 @@ export class UserRepository {
           role: true,
           created_at: true,
           updated_at: true
+        },
+        orderBy: {
+          name: 'asc'
         }
       })
     ]);

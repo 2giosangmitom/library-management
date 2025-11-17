@@ -1,15 +1,15 @@
-import { AuthorModel } from './author.repository';
+import { AuthorRepository } from './author.repository';
 import { Prisma } from '@prisma/client';
 
 export class AuthorService {
   private static instance: AuthorService;
-  private authorModel: AuthorModel;
+  private authorModel: AuthorRepository;
 
-  private constructor(authorModel: AuthorModel) {
+  private constructor(authorModel: AuthorRepository) {
     this.authorModel = authorModel;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, authorModel = AuthorModel.getInstance(fastify)): AuthorService {
+  public static getInstance(fastify: FastifyTypeBox, authorModel = AuthorRepository.getInstance(fastify)): AuthorService {
     if (!AuthorService.instance) {
       AuthorService.instance = new AuthorService(authorModel);
     }
@@ -34,7 +34,7 @@ export class AuthorService {
    * Service method to get all authors
    */
   public getAllAuthors(page = 1, limit = 10) {
-    return this.authorModel.getAllAuthors(page, limit);
+    return this.authorModel.findAllAuthors(page, limit);
   }
 
   /**
@@ -42,7 +42,7 @@ export class AuthorService {
    * @param author_slug Author slug
    */
   public getAuthorDetails(author_slug: string) {
-    return this.authorModel.getAuthorBySlug(author_slug);
+    return this.authorModel.findAuthorBySlug(author_slug);
   }
 
   /**
