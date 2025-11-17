@@ -121,4 +121,26 @@ export class UserRepository {
       }
     });
   }
+
+  /**
+   * Find all users with pagination
+   * @param page The page number
+   * @param pageSize The number of users per page
+   * @returns List of users
+   */
+  public async findAllUsers(page: number, pageSize: number) {
+    const skip = (page - 1) * pageSize;
+    return this.fastify.prisma.user.findMany({
+      skip,
+      take: pageSize,
+      select: {
+        user_id: true,
+        name: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true
+      }
+    });
+  }
 }

@@ -12,7 +12,8 @@ describe('UserRepository', async () => {
       user: {
         create: vi.fn(),
         findUnique: vi.fn(),
-        update: vi.fn()
+        update: vi.fn(),
+        findMany: vi.fn()
       }
     } as unknown as PrismaClient);
   });
@@ -311,6 +312,63 @@ describe('UserRepository', async () => {
       vi.mocked(app.prisma.user.findUnique).mockRejectedValueOnce(mockError);
 
       await expect(userRepository.getUserCredentialsByEmail(email)).rejects.toThrowError(mockError);
+    });
+  });
+
+  describe('findAllUsers', () => {
+    it("should call prisma's findMany method", async () => {
+      const page = 2;
+      const pageSize = 5;
+
+      await userRepository.findAllUsers(page, pageSize);
+
+      expect(app.prisma.user.findMany).toHaveBeenCalledOnce();
+      expect(app.prisma.user.findMany).toHaveBeenCalledWith({
+        skip: pageSize,
+        take: pageSize,
+        select: {
+          user_id: true,
+          name: true,
+          email: true,
+          role: true,
+          created_at: true,
+          updated_at: true
+        }
+      });
+    });
+
+    it('should return a list of users', async () => {
+      const page = 1;
+      const pageSize = 3;
+
+      const mockUsers = Array.from({ length: pageSize }).map(() => ({
+        user_id: faker.string.uuid(),
+        name: faker.person.fullName(),
+        email: faker.internet.email(),
+        role: Role.MEMBER,
+        created_at: new Date(),
+        updated_at: new Date()
+      })) as Awaited<ReturnType<typeof app.prisma.user.findMany>>;
+
+      vi.mocked(app.prisma.user.findMany).mockResolvedValueOnce(mockUsers);
+
+      const result = await userRepository.findAllUsers(page, pageSize);
+
+      expect(result).toEqual(mockUsers);
+    });
+
+    it('should throw an error if prisma findMany fails', async () => {
+      const page = 1;
+      const pageSize = 3;
+
+      const mockError = new Prisma.PrismaClientKnownRequestError('Prisma findMany failed', {
+        code: 'P2002',
+        clientVersion: Prisma.prismaVersion.client
+      });
+
+      vi.mocked(app.prisma.user.findMany).mockRejectedValueOnce(mockError);
+
+      await expect(userRepository.findAllUsers(page, pageSize)).rejects.toThrowError(mockError);
     });
   });
 
