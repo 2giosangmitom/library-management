@@ -5,15 +5,20 @@ import { PrismaClient, Role, Prisma } from '@prisma/client';
 
 describe('UserRepository', async () => {
   const app = fastify();
-  app.decorate('prisma', {
-    user: {
-      create: vi.fn()
-    }
-  } as unknown as PrismaClient);
   const userRepository = UserRepository.getInstance(app);
 
+  beforeAll(() => {
+    app.decorate('prisma', {
+      user: {
+        create: vi.fn(),
+        findUnique: vi.fn(),
+        update: vi.fn()
+      }
+    } as unknown as PrismaClient);
+  });
+
   beforeEach(() => {
-    vi.mockObject(app.prisma.user, { spy: true });
+    vi.clearAllMocks();
   });
 
   describe('createUser', () => {
@@ -79,6 +84,242 @@ describe('UserRepository', async () => {
       vi.mocked(app.prisma.user.create).mockRejectedValueOnce(mockError);
 
       await expect(userRepository.createUser(data)).rejects.toThrowError(mockError);
+    });
+  });
+
+  describe('findUserByEmail', () => {
+    it("should call prisma's findUnique method with correct parameters", async () => {
+      const email = faker.internet.email();
+
+      await userRepository.findUserByEmail(email);
+
+      expect(app.prisma.user.findUnique).toHaveBeenCalledOnce();
+      expect(app.prisma.user.findUnique).toHaveBeenCalledWith({
+        select: {
+          user_id: true,
+          name: true,
+          email: true,
+          role: true,
+          created_at: true,
+          updated_at: true
+        },
+        where: {
+          email
+        }
+      });
+    });
+
+    it('should return the found user', async () => {
+      const email = faker.internet.email();
+
+      const mockUser = {
+        user_id: faker.string.uuid(),
+        password_hash: faker.internet.password(),
+        salt: faker.string.alpha(16),
+        name: faker.person.fullName(),
+        email,
+        role: Role.MEMBER
+      } as Awaited<ReturnType<typeof app.prisma.user.findUnique>>;
+
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(mockUser);
+
+      const result = await userRepository.findUserByEmail(email);
+
+      expect(result).toEqual(mockUser);
+    });
+
+    it('should throw an error if prisma findUnique fails', async () => {
+      const email = faker.internet.email();
+
+      const mockError = new Prisma.PrismaClientKnownRequestError('Prisma findUnique failed', {
+        code: 'P2002',
+        clientVersion: Prisma.prismaVersion.client
+      });
+
+      vi.mocked(app.prisma.user.findUnique).mockRejectedValueOnce(mockError);
+
+      await expect(userRepository.findUserByEmail(email)).rejects.toThrowError(mockError);
+    });
+  });
+
+  describe('findUserById', () => {
+    it("should call prisma's findUnique method with correct parameters", async () => {
+      const user_id = faker.string.uuid();
+
+      await userRepository.findUserById(user_id);
+
+      expect(app.prisma.user.findUnique).toHaveBeenCalledOnce();
+      expect(app.prisma.user.findUnique).toHaveBeenCalledWith({
+        select: {
+          user_id: true,
+          name: true,
+          email: true,
+          role: true,
+          created_at: true,
+          updated_at: true
+        },
+        where: {
+          user_id
+        }
+      });
+    });
+
+    it('should return the found user', async () => {
+      const user_id = faker.string.uuid();
+
+      const mockUser = {
+        user_id,
+        password_hash: faker.internet.password(),
+        salt: faker.string.alpha(16),
+        name: faker.person.fullName(),
+        email: faker.internet.email(),
+        role: Role.MEMBER
+      } as Awaited<ReturnType<typeof app.prisma.user.findUnique>>;
+
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(mockUser);
+
+      const result = await userRepository.findUserById(user_id);
+
+      expect(result).toEqual(mockUser);
+    });
+
+    it('should throw an error if prisma findUnique fails', async () => {
+      const user_id = faker.string.uuid();
+
+      const mockError = new Prisma.PrismaClientKnownRequestError('Prisma findUnique failed', {
+        code: 'P2002',
+        clientVersion: Prisma.prismaVersion.client
+      });
+
+      vi.mocked(app.prisma.user.findUnique).mockRejectedValueOnce(mockError);
+
+      await expect(userRepository.findUserById(user_id)).rejects.toThrowError(mockError);
+    });
+  });
+
+  describe('updateUser', () => {
+    it("should call prisma's update method with correct parameters", async () => {
+      const user_id = faker.string.uuid();
+      const data = {
+        name: faker.person.fullName(),
+        role: Role.ADMIN,
+        email: faker.internet.email()
+      };
+
+      await userRepository.updateUser(user_id, data);
+
+      expect(app.prisma.user.update).toHaveBeenCalledOnce();
+      expect(app.prisma.user.update).toHaveBeenCalledWith({
+        select: {
+          user_id: true,
+          name: true,
+          email: true,
+          role: true,
+          updated_at: true
+        },
+        where: {
+          user_id
+        },
+        data: {
+          ...data
+        }
+      });
+    });
+
+    it('should return the updated user', async () => {
+      const user_id = faker.string.uuid();
+      const data = {
+        name: faker.person.fullName(),
+        role: Role.ADMIN,
+        email: faker.internet.email()
+      };
+
+      const mockUser = {
+        user_id,
+        password_hash: faker.internet.password(),
+        salt: faker.string.alpha(16),
+        ...data
+      } as Awaited<ReturnType<typeof app.prisma.user.update>>;
+
+      vi.mocked(app.prisma.user.update).mockResolvedValueOnce(mockUser);
+
+      const result = await userRepository.updateUser(user_id, data);
+
+      expect(result).toEqual(mockUser);
+    });
+
+    it('should throw an error if prisma update fails', async () => {
+      const user_id = faker.string.uuid();
+      const data = {
+        name: faker.person.fullName(),
+        role: Role.ADMIN,
+        email: faker.internet.email()
+      };
+
+      const mockError = new Prisma.PrismaClientKnownRequestError('Prisma update failed', {
+        code: 'P2002',
+        clientVersion: Prisma.prismaVersion.client
+      });
+
+      vi.mocked(app.prisma.user.update).mockRejectedValueOnce(mockError);
+
+      await expect(userRepository.updateUser(user_id, data)).rejects.toThrowError(mockError);
+    });
+  });
+
+  describe('getUserCredentialsByEmail', () => {
+    it("should call prisma's findUnique method with correct parameters", async () => {
+      const email = faker.internet.email();
+
+      await userRepository.getUserCredentialsByEmail(email);
+
+      expect(app.prisma.user.findUnique).toHaveBeenCalledOnce();
+      expect(app.prisma.user.findUnique).toHaveBeenCalledWith({
+        select: {
+          password_hash: true,
+          salt: true
+        },
+        where: {
+          email
+        }
+      });
+    });
+
+    it('should return the user credentials', async () => {
+      const email = faker.internet.email();
+
+      const mockCredentials = {
+        password_hash: faker.internet.password(),
+        salt: faker.string.alpha(16)
+      } as Awaited<ReturnType<typeof app.prisma.user.findUnique>>;
+
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(mockCredentials);
+
+      const result = await userRepository.getUserCredentialsByEmail(email);
+
+      expect(result).toEqual(mockCredentials);
+    });
+
+    it('should throw an error if prisma findUnique fails', async () => {
+      const email = faker.internet.email();
+
+      const mockError = new Prisma.PrismaClientKnownRequestError('Prisma findUnique failed', {
+        code: 'P2002',
+        clientVersion: Prisma.prismaVersion.client
+      });
+
+      vi.mocked(app.prisma.user.findUnique).mockRejectedValueOnce(mockError);
+
+      await expect(userRepository.getUserCredentialsByEmail(email)).rejects.toThrowError(mockError);
+    });
+  });
+
+  describe('Singleton Behavior', () => {
+    it('should return the same instance on multiple getInstance calls', () => {
+      const instance1 = UserRepository.getInstance(app);
+      const instance2 = UserRepository.getInstance(app);
+
+      expect(instance1).toBe(instance2);
     });
   });
 });

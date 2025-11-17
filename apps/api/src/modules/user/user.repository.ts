@@ -1,3 +1,5 @@
+import { Role } from '@prisma/client';
+
 export class UserRepository {
   private fastify: FastifyTypeBox;
   private static instance: UserRepository | null = null;
@@ -38,16 +40,16 @@ export class UserRepository {
    */
   public async findUserByEmail(email: string) {
     return this.fastify.prisma.user.findUnique({
-      select: {
-        user_id: true,
-        password_hash: true,
-        salt: true,
-        name: true,
-        email: true,
-        role: true
-      },
       where: {
         email
+      },
+      select: {
+        user_id: true,
+        name: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true
       }
     });
   }
@@ -59,74 +61,63 @@ export class UserRepository {
    */
   public async findUserById(user_id: string) {
     return this.fastify.prisma.user.findUnique({
-      select: {
-        user_id: true,
-        password_hash: true,
-        salt: true,
-        name: true,
-        email: true,
-        role: true
-      },
       where: {
         user_id
+      },
+      select: {
+        user_id: true,
+        name: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true
       }
     });
   }
 
   /**
-   * Update a user's name by ID
+   * Update user information
    * @param user_id The user ID
    * @param data Fields to update
    */
-  public updateUser(user_id: string, data: { name?: string }) {
+  public updateUser(
+    user_id: string,
+    data: {
+      name?: string;
+      role?: Role;
+      email?: string;
+      password_hash?: string;
+      salt?: string;
+    }
+  ) {
     return this.fastify.prisma.user.update({
-      where: { user_id },
-      data,
+      where: {
+        user_id
+      },
       select: {
         user_id: true,
         email: true,
         name: true,
         role: true,
         updated_at: true
-      }
+      },
+      data
     });
   }
 
   /**
-   * Update a user's email by ID
-   * @param user_id The user ID
-   * @param email The new email
+   * Get user's password hash and salt by email
+   * @param email The email address
+   * @returns The password hash and salt
    */
-  public updateUserEmail(user_id: string, email: string) {
-    return this.fastify.prisma.user.update({
-      where: { user_id },
-      data: { email },
+  public async getUserCredentialsByEmail(email: string) {
+    return this.fastify.prisma.user.findUnique({
+      where: {
+        email
+      },
       select: {
-        user_id: true,
-        email: true,
-        name: true,
-        role: true,
-        updated_at: true
-      }
-    });
-  }
-
-  /**
-   * Update a user's password by ID
-   * @param user_id The user ID
-   * @param password_hash The new password hash
-   * @param salt The new salt
-   */
-  public updateUserPassword(user_id: string, password_hash: string, salt: string) {
-    return this.fastify.prisma.user.update({
-      where: { user_id },
-      data: { password_hash, salt },
-      select: {
-        user_id: true,
-        email: true,
-        name: true,
-        role: true,
-        updated_at: true
+        password_hash: true,
+        salt: true
       }
     });
   }
