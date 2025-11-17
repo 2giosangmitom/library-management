@@ -1,0 +1,28 @@
+type: http_request
+model: http_request
+id: rq_sVsFFnGsa7
+createdAt: 2025-11-17T08:38:16.213238799
+updatedAt: 2025-11-17T08:47:00.911811977
+workspaceId: wk_NVRvzyM7MY
+folderId: null
+authentication: {}
+authenticationType: null
+body:
+  text: |-
+    {
+      "email": "test-signup@test.com",
+      "password": "Password123!",
+      "name": "Test Sign Up"
+    }
+bodyType: application/json
+description: ''
+headers:
+- enabled: true
+  name: Content-Type
+  value: application/json
+  id: PPKebr0BG5
+method: POST
+name: ''
+sortPriority: -1763368696212.0
+url: ${[ base ]}/api/auth/signup
+urlParameters: []
