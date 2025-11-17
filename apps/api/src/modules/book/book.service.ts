@@ -1,15 +1,15 @@
-import { BookModel } from './book.repository';
+import { BookRepository } from './book.repository';
 import { Prisma } from '@prisma/client';
 
 export class BookService {
   private static instance: BookService;
-  private bookModel: BookModel;
+  private bookModel: BookRepository;
 
-  private constructor(bookModel: BookModel) {
+  private constructor(bookModel: BookRepository) {
     this.bookModel = bookModel;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, bookModel = BookModel.getInstance(fastify)): BookService {
+  public static getInstance(fastify: FastifyTypeBox, bookModel = BookRepository.getInstance(fastify)): BookService {
     if (!BookService.instance) {
       BookService.instance = new BookService(bookModel);
     }
