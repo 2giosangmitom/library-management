@@ -9,7 +9,10 @@ export class AuthorService {
     this.authorModel = authorModel;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, authorModel = AuthorRepository.getInstance(fastify)): AuthorService {
+  public static getInstance(
+    fastify: FastifyTypeBox,
+    authorModel = AuthorRepository.getInstance(fastify)
+  ): AuthorService {
     if (!AuthorService.instance) {
       AuthorService.instance = new AuthorService(authorModel);
     }
