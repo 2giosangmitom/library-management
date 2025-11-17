@@ -80,7 +80,7 @@ export class UserRepository {
    * @param user_id The user ID
    * @param data Fields to update
    */
-  public updateUser(
+  public async updateUser(
     user_id: string,
     data: {
       name?: string;
@@ -130,17 +130,20 @@ export class UserRepository {
    */
   public async findAllUsers(page: number, pageSize: number) {
     const skip = (page - 1) * pageSize;
-    return this.fastify.prisma.user.findMany({
-      skip,
-      take: pageSize,
-      select: {
-        user_id: true,
-        name: true,
-        email: true,
-        role: true,
-        created_at: true,
-        updated_at: true
-      }
-    });
+    return this.fastify.prisma.$transaction([
+      this.fastify.prisma.user.count(),
+      this.fastify.prisma.user.findMany({
+        skip,
+        take: pageSize,
+        select: {
+          user_id: true,
+          name: true,
+          email: true,
+          role: true,
+          created_at: true,
+          updated_at: true
+        }
+      })
+    ]);
   }
 }

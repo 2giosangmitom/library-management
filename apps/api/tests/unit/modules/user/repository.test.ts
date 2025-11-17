@@ -9,11 +9,13 @@ describe('UserRepository', async () => {
 
   beforeAll(() => {
     app.decorate('prisma', {
+      $transaction: vi.fn(),
       user: {
         create: vi.fn(),
         findUnique: vi.fn(),
         update: vi.fn(),
-        findMany: vi.fn()
+        findMany: vi.fn(),
+        count: vi.fn()
       }
     } as unknown as PrismaClient);
   });
@@ -337,7 +339,26 @@ describe('UserRepository', async () => {
       });
     });
 
-    it('should return a list of users', async () => {
+    it("should call prisma's count method", async () => {
+      const page = 2;
+      const pageSize = 5;
+
+      await userRepository.findAllUsers(page, pageSize);
+
+      expect(app.prisma.user.count).toHaveBeenCalledOnce();
+      expect(app.prisma.user.count).toHaveBeenCalledWith();
+    });
+
+    it("should call prisma's $transaction method", async () => {
+      const page = 2;
+      const pageSize = 5;
+
+      await userRepository.findAllUsers(page, pageSize);
+
+      expect(app.prisma.$transaction).toHaveBeenCalledOnce();
+    });
+
+    it('should return a list of users and total count', async () => {
       const page = 1;
       const pageSize = 3;
 
@@ -350,23 +371,23 @@ describe('UserRepository', async () => {
         updated_at: new Date()
       })) as Awaited<ReturnType<typeof app.prisma.user.findMany>>;
 
-      vi.mocked(app.prisma.user.findMany).mockResolvedValueOnce(mockUsers);
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([10, mockUsers]);
 
       const result = await userRepository.findAllUsers(page, pageSize);
 
-      expect(result).toEqual(mockUsers);
+      expect(result).toEqual([10, mockUsers]);
     });
 
-    it('should throw an error if prisma findMany fails', async () => {
+    it('should throw an error if prisma $transaction fails', async () => {
       const page = 1;
       const pageSize = 3;
 
-      const mockError = new Prisma.PrismaClientKnownRequestError('Prisma findMany failed', {
+      const mockError = new Prisma.PrismaClientKnownRequestError('Prisma $transaction failed', {
         code: 'P2002',
         clientVersion: Prisma.prismaVersion.client
       });
 
-      vi.mocked(app.prisma.user.findMany).mockRejectedValueOnce(mockError);
+      vi.mocked(app.prisma.$transaction).mockRejectedValueOnce(mockError);
 
       await expect(userRepository.findAllUsers(page, pageSize)).rejects.toThrowError(mockError);
     });
