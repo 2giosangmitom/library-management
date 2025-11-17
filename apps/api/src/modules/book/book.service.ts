@@ -1,4 +1,4 @@
-import { BookModel } from './book.model';
+import { BookModel } from './book.repository';
 import { Prisma } from '@prisma/client';
 
 export class BookService {

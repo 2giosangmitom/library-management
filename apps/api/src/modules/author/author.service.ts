@@ -1,4 +1,4 @@
-import { AuthorModel } from './author.model';
+import { AuthorModel } from './author.repository';
 import { Prisma } from '@prisma/client';
 
 export class AuthorService {

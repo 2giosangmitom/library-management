@@ -1,16 +1,16 @@
-export class CategoryModel {
-  private static instance: CategoryModel;
+export class CategoryRepository {
+  private static instance: CategoryRepository;
   private fastify: FastifyTypeBox;
 
   private constructor(fastify: FastifyTypeBox) {
     this.fastify = fastify;
   }
 
-  public static getInstance(fastify: FastifyTypeBox): CategoryModel {
-    if (!CategoryModel.instance) {
-      CategoryModel.instance = new CategoryModel(fastify);
+  public static getInstance(fastify: FastifyTypeBox): CategoryRepository {
+    if (!CategoryRepository.instance) {
+      CategoryRepository.instance = new CategoryRepository(fastify);
     }
-    return CategoryModel.instance;
+    return CategoryRepository.instance;
   }
 
   /**

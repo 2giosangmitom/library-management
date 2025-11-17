@@ -54,8 +54,6 @@ describe('auth hooks', () => {
     app.get('/verify-refresh-token', { preHandler: [verifyRefreshTokenHook] }, async () => {
       return { message: 'Refresh token valid' };
     });
-
-    await app.ready();
   });
 
   describe('authHook', () => {

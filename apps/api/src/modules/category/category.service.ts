@@ -1,17 +1,17 @@
-import { CategoryModel } from './category.model';
+import { CategoryRepository } from './category.repository';
 import { Prisma } from '@prisma/client';
 
 export class CategoryService {
   private static instance: CategoryService;
-  private categoryModel: CategoryModel;
+  private categoryModel: CategoryRepository;
   private fastify: FastifyTypeBox;
 
-  private constructor(fastify: FastifyTypeBox, categoryModel: CategoryModel) {
+  private constructor(fastify: FastifyTypeBox, categoryModel: CategoryRepository) {
     this.fastify = fastify;
     this.categoryModel = categoryModel;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, categoryModel = CategoryModel.getInstance(fastify)) {
+  public static getInstance(fastify: FastifyTypeBox, categoryModel = CategoryRepository.getInstance(fastify)) {
     if (!CategoryService.instance) {
       CategoryService.instance = new CategoryService(fastify, categoryModel);
     }

@@ -1,15 +1,15 @@
 import { generateHash, verifyHash } from '@utils/hash';
-import { UserModel } from '@modules/user/user.model';
+import { UserRepository } from '@modules/user/user.repository';
 
 export class AuthService {
   private static instance: AuthService | null = null;
-  private userModel: UserModel;
+  private userModel: UserRepository;
 
-  private constructor(userModel: UserModel) {
+  private constructor(userModel: UserRepository) {
     this.userModel = userModel;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, userModel = UserModel.getInstance(fastify)) {
+  public static getInstance(fastify: FastifyTypeBox, userModel = UserRepository.getInstance(fastify)) {
     if (!AuthService.instance) {
       AuthService.instance = new AuthService(userModel);
     }

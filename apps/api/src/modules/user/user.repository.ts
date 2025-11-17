@@ -1,16 +1,16 @@
-export class UserModel {
+export class UserRepository {
   private fastify: FastifyTypeBox;
-  private static instance: UserModel | null = null;
+  private static instance: UserRepository | null = null;
 
   private constructor(fastify: FastifyTypeBox) {
     this.fastify = fastify;
   }
 
   public static getInstance(fastify: FastifyTypeBox) {
-    if (!UserModel.instance) {
-      UserModel.instance = new UserModel(fastify);
+    if (!UserRepository.instance) {
+      UserRepository.instance = new UserRepository(fastify);
     }
-    return UserModel.instance;
+    return UserRepository.instance;
   }
 
   /**
@@ -24,6 +24,7 @@ export class UserModel {
         user_id: true,
         email: true,
         name: true,
+        role: true,
         created_at: true
       },
       data
