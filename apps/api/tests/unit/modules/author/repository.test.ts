@@ -49,7 +49,8 @@ describe('AuthorRepository', () => {
           date_of_birth: true,
           date_of_death: true,
           slug: true,
-          created_at: true
+          created_at: true,
+          updated_at: true
         },
         data: authorData
       });
@@ -161,6 +162,7 @@ describe('AuthorRepository', () => {
           date_of_birth: true,
           date_of_death: true,
           slug: true,
+          created_at: true,
           updated_at: true
         },
         data: updateData

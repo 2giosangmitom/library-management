@@ -37,7 +37,8 @@ export class AuthorRepository {
         date_of_birth: true,
         date_of_death: true,
         slug: true,
-        created_at: true
+        created_at: true,
+        updated_at: true
       },
       data
     });
@@ -120,8 +121,10 @@ export class AuthorRepository {
    */
   public async deleteAuthor(author_id: string) {
     return this.fastify.prisma.author.delete({
-      select: { name: true },
-      where: { author_id }
+      where: { author_id },
+      select: {
+        name: true
+      }
     });
   }
 
@@ -153,6 +156,7 @@ export class AuthorRepository {
         date_of_birth: true,
         date_of_death: true,
         slug: true,
+        created_at: true,
         updated_at: true
       },
       data
