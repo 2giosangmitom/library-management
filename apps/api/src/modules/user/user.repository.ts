@@ -27,7 +27,8 @@ export class UserRepository {
         email: true,
         name: true,
         role: true,
-        created_at: true
+        created_at: true,
+        updated_at: true
       },
       data
     });
@@ -40,9 +41,7 @@ export class UserRepository {
    */
   public async findUserByEmail(email: string) {
     return this.fastify.prisma.user.findUnique({
-      where: {
-        email
-      },
+      where: { email },
       select: {
         user_id: true,
         name: true,
@@ -61,9 +60,7 @@ export class UserRepository {
    */
   public async findUserById(user_id: string) {
     return this.fastify.prisma.user.findUnique({
-      where: {
-        user_id
-      },
+      where: { user_id },
       select: {
         user_id: true,
         name: true,
@@ -92,14 +89,13 @@ export class UserRepository {
     }
   ) {
     return this.fastify.prisma.user.update({
-      where: {
-        user_id
-      },
+      where: { user_id },
       select: {
         user_id: true,
         email: true,
         name: true,
         role: true,
+        created_at: true,
         updated_at: true
       },
       data
@@ -113,9 +109,7 @@ export class UserRepository {
    */
   public async getUserCredentialsByEmail(email: string) {
     return this.fastify.prisma.user.findUnique({
-      where: {
-        email
-      },
+      where: { email },
       select: {
         password_hash: true,
         salt: true
@@ -130,11 +124,10 @@ export class UserRepository {
    * @returns Total count and list of users
    */
   public async findAllUsers(page: number, pageSize: number) {
-    const skip = (page - 1) * pageSize;
     return this.fastify.prisma.$transaction([
       this.fastify.prisma.user.count(),
       this.fastify.prisma.user.findMany({
-        skip,
+        skip: (page - 1) * pageSize,
         take: pageSize,
         select: {
           user_id: true,

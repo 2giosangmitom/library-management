@@ -42,7 +42,8 @@ describe('UserRepository', async () => {
           email: true,
           name: true,
           role: true,
-          created_at: true
+          created_at: true,
+          updated_at: true
         },
         data: { ...data }
       });
@@ -218,6 +219,7 @@ describe('UserRepository', async () => {
           name: true,
           email: true,
           role: true,
+          created_at: true,
           updated_at: true
         },
         where: {
