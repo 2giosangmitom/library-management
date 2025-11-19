@@ -1,4 +1,5 @@
 import { BookCondition } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 
 export class BookCloneRepository {
   private static instance: BookCloneRepository | null = null;
@@ -72,13 +73,37 @@ export class BookCloneRepository {
    * @param pageSize The number of items per page.
    * @returns An array of book clone records.
    */
-  public async findAllBookClones(page: number, pageSize: number) {
-    return this.fastify.prisma.$transaction([
-      this.fastify.prisma.book_Clone.count(),
+  public async findAllBookClones(
+    page: number,
+    pageSize: number,
+    where?: Partial<{
+      book_id: string;
+      location_id: string;
+      is_available: boolean;
+      barcode: string;
+      condition: BookCondition;
+    }>,
+    orderBy?: Partial<{
+      book_clone_id: Prisma.SortOrder;
+      book_id: Prisma.SortOrder;
+      location_id: Prisma.SortOrder;
+      is_available: Prisma.SortOrder;
+      barcode: Prisma.SortOrder;
+      condition: Prisma.SortOrder;
+      created_at: Prisma.SortOrder;
+      updated_at: Prisma.SortOrder;
+    }>
+  ) {
+    const [total, bookClones] = await this.fastify.prisma.$transaction([
+      this.fastify.prisma.book_Clone.count({ where }),
       this.fastify.prisma.book_Clone.findMany({
         skip: (page - 1) * pageSize,
-        take: pageSize
+        take: pageSize,
+        where,
+        orderBy
       })
     ]);
+
+    return { total, data: bookClones };
   }
 }

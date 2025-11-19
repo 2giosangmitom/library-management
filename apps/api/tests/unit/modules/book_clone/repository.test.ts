@@ -191,6 +191,7 @@ describe('BookCloneRepository', () => {
       const page = 4;
       const pageSize = 10;
 
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([0, []]);
       await bookCloneRepository.findAllBookClones(page, pageSize);
 
       expect(app.prisma.book_Clone.findMany).toHaveBeenCalledWith(
@@ -205,6 +206,7 @@ describe('BookCloneRepository', () => {
       const page = 2;
       const pageSize = 5;
 
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([0, []]);
       await bookCloneRepository.findAllBookClones(page, pageSize);
 
       expect(app.prisma.book_Clone.count).toHaveBeenCalled();
@@ -228,7 +230,10 @@ describe('BookCloneRepository', () => {
 
       vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([mockCount, mockBookClones]);
 
-      await expect(bookCloneRepository.findAllBookClones(page, pageSize)).resolves.toEqual([mockCount, mockBookClones]);
+      await expect(bookCloneRepository.findAllBookClones(page, pageSize)).resolves.toEqual({
+        total: mockCount,
+        data: mockBookClones
+      });
     });
 
     it('should throw an error if prisma.book_Clone.findMany fails', async () => {
@@ -243,6 +248,45 @@ describe('BookCloneRepository', () => {
 
       await expect(bookCloneRepository.findAllBookClones(page, pageSize)).rejects.toThrow(
         Prisma.PrismaClientKnownRequestError
+      );
+    });
+
+    it("should pass 'where' parameter correctly", async () => {
+      const page = 1;
+      const pageSize = 10;
+      const where = {
+        is_available: true
+      };
+
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([0, []]);
+      await bookCloneRepository.findAllBookClones(page, pageSize, where);
+
+      expect(app.prisma.book_Clone.count).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where
+        })
+      );
+      expect(app.prisma.book_Clone.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where
+        })
+      );
+    });
+
+    it("should pass 'orderBy' parameter correctly", async () => {
+      const page = 1;
+      const pageSize = 10;
+      const orderBy = {
+        created_at: 'desc'
+      } as const;
+
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([0, []]);
+      await bookCloneRepository.findAllBookClones(page, pageSize, undefined, orderBy);
+
+      expect(app.prisma.book_Clone.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy
+        })
       );
     });
   });
