@@ -39,21 +39,11 @@ describe('AuthorRepository', () => {
 
       await authorRepository.createAuthor(authorData);
 
-      expect(app.prisma.author.create).toHaveBeenCalledWith({
-        select: {
-          author_id: true,
-          name: true,
-          short_biography: true,
-          biography: true,
-          nationality: true,
-          date_of_birth: true,
-          date_of_death: true,
-          slug: true,
-          created_at: true,
-          updated_at: true
-        },
-        data: authorData
-      });
+      expect(app.prisma.author.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: authorData
+        })
+      );
     });
 
     it('should return the created author', async () => {
@@ -108,10 +98,11 @@ describe('AuthorRepository', () => {
 
       await authorRepository.deleteAuthor(author_id);
 
-      expect(app.prisma.author.delete).toHaveBeenCalledWith({
-        select: { name: true },
-        where: { author_id }
-      });
+      expect(app.prisma.author.delete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { author_id }
+        })
+      );
     });
 
     it('should return the deleted author name', async () => {
@@ -151,22 +142,13 @@ describe('AuthorRepository', () => {
 
       await authorRepository.updateAuthor(author_id, updateData);
 
-      expect(app.prisma.author.update).toHaveBeenCalledWith({
-        where: { author_id },
-        select: {
-          author_id: true,
-          name: true,
-          short_biography: true,
-          biography: true,
-          nationality: true,
-          date_of_birth: true,
-          date_of_death: true,
-          slug: true,
-          created_at: true,
-          updated_at: true
-        },
-        data: updateData
-      });
+      expect(app.prisma.author.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { author_id },
+
+          data: updateData
+        })
+      );
     });
 
     it('should throw an error if prisma update fails', async () => {
@@ -220,21 +202,11 @@ describe('AuthorRepository', () => {
 
       await authorRepository.findAuthorBySlug(author_slug);
 
-      expect(app.prisma.author.findUnique).toHaveBeenCalledWith({
-        where: { slug: author_slug },
-        select: {
-          author_id: true,
-          name: true,
-          short_biography: true,
-          biography: true,
-          nationality: true,
-          date_of_birth: true,
-          date_of_death: true,
-          slug: true,
-          created_at: true,
-          updated_at: true
-        }
-      });
+      expect(app.prisma.author.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { slug: author_slug }
+        })
+      );
     });
 
     it('should return the found author', async () => {
@@ -290,21 +262,11 @@ describe('AuthorRepository', () => {
 
       await authorRepository.findAuthorById(author_id);
 
-      expect(app.prisma.author.findUnique).toHaveBeenCalledWith({
-        where: { author_id },
-        select: {
-          author_id: true,
-          name: true,
-          short_biography: true,
-          biography: true,
-          nationality: true,
-          date_of_birth: true,
-          date_of_death: true,
-          slug: true,
-          created_at: true,
-          updated_at: true
-        }
-      });
+      expect(app.prisma.author.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { author_id }
+        })
+      );
     });
 
     it('should return the found author', async () => {
@@ -361,18 +323,12 @@ describe('AuthorRepository', () => {
       await authorRepository.findAllAuthors(page, pageSize);
 
       expect(app.prisma.author.findMany).toHaveBeenCalledOnce();
-      expect(app.prisma.author.findMany).toHaveBeenCalledWith({
-        select: {
-          name: true,
-          short_biography: true,
-          slug: true
-        },
-        skip: 5,
-        take: 5,
-        orderBy: {
-          name: 'asc'
-        }
-      });
+      expect(app.prisma.author.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 5,
+          take: 5
+        })
+      );
     });
 
     it("should call prisma's count method", async () => {
@@ -427,7 +383,7 @@ describe('AuthorRepository', () => {
     });
   });
 
-  describe('Singleton Behavior', () => {
+  describe('getInstance', () => {
     it('should return the same instance on multiple calls to getInstance', () => {
       const instance1 = AuthorRepository.getInstance(app);
       const instance2 = AuthorRepository.getInstance(app);

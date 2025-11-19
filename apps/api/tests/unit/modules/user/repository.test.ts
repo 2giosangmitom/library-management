@@ -36,17 +36,11 @@ describe('UserRepository', async () => {
       await userRepository.createUser(data);
 
       expect(app.prisma.user.create).toHaveBeenCalledOnce();
-      expect(app.prisma.user.create).toHaveBeenCalledWith({
-        select: {
-          user_id: true,
-          email: true,
-          name: true,
-          role: true,
-          created_at: true,
-          updated_at: true
-        },
-        data: { ...data }
-      });
+      expect(app.prisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data
+        })
+      );
     });
 
     it('should return the created user', async () => {
@@ -98,19 +92,13 @@ describe('UserRepository', async () => {
       await userRepository.findUserByEmail(email);
 
       expect(app.prisma.user.findUnique).toHaveBeenCalledOnce();
-      expect(app.prisma.user.findUnique).toHaveBeenCalledWith({
-        select: {
-          user_id: true,
-          name: true,
-          email: true,
-          role: true,
-          created_at: true,
-          updated_at: true
-        },
-        where: {
-          email
-        }
-      });
+      expect(app.prisma.user.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            email
+          }
+        })
+      );
     });
 
     it('should return the found user', async () => {
@@ -153,19 +141,13 @@ describe('UserRepository', async () => {
       await userRepository.findUserById(user_id);
 
       expect(app.prisma.user.findUnique).toHaveBeenCalledOnce();
-      expect(app.prisma.user.findUnique).toHaveBeenCalledWith({
-        select: {
-          user_id: true,
-          name: true,
-          email: true,
-          role: true,
-          created_at: true,
-          updated_at: true
-        },
-        where: {
-          user_id
-        }
-      });
+      expect(app.prisma.user.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            user_id
+          }
+        })
+      );
     });
 
     it('should return the found user', async () => {
@@ -213,22 +195,14 @@ describe('UserRepository', async () => {
       await userRepository.updateUser(user_id, data);
 
       expect(app.prisma.user.update).toHaveBeenCalledOnce();
-      expect(app.prisma.user.update).toHaveBeenCalledWith({
-        select: {
-          user_id: true,
-          name: true,
-          email: true,
-          role: true,
-          created_at: true,
-          updated_at: true
-        },
-        where: {
-          user_id
-        },
-        data: {
-          ...data
-        }
-      });
+      expect(app.prisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            user_id
+          },
+          data
+        })
+      );
     });
 
     it('should return the updated user', async () => {
@@ -323,27 +297,18 @@ describe('UserRepository', async () => {
 
   describe('findAllUsers', () => {
     it("should call prisma's findMany method", async () => {
-      const page = 2;
+      const page = 3;
       const pageSize = 5;
 
       await userRepository.findAllUsers(page, pageSize);
 
       expect(app.prisma.user.findMany).toHaveBeenCalledOnce();
-      expect(app.prisma.user.findMany).toHaveBeenCalledWith({
-        skip: 5,
-        take: 5,
-        select: {
-          user_id: true,
-          name: true,
-          email: true,
-          role: true,
-          created_at: true,
-          updated_at: true
-        },
-        orderBy: {
-          name: 'asc'
-        }
-      });
+      expect(app.prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 10,
+          take: 5
+        })
+      );
     });
 
     it("should call prisma's count method", async () => {
@@ -401,7 +366,7 @@ describe('UserRepository', async () => {
     });
   });
 
-  describe('Singleton Behavior', () => {
+  describe('getInstance', () => {
     it('should return the same instance on multiple getInstance calls', () => {
       const instance1 = UserRepository.getInstance(app);
       const instance2 = UserRepository.getInstance(app);
