@@ -201,7 +201,7 @@ describe('BookCloneRepository', () => {
       );
     });
 
-    it("should call prisma.book_Clone.count to get total count", async () => {
+    it('should call prisma.book_Clone.count to get total count', async () => {
       const page = 2;
       const pageSize = 5;
 
@@ -228,10 +228,7 @@ describe('BookCloneRepository', () => {
 
       vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([mockCount, mockBookClones]);
 
-      await expect(bookCloneRepository.findAllBookClones(page, pageSize)).resolves.toEqual([
-        mockCount,
-        mockBookClones
-      ]);
+      await expect(bookCloneRepository.findAllBookClones(page, pageSize)).resolves.toEqual([mockCount, mockBookClones]);
     });
 
     it('should throw an error if prisma.book_Clone.findMany fails', async () => {
