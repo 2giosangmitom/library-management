@@ -14,7 +14,7 @@
 
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+    "exactOptionalPropertyTypes": false,
 
     // Recommended Options
     "strict": true,
@@ -24,6 +24,7 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
+    "strictNullChecks": true,
     "skipLibCheck": true,
     "paths": {
       "@config/*": ["src/config/*"],
