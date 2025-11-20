@@ -3,7 +3,7 @@ import { fastifyAutoload } from '@fastify/autoload';
 import { type TypeBoxTypeProvider, TypeBoxValidatorCompiler } from '@fastify/type-provider-typebox';
 import ConfigService from './config/configService.js';
 
-async function buildApp() {
+export async function buildApp() {
   const app = fastify({
     logger: {
       level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
@@ -40,5 +40,3 @@ async function buildApp() {
 
   return app;
 }
-
-export { buildApp };
