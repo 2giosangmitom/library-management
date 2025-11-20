@@ -6,6 +6,22 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    reporters: 'tree'
+    reporters: 'tree',
+    projects: [
+      {
+        extends: true,
+        test: {
+          name: 'Unit',
+          include: ['tests/unit/**/*.test.ts']
+        }
+      },
+      {
+        extends: true,
+        test: {
+          name: 'Integration',
+          include: ['tests/integration/**/*.test.ts']
+        }
+      }
+    ]
   }
 });
