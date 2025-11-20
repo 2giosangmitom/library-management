@@ -1,5 +1,5 @@
 import { fastifyEnv } from '@fastify/env';
-import { envSchema, envType } from './env-schema';
+import { envSchema, type envType } from './envSchema.js';
 
 export default class ConfigService {
   private fastify: FastifyTypeBox;

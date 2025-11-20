@@ -1,4 +1,4 @@
-import { FastifyRequest } from 'fastify';
+import { type FastifyRequest } from 'fastify';
 
 /**
  * Authentication hook to verify JWT tokens.
@@ -16,8 +16,7 @@ export async function verifyRefreshTokenHook(req: FastifyRequest) {
   try {
     await req.jwtVerify({ onlyCookie: true });
   } catch (error) {
-    if (error instanceof Error) throw req.server.httpErrors.unauthorized(error.message);
-    throw req.server.httpErrors.unauthorized('Invalid refresh token');
+    throw req.server.httpErrors.unauthorized(error instanceof Error ? error.message : 'Invalid refresh token');
   }
 }
 

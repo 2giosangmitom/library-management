@@ -1,7 +1,7 @@
 import { fastify } from 'fastify';
 import { fastifyAutoload } from '@fastify/autoload';
-import { TypeBoxTypeProvider, TypeBoxValidatorCompiler } from '@fastify/type-provider-typebox';
-import ConfigService from './config';
+import { type TypeBoxTypeProvider, TypeBoxValidatorCompiler } from '@fastify/type-provider-typebox';
+import ConfigService from './config/configService.js';
 
 async function buildApp() {
   const app = fastify({
@@ -32,6 +32,7 @@ async function buildApp() {
     indexPattern: /.*.routes.(ts|js)/,
     autoHooks: true,
     autoHooksPattern: /.*.hooks.(ts|js)/,
+    cascadeHooks: true,
     options: {
       prefix: '/api'
     }

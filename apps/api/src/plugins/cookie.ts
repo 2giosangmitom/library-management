@@ -1,6 +1,6 @@
 import fp from 'fastify-plugin';
 import { fastifyCookie } from '@fastify/cookie';
-import { envType } from '@config/env-schema';
+import { type envType } from '@config/envSchema';
 
 export default fp(
   async (fastify: FastifyTypeBox, opts: envType) => {

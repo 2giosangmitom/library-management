@@ -1,4 +1,4 @@
-import { envType } from '@config/env-schema';
+import { type envType } from '@config/envSchema';
 import { fastifyJwt } from '@fastify/jwt';
 import { JWTUtils } from '@utils/jwt';
 import fp from 'fastify-plugin';

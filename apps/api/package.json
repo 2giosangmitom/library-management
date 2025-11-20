@@ -4,14 +4,11 @@
   "description": "API service for BookWise application",
   "scripts": {
     "dev": "NODE_ENV=development tsx --env-file .env --watch src/server.ts | pino-pretty",
-    "build": "esbuild 'src/**/*.ts' --outdir=dist --platform=node --format=cjs --minify && tsc-alias -p tsconfig.json",
-    "typecheck": "tsc",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:migrate:reset": "prisma migrate reset --force",
-    "prisma:migrate:test": "dotenv -e .env.test -- prisma migrate dev",
-    "prisma:migrate:reset:test": "dotenv -e .env.test -- prisma migrate reset --force",
-    "pretest:integration": "pnpm prisma:migrate:reset:test",
+    "build": "esbuild 'src/**/*.ts' --outdir=dist --bundle --minify --platform=node --format=cjs --packages=external && tsc-alias -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "dotenv -e .env -- prisma generate",
+    "prisma:migrate": "dotenv -e .env -- prisma migrate dev",
+    "prisma:migrate:reset": "dotenv -e .env -- prisma migrate reset --force",
     "test:integration": "dotenv -e .env.test -- vitest run tests/integration",
     "test:unit": "vitest run tests/unit",
     "test:coverage": "dotenv -e .env.test -- vitest run --coverage"
@@ -28,25 +25,28 @@
     "@fastify/swagger": "^9.6.1",
     "@fastify/swagger-ui": "^5.2.3",
     "@fastify/type-provider-typebox": "^6.1.0",
-    "@prisma/client": "^6.19.0",
+    "@prisma/adapter-pg": "^7.0.0",
+    "@prisma/client": "^7.0.0",
     "close-with-grace": "^2.3.0",
     "fastify": "^5.6.2",
     "fastify-plugin": "^5.1.0",
     "nanoid": "^5.1.6",
-    "typebox": "^1.0.53",
-    "typescript": "~5.9.3"
+    "pg": "^8.16.3",
+    "typebox": "^1.0.54",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.1.0",
     "@types/node": "^24.10.1",
-    "@vitest/coverage-v8": "^4.0.9",
+    "@types/pg": "^8.15.6",
+    "@vitest/coverage-v8": "^4.0.10",
     "dotenv-cli": "^11.0.0",
     "esbuild": "^0.27.0",
     "pino-pretty": "^13.1.2",
-    "prisma": "^6.19.0",
+    "prisma": "^7.0.0",
     "tsc-alias": "^1.8.16",
     "tsx": "^4.20.6",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^4.0.9"
+    "vitest": "^4.0.10"
   }
 }

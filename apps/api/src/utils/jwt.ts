@@ -1,4 +1,4 @@
-import { FastifyRedis } from '@fastify/redis';
+import { type FastifyRedis } from '@fastify/redis';
 
 type TokenType = 'access_token' | 'refresh_token';
 

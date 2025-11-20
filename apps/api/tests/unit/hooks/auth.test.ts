@@ -1,11 +1,11 @@
-import { fastify } from 'fastify';
+import { fastify, FastifyRequest } from 'fastify';
 import fp from 'fastify-plugin';
-import { envType } from '@config/env-schema';
+import { type envType } from '@config/envSchema';
 import jwt from '@plugins/jwt';
 import cookie from '@plugins/cookie';
 import auth from '@plugins/auth';
 import { authHook, isLibrarianHook, isAdminHook, isAdminOrLibrarianHook, verifyRefreshTokenHook } from '@hooks/auth';
-import { FastifyRedis } from '@fastify/redis';
+import { type FastifyRedis } from '@fastify/redis';
 import sensible from '@plugins/sensible';
 
 describe('auth hooks', () => {
@@ -307,6 +307,38 @@ describe('auth hooks', () => {
           "statusCode": 401,
         }
       `);
+    });
+
+    it('should throw an error if the token is malformed', async () => {
+      const response = await app.inject({
+        path: '/verify-refresh-token',
+        cookies: {
+          refreshToken: app.signCookie('valid-token-but-we-force-error')
+        }
+      });
+
+      expect(response.statusCode).toBe(401);
+      expect(response.json()).toMatchInlineSnapshot(`
+        {
+          "error": "Unauthorized",
+          "message": "Authorization token is invalid: The token is malformed.",
+          "statusCode": 401,
+        }
+      `);
+    });
+
+    it("should throw the default error message if the error isn't an instance of Error", async () => {
+      const mockReq = {
+        jwtVerify: vi.fn().mockRejectedValue('some string error'),
+        server: {
+          httpErrors: app.httpErrors
+        }
+      } as unknown as FastifyRequest;
+
+      await expect(verifyRefreshTokenHook(mockReq)).rejects.toMatchObject({
+        statusCode: 401,
+        message: 'Invalid refresh token'
+      });
     });
   });
 });

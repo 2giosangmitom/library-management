@@ -1,22 +1,12 @@
 {
   "compilerOptions": {
-    // File Layout
     "baseUrl": ".",
     "rootDir": ".",
     "outDir": "dist",
-
-    // Environment Settings
     "module": "nodenext",
     "target": "esnext",
     "lib": ["esnext"],
     "types": ["node", "vitest/globals"],
-    "noEmit": true,
-
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": false,
-
-    // Recommended Options
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "nodenext",
@@ -24,7 +14,7 @@
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "strictNullChecks": true,
+    "useUnknownInCatchVariables": true,
     "skipLibCheck": true,
     "paths": {
       "@config/*": ["src/config/*"],

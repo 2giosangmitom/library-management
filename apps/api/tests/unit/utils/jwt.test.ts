@@ -1,4 +1,4 @@
-import { FastifyRedis } from '@fastify/redis';
+import { type FastifyRedis } from '@fastify/redis';
 import { JWTUtils } from '@utils/jwt';
 
 describe('RedisTokenUtils', () => {
