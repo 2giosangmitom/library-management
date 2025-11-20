@@ -1,0 +1,27 @@
+import { Type } from 'typebox';
+import { FastifySchema } from 'fastify';
+import { nameMinLength, nameMaxLength, passwordMaxLength, passwordMinLength } from '@src/constants';
+import { Role } from '@src/generated/prisma/enums';
+
+export const SignUpSchema = {
+  summary: 'Create a new user account',
+  description: 'Creates a new user account with the provided email, password, and full name.',
+  body: Type.Object({
+    email: Type.String({ format: 'email' }),
+    password: Type.String({ minLength: passwordMinLength, maxLength: passwordMaxLength }),
+    fullName: Type.String({ minLength: nameMinLength, maxLength: nameMaxLength })
+  }),
+  response: {
+    201: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        user_id: Type.String({ format: 'uuid' }),
+        email: Type.String({ format: 'email' }),
+        name: Type.String({ minLength: nameMinLength, maxLength: nameMaxLength }),
+        role: Type.Enum(Role),
+        created_at: Type.String({ format: 'date-time' }),
+        updated_at: Type.String({ format: 'date-time' })
+      })
+    })
+  }
+} as const satisfies FastifySchema;
