@@ -36,6 +36,7 @@ erDiagram
     DATE date_of_death "NULLABLE"
     VARCHAR(100) nationality "NULLABLE"
     VARCHAR(50) slug "UNIQUE"
+    VARCHAR(255) image_url "NULLABLE"
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
@@ -45,6 +46,7 @@ erDiagram
     VARCHAR(100) name
     VARCHAR(100) website
     VARCHAR(50) slug "UNIQUE"
+    VARCHAR(255) image_url "NULLABLE"
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
@@ -54,6 +56,9 @@ erDiagram
     UUID publisher_id FK "NULLABLE"
     VARCHAR(255) title
     TEXT description
+    VARCHAR(255) image_url "NULLABLE"
+    VARCHAR(20) isbn "UNIQUE"
+    DATE published_at
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }

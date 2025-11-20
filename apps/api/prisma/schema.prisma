@@ -3,8 +3,8 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
   moduleFormat = "cjs"
 }
 
@@ -47,6 +47,7 @@ model Author {
   date_of_death   DateTime?
   nationality     String?   @db.VarChar(100)
   slug            String    @unique @db.VarChar(50)
+  image_url       String?   @db.VarChar(255)
   created_at      DateTime  @default(now())
   updated_at      DateTime  @updatedAt
 
@@ -58,6 +59,7 @@ model Publisher {
   name         String   @db.VarChar(100)
   website      String   @db.VarChar(100)
   slug         String   @unique @db.VarChar(50)
+  image_url    String?  @db.VarChar(255)
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
@@ -69,6 +71,9 @@ model Book {
   publisher_id String?  @db.Uuid
   title        String   @db.VarChar(255)
   description  String   @db.Text
+  image_url    String?  @db.VarChar(255)
+  isbn         String   @unique @db.VarChar(20)
+  published_at DateTime @db.Date
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt
 
