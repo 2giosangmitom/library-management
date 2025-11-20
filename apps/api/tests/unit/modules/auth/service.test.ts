@@ -1,0 +1,110 @@
+import AuthService from '@modules/auth/auth.service';
+import { Role } from '@src/generated/prisma/enums';
+import { faker } from '@faker-js/faker';
+import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
+import { HttpError } from '@fastify/sensible';
+import * as hashUtils from '@utils/hash';
+
+describe('AuthService', async () => {
+  const app = await buildMockFastify();
+  const authService = AuthService.getInstance(app);
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  describe('createUserAccount', () => {
+    it('should throw conflict error if email already exists', async () => {
+      // Mock existing user
+      vi.spyOn(app.prisma.user, 'findUnique').mockResolvedValueOnce({
+        user_id: faker.string.uuid(),
+        email: faker.internet.email(),
+        password_hash: 'hashedpassword',
+        salt: 'salt',
+        role: Role.MEMBER,
+        name: faker.person.fullName(),
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      });
+
+      await expect(
+        authService.createUserAccount({
+          email: faker.internet.email(),
+          password: faker.internet.password(),
+          fullName: faker.person.fullName(),
+          role: Role.MEMBER
+        })
+      ).rejects.toThrow(HttpError);
+      expect(app.httpErrors.conflict).toHaveBeenCalledWith('Email is already in use');
+    });
+
+    it('should call prisma.user.create with correct data', async () => {
+      const email = faker.internet.email();
+      const password = faker.internet.password();
+      const fullName = faker.person.fullName();
+      const role = Role.MEMBER;
+
+      // Mock no existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(null);
+
+      await authService.createUserAccount({
+        email,
+        password,
+        fullName,
+        role
+      });
+
+      expect(app.prisma.user.create).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            email,
+            role,
+            name: fullName
+          })
+        })
+      );
+    });
+
+    it("should hash the user's password before storing", async () => {
+      const email = faker.internet.email();
+      const password = faker.internet.password();
+      const fullName = faker.person.fullName();
+      const role = Role.MEMBER;
+
+      // Mock no existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(null);
+
+      // Spy on hash generation
+      const mockHashResult = {
+        hash: faker.string.alphanumeric(64),
+        salt: faker.string.alphanumeric(16)
+      };
+      vi.spyOn(hashUtils, 'generateHash').mockResolvedValueOnce(mockHashResult);
+
+      await authService.createUserAccount({
+        email,
+        password,
+        fullName,
+        role
+      });
+
+      expect(hashUtils.generateHash).toHaveBeenCalledExactlyOnceWith(password);
+      expect(app.prisma.user.create).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            password_hash: mockHashResult.hash,
+            salt: mockHashResult.salt
+          })
+        })
+      );
+    });
+  });
+
+  describe('getInstance', () => {
+    it('should return the same instance on multiple calls', () => {
+      const instance1 = AuthService.getInstance(app);
+      const instance2 = AuthService.getInstance(app);
+      expect(instance1).toBe(instance2);
+    });
+  });
+});
