@@ -1,6 +1,6 @@
 import { type FastifyRedis } from '@fastify/redis';
 
-type TokenType = 'access_token' | 'refresh_token';
+export type TokenType = 'access_token' | 'refresh_token';
 
 /**
  * Utilities for managing JWT tokens in Redis.
