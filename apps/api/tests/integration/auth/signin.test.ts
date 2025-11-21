@@ -110,4 +110,19 @@ describe('POST /api/auth/signin', async () => {
       }
     });
   });
+
+  it('should set refresh token cookie on successful signin', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/auth/signin',
+      payload: {
+        email: users[1].email,
+        password: users[1].password
+      }
+    });
+
+    expect(response.statusCode).toBe(200);
+    const refreshTokenCookie = response.cookies.find((cookie) => cookie.name === 'refreshToken');
+    expect(refreshTokenCookie).toBeDefined();
+  });
 });
