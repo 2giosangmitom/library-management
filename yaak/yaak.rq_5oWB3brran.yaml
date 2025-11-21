@@ -1,0 +1,22 @@
+type: http_request
+model: http_request
+id: rq_5oWB3brran
+createdAt: 2025-11-21T13:39:49.407285401
+updatedAt: 2025-11-21T13:44:32.117631358
+workspaceId: wk_nUPATyuKk9
+folderId: null
+authentication: {}
+authenticationType: null
+body: {}
+bodyType: null
+description: ''
+headers:
+- enabled: true
+  name: ''
+  value: ''
+  id: 7Cvw8WNyTB
+method: POST
+name: ''
+sortPriority: 2000.0
+url: http://localhost:3000/api/auth/refresh-token
+urlParameters: []

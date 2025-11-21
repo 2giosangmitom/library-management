@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_oXiCC4YvpV
 createdAt: 2025-11-21T01:29:47.695000666
-updatedAt: 2025-11-21T02:22:33.064591612
+updatedAt: 2025-11-21T13:43:21.894273287
 workspaceId: wk_nUPATyuKk9
 folderId: null
 authentication: {}
@@ -22,6 +22,6 @@ headers:
   id: BKu45vcgqN
 method: POST
 name: ''
-sortPriority: -1763622763073.0
+sortPriority: 1000.0
 url: http://localhost:3000/api/auth/signin
 urlParameters: []

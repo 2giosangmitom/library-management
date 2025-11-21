@@ -2,12 +2,12 @@ type: workspace
 model: workspace
 id: wk_nUPATyuKk9
 createdAt: 2025-11-17T08:49:34.823367707
-updatedAt: 2025-11-17T08:49:34.823368368
+updatedAt: 2025-11-21T13:50:11.191807015
 authentication: {}
 authenticationType: null
 description: ''
 headers: []
-name: Yaak
+name: BookWise
 encryptionKeyChallenge: null
 settingValidateCertificates: true
 settingFollowRedirects: true
