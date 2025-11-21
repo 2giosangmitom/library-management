@@ -8,8 +8,10 @@ import redisPlugin from '@plugins/redis';
 import jwtPlugin from '@plugins/jwt';
 import sensible from '@plugins/sensible';
 import cookie from '@plugins/cookie';
+import auth from '@plugins/auth';
 
 import authRoutes from '@modules/auth/auth.routes';
+import authorRoutes from '@modules/author/author.routes';
 
 export async function build(): Promise<FastifyTypeBox> {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -22,6 +24,7 @@ export async function build(): Promise<FastifyTypeBox> {
   // Register plugins
   await app.register(prismaPlugin, config);
   await app.register(redisPlugin, config);
+  await app.register(auth);
   await app.register(sensible, config);
   await app.register(cookie, config);
   await app.register(jwtPlugin, config);
@@ -36,6 +39,13 @@ export async function build(): Promise<FastifyTypeBox> {
           instance.register(fp(authRoutes));
         },
         { prefix: '/auth' }
+      );
+
+      apiInstance.register(
+        (instance) => {
+          instance.register(fp(authorRoutes));
+        },
+        { prefix: '/author' }
       );
     },
     { prefix: '/api' }
