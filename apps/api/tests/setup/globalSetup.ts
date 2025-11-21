@@ -1,11 +1,6 @@
 import { execSync } from 'node:child_process';
 import { build } from '@tests/integration/helpers/build';
-
-export const users = Array.from({ length: 10 }, (_, i) => ({
-  email: `user${i}@example.com`,
-  password: `Password123!`,
-  fullName: `User ${i}`
-}));
+import { users } from '@tests/integration/helpers/build';
 
 export default async function globalSetup() {
   console.log('Setting up integration test database...');

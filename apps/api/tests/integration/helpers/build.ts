@@ -45,3 +45,9 @@ export async function build(): Promise<FastifyTypeBox> {
 
   return app;
 }
+
+export const users = Array.from({ length: 10 }, (_, i) => ({
+  email: `user${i}@example.com`,
+  password: `Password123!`,
+  fullName: `User ${i}`
+}));
