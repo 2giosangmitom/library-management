@@ -22,7 +22,9 @@ export const SignUpSchema = {
         created_at: Type.String({ format: 'date-time' }),
         updated_at: Type.String({ format: 'date-time' })
       })
-    })
+    }),
+    409: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;
 
@@ -39,7 +41,9 @@ export const SignInSchema = {
       data: Type.Object({
         access_token: Type.String()
       })
-    })
+    }),
+    401: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;
 
@@ -52,7 +56,9 @@ export const RefreshTokenSchema = {
       data: Type.Object({
         access_token: Type.String()
       })
-    })
+    }),
+    401: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
   }
 } satisfies FastifySchema;
 
@@ -62,6 +68,8 @@ export const SignOutSchema = {
   response: {
     200: Type.Object({
       message: Type.String()
-    })
+    }),
+    401: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;
