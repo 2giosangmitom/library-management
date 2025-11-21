@@ -14,7 +14,7 @@ erDiagram
     VARCHAR(100) email "UNIQUE"
     VARCHAR(255) password_hash
     VARCHAR(255) salt
-    ENUM role "MEMBER, LIBRARIAN"
+    ENUM role "ADMIN, MEMBER, LIBRARIAN"
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
@@ -22,7 +22,7 @@ erDiagram
   CATEGORY {
     UUID category_id PK
     VARCHAR(100) name
-    VARCHAR(50) slug
+    VARCHAR(50) slug "UNIQUE"
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
@@ -30,12 +30,23 @@ erDiagram
   AUTHOR {
     UUID author_id PK
     VARCHAR(100) name
-    TEXT biography
     VARCHAR(255) short_biography
+    TEXT biography
     DATE date_of_birth "NULLABLE"
     DATE date_of_death "NULLABLE"
-    VARCHAR(100) nationality
+    VARCHAR(100) nationality "NULLABLE"
     VARCHAR(50) slug "UNIQUE"
+    VARCHAR(255) image_url "NULLABLE"
+    TIMESTAMP created_at
+    TIMESTAMP updated_at
+  }
+
+  PUBLISHER {
+    UUID publisher_id PK
+    VARCHAR(100) name
+    VARCHAR(100) website
+    VARCHAR(50) slug "UNIQUE"
+    VARCHAR(255) image_url "NULLABLE"
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
@@ -45,8 +56,9 @@ erDiagram
     UUID publisher_id FK "NULLABLE"
     VARCHAR(255) title
     TEXT description
-    INT total_copies
-    INT available_copies
+    VARCHAR(255) image_url "NULLABLE"
+    VARCHAR(20) isbn "UNIQUE"
+    DATE published_at
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
@@ -61,10 +73,23 @@ erDiagram
     UUID category_id PK, FK
   }
 
-  PUBLISHER {
-    UUID publisher_id PK
-    VARCHAR(100) name
-    VARCHAR(100) website
+  LOCATION {
+    VARCHAR(50) location_id PK
+    VARCHAR(50) room
+    SMALLINT floor
+    SMALLINT shelf
+    SMALLINT row
+    TIMESTAMP created_at
+    TIMESTAMP updated_at
+  }
+
+  BOOK_CLONE {
+    UUID book_clone_id PK
+    UUID book_id FK
+    UUID location_id FK
+    BOOLEAN is_available
+    VARCHAR(50) barcode "UNIQUE"
+    ENUM condition "NEW, GOOD, WORN, DAMAGED, LOST"
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
@@ -72,7 +97,7 @@ erDiagram
   LOAN {
     UUID loan_id PK
     UUID user_id FK
-    UUID book_id FK
+    UUID book_clone_id FK
     DATE loan_date
     DATE due_date
     DATE return_date "NULLABLE"
@@ -85,19 +110,21 @@ erDiagram
     UUID rating_id PK
     UUID book_id FK
     UUID user_id FK
-    SMALLINT rate
+    SMALLINT rate "1-5"
     TEXT comment
     TIMESTAMP created_at
     TIMESTAMP updated_at
   }
 
   USER ||--o{ LOAN: "borrows"
-  BOOK ||--o{ LOAN: "is loaned in"
-  BOOK ||--o{ BOOK_AUTHOR: "has"
-  BOOK ||--o| PUBLISHER: "published by"
+  BOOK_CLONE ||--o| LOAN: "is loaned"
+  BOOK }o--o| PUBLISHER: "published by"
+  BOOK ||--o{ BOOK_AUTHOR: "has author"
   AUTHOR ||--o{ BOOK_AUTHOR: "writes"
-  BOOK ||--o{ BOOK_CATEGORY: "belongs to"
-  CATEGORY ||--o{ BOOK_CATEGORY: "includes"
-  USER ||--o{ RATING: "belongs to"
-  BOOK ||--o{ RATING: "rated for"
+  BOOK ||--o{ BOOK_CATEGORY: "categorized as"
+  CATEGORY ||--o{ BOOK_CATEGORY: "contains"
+  USER ||--o{ RATING: "rates"
+  BOOK ||--o{ RATING: "rated by"
+  BOOK ||--o{ BOOK_CLONE: "has copies"
+  LOCATION ||--o{ BOOK_CLONE: "placed at"
 ```

@@ -8,6 +8,7 @@ on:
       - master
 
 jobs:
+  # Check code formatting using prettier
   format:
     runs-on: ubuntu-latest
     steps:
@@ -20,6 +21,7 @@ jobs:
       - name: Check code formatting
         run: mise check-format
 
+  # Lint the codebase with ESLint
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -35,6 +37,7 @@ jobs:
       - name: Run linter
         run: pnpm lint
 
+  # Type check the codebase with TypeScript
   typecheck:
     runs-on: ubuntu-latest
     steps:
@@ -48,11 +51,12 @@ jobs:
         run: pnpm install
 
       - name: Generate Prisma client
-        run: pnpm --filter api prisma:generate
+        run: pnpm --filter api prisma:generate:test
 
       - name: Run type checking for API
         run: pnpm --filter api typecheck
 
+  # Run tests and collect coverage
   test:
     runs-on: ubuntu-latest
     steps:
@@ -69,10 +73,7 @@ jobs:
         run: mise compose-up-dev
 
       - name: Generate Prisma client
-        run: pnpm --filter api prisma:generate
-
-      - name: Run database migrations
-        run: pnpm --filter api prisma:migrate:test
+        run: pnpm --filter api prisma:generate:test
 
       - name: Run coverage report
         run: pnpm --filter api test:coverage

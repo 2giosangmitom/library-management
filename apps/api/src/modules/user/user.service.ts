@@ -1,92 +1,69 @@
-import { UserModel } from './user.model';
-import { Prisma } from '@prisma/client';
-import { generateHash, verifyHash } from '@utils/hash';
-import { RedisTokenUtils } from '@utils/redis';
+import { Prisma, Role } from '@src/generated/prisma/client';
 
-export class UserService {
+export default class UserService {
   private static instance: UserService;
-  private userModel: UserModel;
   private fastify: FastifyTypeBox;
-  private redisTokenUtils: RedisTokenUtils;
 
-  private constructor(fastify: FastifyTypeBox, userModel: UserModel) {
-    this.userModel = userModel;
-    this.redisTokenUtils = RedisTokenUtils.getInstance(fastify.redis);
+  private constructor(fastify: FastifyTypeBox) {
     this.fastify = fastify;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, userModel = UserModel.getInstance(fastify)): UserService {
+  public static getInstance(fastify: FastifyTypeBox): UserService {
     if (!UserService.instance) {
-      UserService.instance = new UserService(fastify, userModel);
+      UserService.instance = new UserService(fastify);
     }
     return UserService.instance;
   }
 
-  /**
-   * Get user information by user ID
-   * @param user_id The user ID
-   * @returns The user information
-   */
-  public async getUserInfo(user_id: string) {
-    return this.userModel.findUserById(user_id);
-  }
+  public async findUsers(
+    paginationOpts: {
+      page: number;
+      limit: number;
+    } = { page: 1, limit: 10 },
+    filterOpts?: Partial<{ email: string; name: string; role: Role }>,
+    sortOpts?: Prisma.UserFindManyArgs['orderBy']
+  ) {
+    const { page, limit } = paginationOpts;
+    const where: Prisma.UserWhereInput = {};
 
-  /**
-   * Update user's name
-   * @param user_id The user ID
-   * @param data The fields to update
-   */
-  public async updateUser(user_id: string, data: { name: string }) {
-    try {
-      return await this.userModel.updateUser(user_id, data);
-    } catch (error) {
-      // If user not found, Prisma throws P2025
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return null;
+    if (filterOpts) {
+      if (filterOpts.email) {
+        where.email = { contains: filterOpts.email, mode: 'insensitive' };
       }
-      throw error;
-    }
-  }
-
-  /**
-   * Update user's email
-   * @param user_id The user ID
-   * @param email The new email
-   */
-  public async updateEmail(user_id: string, email: string) {
-    try {
-      return await this.userModel.updateUserEmail(user_id, email);
-    } catch (error) {
-      // If user not found, Prisma throws P2025
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-        return null;
+      if (filterOpts.name) {
+        where.name = { contains: filterOpts.name, mode: 'insensitive' };
       }
-      // Rethrow other errors
-      throw error;
+      if (filterOpts.role) {
+        where.role = filterOpts.role;
+      }
     }
-  }
 
-  /**
-   * Change user's password
-   * @param user_id The user ID
-   * @param currentPassword The current password to verify
-   * @param newPassword The new password to set
-   * @param currentJWT The current JWT to exclude from revocation
-   * @returns true if updated, false if current password invalid, null if user not found
-   */
-  public async changePassword(user_id: string, currentPassword: string, newPassword: string, currentJWT: string) {
-    const user = await this.userModel.findUserById(user_id);
-    if (!user) return null;
+    const [users, total] = await this.fastify.prisma.$transaction([
+      this.fastify.prisma.user.findMany({
+        where,
+        orderBy: sortOpts,
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          user_id: true,
+          email: true,
+          name: true,
+          role: true,
+          created_at: true,
+          updated_at: true
+        }
+      }),
+      this.fastify.prisma.user.count({ where })
+    ]);
 
-    const valid = await verifyHash(currentPassword, user.password_hash, user.salt);
-    if (!valid) return false;
-
-    const { hash, salt } = await generateHash(newPassword);
-    await this.userModel.updateUserPassword(user_id, hash, salt);
-
-    // Sign out other sessions
-    await this.redisTokenUtils.revokeAllJWTs(user_id, currentJWT);
-
-    return true;
+    return {
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      },
+      data: users
+    };
   }
 }

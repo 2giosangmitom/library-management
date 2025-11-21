@@ -1,82 +1,67 @@
+import { Type } from 'typebox';
 import { FastifySchema } from 'fastify';
-import Type from 'typebox';
+import { nameMinLength, nameMaxLength, passwordMaxLength, passwordMinLength } from '@src/constants';
+import { Role } from '@src/generated/prisma/enums';
 
-export const signUpSchema = {
-  summary: 'Create new user account',
-  description: 'Endpoint to register a new user by providing email, password, and name.',
+export const SignUpSchema = {
+  summary: 'Create a new user account',
+  description: 'Creates a new user account with the provided email, password, and full name.',
   body: Type.Object({
     email: Type.String({ format: 'email' }),
-    password: Type.String({ minLength: 8 }),
-    name: Type.String({ minLength: 1 })
+    password: Type.String({ minLength: passwordMinLength, maxLength: passwordMaxLength }),
+    fullName: Type.String({ minLength: nameMinLength, maxLength: nameMaxLength })
   }),
   response: {
-    201: Type.Object(
-      {
+    201: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
         user_id: Type.String({ format: 'uuid' }),
         email: Type.String({ format: 'email' }),
-        name: Type.String(),
-        created_at: Type.String({ format: 'date-time' })
-      },
-      {
-        description: 'User successfully created'
-      }
-    ),
-    409: Type.Object(
-      {
-        message: Type.String()
-      },
-      {
-        description: 'Conflict - Email already exists'
-      }
-    )
+        name: Type.String({ minLength: nameMinLength, maxLength: nameMaxLength }),
+        role: Type.Enum(Role),
+        created_at: Type.String({ format: 'date-time' }),
+        updated_at: Type.String({ format: 'date-time' })
+      })
+    })
   }
 } as const satisfies FastifySchema;
 
-export const signInSchema = {
-  summary: 'Sign in',
-  description: 'Endpoint to sign in by email and password.',
+export const SignInSchema = {
+  summary: 'Authenticate a user',
+  description: 'Authenticates a user with the provided email and password.',
   body: Type.Object({
     email: Type.String({ format: 'email' }),
-    password: Type.String({ minLength: 8 })
+    password: Type.String({ minLength: passwordMinLength, maxLength: passwordMaxLength })
   }),
   response: {
-    200: Type.Object(
-      {
-        jwt: Type.String()
-      },
-      {
-        description: 'User signed in successfully'
-      }
-    ),
-    401: Type.Object(
-      {
-        message: Type.String()
-      },
-      {
-        description: 'Wrong credentials provided'
-      }
-    )
+    200: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        access_token: Type.String()
+      })
+    })
   }
 } as const satisfies FastifySchema;
 
-export const signOutSchema = {
-  summary: 'Sign out',
-  description: 'Endpoint to sign out the user by invalidating the JWT token.',
-  headers: Type.Object({
-    authorization: Type.String()
-  }),
-  security: [{ JWT: [] }],
+export const RefreshTokenSchema = {
+  summary: 'Refresh access token',
+  description: 'Generates a new access token using a valid refresh token.',
   response: {
-    204: Type.Null({
-      description: 'User signed out successfully'
-    }),
-    401: Type.Object(
-      {
-        message: Type.String()
-      },
-      {
-        description: 'Unauthorized - Invalid or missing token'
-      }
-    )
+    200: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        access_token: Type.String()
+      })
+    })
+  }
+} satisfies FastifySchema;
+
+export const SignOutSchema = {
+  summary: 'Sign out a user',
+  description: 'Signs out a user by revoking their tokens.',
+  response: {
+    200: Type.Object({
+      message: Type.String()
+    })
   }
 } as const satisfies FastifySchema;

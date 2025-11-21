@@ -1,74 +1,186 @@
-import { build } from '@tests/helpers/fastify';
-import { createUser } from '@tests/helpers/user';
+import { authHook } from '@src/hooks/auth';
+import { users } from '../helpers/build';
+import { build } from '../helpers/build';
 
-const ENDPOINT = '/auth/signout';
-
-describe(`POST ${ENDPOINT}`, async () => {
+describe('POST /api/auth/signout', async () => {
   const app = await build();
-  let signedUpUser: Awaited<ReturnType<typeof createUser>>;
 
-  afterAll(async () => {
-    await app.close();
+  beforeAll(() => {
+    app.get('/test/protected-route', { preHandler: authHook }, async () => {
+      return { message: 'Access granted to protected route' };
+    });
   });
 
-  beforeAll(async () => {
-    // Sign up an account for later usage
-    signedUpUser = await createUser(app, 'Test sign out', 'password123');
-  });
+  it('should sign out successfully with valid refresh token', async () => {
+    const user = users[0];
 
-  it('should sign out successfully and invalidate the JWT', async () => {
-    // Sign in to get JWT
+    // Sign in to get tokens
     const signInResponse = await app.inject({
       method: 'POST',
-      path: '/auth/signin',
-      body: {
-        email: signedUpUser.email,
-        password: 'password123'
+      url: '/api/auth/signin',
+      payload: {
+        email: user.email,
+        password: user.password
       }
     });
 
-    expect(signInResponse.statusCode).toBe(200);
-    const { jwt } = signInResponse.json();
-    assert.isString(jwt);
+    const refreshToken = signInResponse.cookies.find((cookie) => cookie.name === 'refreshToken');
+    assert.ok(refreshToken);
 
-    // Sign out using the obtained JWT
+    // Sign out using the refresh token
     const signOutResponse = await app.inject({
       method: 'POST',
-      path: ENDPOINT,
-      headers: {
-        Authorization: `Bearer ${jwt}`
+      url: '/api/auth/signout',
+      cookies: {
+        refreshToken: refreshToken.value
       }
     });
 
-    assert.equal(signOutResponse.statusCode, 204);
+    expect(signOutResponse.statusCode).toBe(200);
+    expect(signOutResponse.json()).toMatchInlineSnapshot(`
+      {
+        "message": "User signed out successfully",
+      }
+    `);
+  });
 
-    // Try to access a protected route with the same JWT to verify it's invalidated
-    const protectedResponse = await app.inject({
+  it('should fail to sign out with missing refresh token', async () => {
+    const signOutResponse = await app.inject({
       method: 'POST',
-      path: ENDPOINT,
+      url: '/api/auth/signout'
+    });
+
+    expect(signOutResponse.statusCode).toBe(401);
+    expect(signOutResponse.json()).toMatchInlineSnapshot(`
+      {
+        "error": "Unauthorized",
+        "message": "No Authorization was found in request.cookies",
+        "statusCode": 401,
+      }
+    `);
+  });
+
+  it("can't use the refresh token after sign out", async () => {
+    const user = users[1];
+
+    // Sign in to get tokens
+    const signInResponse = await app.inject({
+      method: 'POST',
+      url: '/api/auth/signin',
+      payload: {
+        email: user.email,
+        password: user.password
+      }
+    });
+
+    const refreshToken = signInResponse.cookies.find((cookie) => cookie.name === 'refreshToken');
+    assert.ok(refreshToken);
+
+    // Sign out using the refresh token
+    const signOutResponse = await app.inject({
+      method: 'POST',
+      url: '/api/auth/signout',
+      cookies: {
+        refreshToken: refreshToken.value
+      }
+    });
+
+    expect(signOutResponse.statusCode).toBe(200);
+
+    // Attempt to refresh token after sign out
+    const refreshTokenResponse = await app.inject({
+      method: 'POST',
+      url: '/api/auth/refresh-token',
+      cookies: {
+        refreshToken: refreshToken.value
+      }
+    });
+
+    expect(refreshTokenResponse.statusCode).toBe(401);
+    expect(refreshTokenResponse.json()).toMatchInlineSnapshot(`
+      {
+        "error": "Unauthorized",
+        "message": "Untrusted authorization token",
+        "statusCode": 401,
+      }
+    `);
+  });
+
+  it("can't use the access token associated with the refresh token after sign out but other tokens can", async () => {
+    const user = users[2];
+
+    // Sign in to get tokens
+    const signInResponse = await app.inject({
+      method: 'POST',
+      url: '/api/auth/signin',
+      payload: {
+        email: user.email,
+        password: user.password
+      }
+    });
+
+    const refreshToken = signInResponse.cookies.find((cookie) => cookie.name === 'refreshToken');
+    assert.ok(refreshToken);
+
+    const accessToken = signInResponse.json().data.access_token;
+    assert.ok(accessToken);
+
+    // Other sign in the get another access token
+    const otherSignInResponse = await app.inject({
+      method: 'POST',
+      url: '/api/auth/signin',
+      payload: {
+        email: user.email,
+        password: user.password
+      }
+    });
+
+    const otherAccessToken = otherSignInResponse.json().data.access_token;
+    assert.ok(otherAccessToken);
+
+    // Sign out using the refresh token
+    const signOutResponse = await app.inject({
+      method: 'POST',
+      url: '/api/auth/signout',
+      cookies: {
+        refreshToken: refreshToken.value
+      }
+    });
+
+    expect(signOutResponse.statusCode).toBe(200);
+
+    // Attempt to access a protected route using the access token after sign out
+    const protectedResponse = await app.inject({
+      method: 'GET',
+      url: '/test/protected-route',
       headers: {
-        Authorization: `Bearer ${jwt}`
+        Authorization: `Bearer ${accessToken}`
       }
     });
 
     expect(protectedResponse.statusCode).toBe(401);
     expect(protectedResponse.json()).toMatchInlineSnapshot(`
       {
+        "code": "FST_JWT_AUTHORIZATION_TOKEN_UNTRUSTED",
+        "error": "Unauthorized",
         "message": "Untrusted authorization token",
+        "statusCode": 401,
       }
     `);
-  });
 
-  it('should return 401 if no JWT provided', async () => {
-    const response = await app.inject({
-      method: 'POST',
-      path: ENDPOINT
+    // Attempt to access a protected route using the other access token after sign out
+    const otherProtectedResponse = await app.inject({
+      method: 'GET',
+      url: '/test/protected-route',
+      headers: {
+        Authorization: `Bearer ${otherAccessToken}`
+      }
     });
 
-    expect(response.statusCode).toBe(401);
-    expect(response.json()).toMatchInlineSnapshot(`
+    expect(otherProtectedResponse.statusCode).toBe(200);
+    expect(otherProtectedResponse.json()).toMatchInlineSnapshot(`
       {
-        "message": "No Authorization was found in request.headers",
+        "message": "Access granted to protected route",
       }
     `);
   });

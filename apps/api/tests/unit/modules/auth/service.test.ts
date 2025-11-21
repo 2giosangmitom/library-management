@@ -1,123 +1,181 @@
-import { UserModel } from '@modules/user/user.model';
-import { AuthService } from '@modules/auth/auth.service';
-import { fastify } from 'fastify';
+import AuthService from '@modules/auth/auth.service';
+import { Role } from '@src/generated/prisma/enums';
+import { faker } from '@faker-js/faker';
+import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
+import { HttpError } from '@fastify/sensible';
 import * as hashUtils from '@utils/hash';
 
-describe('auth service', () => {
-  const app = fastify();
-  const userModel = UserModel.getInstance(app);
-  const authService = AuthService.getInstance(app, userModel);
+describe('AuthService', async () => {
+  const app = await buildMockFastify();
+  const authService = AuthService.getInstance(app);
 
-  describe('sign up', () => {
-    beforeEach(() => {
-      userModel.createUser = vi.fn();
-    });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
+  });
 
-    it('should return user data if sign up is successful', async () => {
-      vi.spyOn(userModel, 'createUser').mockResolvedValueOnce({
-        user_id: 'some-uuid',
-        email: 'test@example.com',
-        name: 'Test User',
-        created_at: new Date()
+  describe('createUserAccount', () => {
+    it('should throw conflict error if email already exists', async () => {
+      // Mock existing user
+      vi.spyOn(app.prisma.user, 'findUnique').mockResolvedValueOnce({
+        user_id: faker.string.uuid(),
+        email: faker.internet.email(),
+        password_hash: 'hashedpassword',
+        salt: 'salt',
+        role: Role.MEMBER,
+        name: faker.person.fullName(),
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
       });
 
       await expect(
-        authService.signUp({
-          email: 'test@example.com',
-          password: 'password123',
-          name: 'Test User'
+        authService.createUserAccount({
+          email: faker.internet.email(),
+          password: faker.internet.password(),
+          fullName: faker.person.fullName(),
+          role: Role.MEMBER
         })
-      ).resolves.toEqual({
-        user_id: 'some-uuid',
-        email: 'test@example.com',
-        name: 'Test User',
-        created_at: expect.any(Date)
-      });
+      ).rejects.toThrow(HttpError);
+      expect(app.httpErrors.conflict).toHaveBeenCalledWith('Email is already in use');
     });
 
-    it('should hash the password before creating user', async () => {
-      const hashSpy = vi.spyOn(hashUtils, 'generateHash').mockResolvedValueOnce({
-        hash: 'hashedPassword',
-        salt: 'randomSalt'
-      });
+    it('should call prisma.user.create with correct data', async () => {
+      const email = faker.internet.email();
+      const password = faker.internet.password();
+      const fullName = faker.person.fullName();
+      const role = Role.MEMBER;
 
-      const password = 'password123';
+      // Mock no existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(null);
 
-      await authService.signUp({
-        email: 'test@example.com',
+      await authService.createUserAccount({
+        email,
         password,
-        name: 'Test User'
+        fullName,
+        role
       });
 
-      expect(hashSpy).toHaveBeenCalledOnce();
-      expect(hashSpy).toHaveBeenCalledWith(password);
-      expect(userModel.createUser).toHaveBeenCalledOnce();
-      expect(userModel.createUser).toHaveBeenCalledWith({
-        email: 'test@example.com',
-        password_hash: 'hashedPassword',
-        name: 'Test User',
-        salt: 'randomSalt'
-      });
+      expect(app.prisma.user.create).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            email,
+            role,
+            name: fullName
+          })
+        })
+      );
     });
 
-    it('should throw error if createUser fails', async () => {
-      vi.spyOn(userModel, 'createUser').mockRejectedValueOnce(new Error('Database error'));
+    it("should hash the user's password before storing", async () => {
+      const email = faker.internet.email();
+      const password = faker.internet.password();
+      const fullName = faker.person.fullName();
+      const role = Role.MEMBER;
 
-      await expect(
-        authService.signUp({
-          email: 'test@example.com',
-          password: 'password123',
-          name: 'Test User'
+      // Mock no existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(null);
+
+      // Spy on hash generation
+      const mockHashResult = {
+        hash: faker.string.alphanumeric(64),
+        salt: faker.string.alphanumeric(16)
+      };
+      vi.spyOn(hashUtils, 'generateHash').mockResolvedValueOnce(mockHashResult);
+
+      await authService.createUserAccount({
+        email,
+        password,
+        fullName,
+        role
+      });
+
+      expect(hashUtils.generateHash).toHaveBeenCalledExactlyOnceWith(password);
+      expect(app.prisma.user.create).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            password_hash: mockHashResult.hash,
+            salt: mockHashResult.salt
+          })
         })
-      ).rejects.toThrow('Database error');
+      );
     });
   });
 
-  describe('sign in', () => {
-    it('should return false if provide wrong email', async () => {
-      vi.spyOn(userModel, 'findUserByEmail').mockResolvedValueOnce(null);
+  describe('validateUserCredentials', () => {
+    it('should throw unauthorized error if email does not exist', async () => {
+      // Mock no existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(null);
 
-      await expect(authService.signIn({ email: 'test@example.com', password: 'password123' })).resolves.toEqual({
-        verifyResult: false,
-        user_id: null,
-        role: null
-      });
+      await expect(
+        authService.validateUserCredentials({
+          email: faker.internet.email(),
+          password: faker.internet.password()
+        })
+      ).rejects.toThrow(HttpError);
+      expect(app.httpErrors.unauthorized).toHaveBeenCalledWith('Invalid credentials');
     });
 
-    it('should return false if provide wrong password', async () => {
-      vi.spyOn(userModel, 'findUserByEmail').mockResolvedValueOnce({
-        user_id: 'sample-uuid',
-        password_hash: 'mock-hash',
-        salt: 'mock-salt',
-        email: 'test@example.com',
-        name: 'Test',
-        role: 'MEMBER'
-      });
+    it('should throw unauthorized error if password is incorrect', async () => {
+      const fakeUser = {
+        user_id: faker.string.uuid(),
+        email: faker.internet.email(),
+        password_hash: 'hashedpassword',
+        salt: 'salt',
+        role: Role.MEMBER,
+        name: faker.person.fullName(),
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      };
+
+      // Mock existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(fakeUser);
+
+      // Mock password verification to fail
       vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(false);
 
-      await expect(authService.signIn({ email: 'test@example.com', password: 'password123' })).resolves.toEqual({
-        verifyResult: false,
-        user_id: null,
-        role: null
-      });
+      await expect(
+        authService.validateUserCredentials({
+          email: fakeUser.email,
+          password: faker.internet.password()
+        })
+      ).rejects.toThrow(HttpError);
+      expect(app.httpErrors.unauthorized).toHaveBeenCalledWith('Invalid credentials');
     });
 
-    it('should return true and user_id if password is correct', async () => {
-      vi.spyOn(userModel, 'findUserByEmail').mockResolvedValueOnce({
-        user_id: 'sample-uuid',
-        password_hash: 'mock-hash',
-        salt: 'mock-salt',
-        email: 'test@example.com',
-        name: 'Test',
-        role: 'MEMBER'
-      });
+    it('should return user and JWT IDs if credentials are valid', async () => {
+      const fakeUser = {
+        user_id: faker.string.uuid(),
+        email: faker.internet.email(),
+        password_hash: 'hashedpassword',
+        salt: 'salt',
+        role: Role.MEMBER,
+        name: faker.person.fullName(),
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      };
+
+      // Mock existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(fakeUser);
+
+      // Mock password verification to succeed
       vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(true);
 
-      await expect(authService.signIn({ email: 'test@example.com', password: 'password123' })).resolves.toEqual({
-        verifyResult: true,
-        user_id: 'sample-uuid',
-        role: 'MEMBER'
+      const result = await authService.validateUserCredentials({
+        email: fakeUser.email,
+        password: 'correctpassword'
       });
+
+      expect(result).toHaveProperty('user', fakeUser);
+      expect(result).toHaveProperty('accessTokenJwtId');
+      expect(result).toHaveProperty('refreshTokenJwtId');
+    });
+  });
+
+  describe('getInstance', () => {
+    it('should return the same instance on multiple calls', () => {
+      const instance1 = AuthService.getInstance(app);
+      const instance2 = AuthService.getInstance(app);
+      expect(instance1).toBe(instance2);
     });
   });
 });

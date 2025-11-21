@@ -1,87 +1,141 @@
-import { Prisma } from '@prisma/client';
-import { signInSchema, signOutSchema, signUpSchema } from './auth.schema';
-import { AuthService } from './auth.service';
-import { RedisTokenUtils } from '@utils/redis';
+import AuthService from './auth.service';
+import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './auth.schema';
+import { refreshTokenExpiration } from '@src/constants';
 import { nanoid } from 'nanoid';
 
-export class AuthController {
+export default class AuthController {
   private static instance: AuthController;
   private authService: AuthService;
-  private redisTokenUtils: RedisTokenUtils;
+  private fastify: FastifyTypeBox;
 
   private constructor(fastify: FastifyTypeBox, authService: AuthService) {
+    this.fastify = fastify;
     this.authService = authService;
-    this.redisTokenUtils = RedisTokenUtils.getInstance(fastify.redis);
   }
 
-  public static getInstance(fastify: FastifyTypeBox, authService = AuthService.getInstance(fastify)) {
+  public static getInstance(fastify: FastifyTypeBox, authService = AuthService.getInstance(fastify)): AuthController {
     if (!AuthController.instance) {
       AuthController.instance = new AuthController(fastify, authService);
     }
     return AuthController.instance;
   }
 
-  /**
-   * Route handler for signing up a new user
-   */
   public async signUp(
-    req: FastifyRequestTypeBox<typeof signUpSchema>,
-    reply: FastifyReplyTypeBox<typeof signUpSchema>
+    req: FastifyRequestTypeBox<typeof SignUpSchema>,
+    reply: FastifyReplyTypeBox<typeof SignUpSchema>
   ) {
-    const { email, password, name } = req.body;
+    const { email, password, fullName } = req.body;
 
+    const user = await this.authService.createUserAccount({ email, password, fullName, role: 'MEMBER' });
+
+    return reply.status(201).send({
+      message: 'User account created successfully',
+      data: {
+        ...user,
+        created_at: user.created_at.toISOString(),
+        updated_at: user.updated_at.toISOString()
+      }
+    });
+  }
+
+  public async signIn(
+    req: FastifyRequestTypeBox<typeof SignInSchema>,
+    reply: FastifyReplyTypeBox<typeof SignInSchema>
+  ) {
+    const validateResult = await this.authService.validateUserCredentials(req.body);
+
+    const accessToken = await reply.jwtSign({
+      typ: 'access_token',
+      sub: validateResult.user.user_id,
+      role: validateResult.user.role,
+      jti: validateResult.accessTokenJwtId
+    } satisfies AccessToken);
+
+    const refreshToken = await reply.jwtSign(
+      {
+        typ: 'refresh_token',
+        sub: validateResult.user.user_id,
+        jti: validateResult.refreshTokenJwtId
+      } satisfies RefreshToken,
+      {
+        expiresIn: refreshTokenExpiration
+      }
+    );
+
+    return reply
+      .setCookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        path: '/',
+        maxAge: refreshTokenExpiration,
+        sameSite: 'none',
+        secure: true,
+        signed: true
+      })
+      .status(200)
+      .send({
+        message: 'User signed in successfully',
+        data: {
+          access_token: accessToken
+        }
+      });
+  }
+
+  public async refreshToken(
+    req: FastifyRequestTypeBox<typeof RefreshTokenSchema>,
+    reply: FastifyReplyTypeBox<typeof RefreshTokenSchema>
+  ) {
     try {
-      const newUser = await this.authService.signUp({ email, password, name });
-      return reply.status(201).send({
-        ...newUser,
-        created_at: newUser.created_at.toISOString()
+      const data = await req.jwtVerify<RefreshToken>({ onlyCookie: true });
+
+      const newAccessTokenJwtId = nanoid();
+      const { role } = await this.fastify.prisma.user.findUniqueOrThrow({
+        where: { user_id: data.sub },
+        select: { role: true }
+      });
+
+      await this.authService.storeAccessToken(data.sub, newAccessTokenJwtId, data.jti);
+      const newAccessToken = await reply.jwtSign({
+        typ: 'access_token',
+        sub: data.sub,
+        jti: newAccessTokenJwtId,
+        role
+      } satisfies AccessToken);
+
+      return reply.status(200).send({
+        message: 'Access token refreshed successfully',
+        data: {
+          access_token: newAccessToken
+        }
       });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          return reply.status(409).send({ message: 'Email already exists' });
-        }
-      }
-      throw error;
+      throw req.server.httpErrors.unauthorized(error instanceof Error ? error.message : 'Invalid refresh token');
     }
   }
 
-  /**
-   * Route handler for signing in a user
-   */
-  public async signIn(
-    req: FastifyRequestTypeBox<typeof signInSchema>,
-    reply: FastifyReplyTypeBox<typeof signInSchema>
-  ) {
-    const { email, password } = req.body;
-
-    const { verifyResult, user_id, role } = await this.authService.signIn({ email, password });
-    if (!verifyResult || !user_id || !role) {
-      return reply.status(401).send({ message: 'Invalid email or password' });
-    }
-
-    const jti = nanoid();
-    const jwt = await reply.jwtSign({
-      sub: user_id,
-      role,
-      jti
-    });
-    await this.redisTokenUtils.addJWT(jti, user_id, 30 * 24 * 60 * 60); // 30 days expiration
-
-    return reply.send({ jwt });
-  }
-
-  /**
-   * Route handler for signing out a user
-   */
   public async signOut(
-    req: FastifyRequestTypeBox<typeof signOutSchema>,
-    reply: FastifyReplyTypeBox<typeof signOutSchema>
+    req: FastifyRequestTypeBox<typeof SignOutSchema>,
+    reply: FastifyReplyTypeBox<typeof SignOutSchema>
   ) {
-    const jwtData = req.user as JWTPayload;
+    try {
+      const data = await req.jwtVerify<RefreshToken>({ onlyCookie: true });
 
-    await this.redisTokenUtils.deleteJWT(jwtData.jti);
+      await this.authService.revokeUserRefreshToken(data.sub, data.jti);
 
-    return reply.status(204).send();
+      return reply
+        .clearCookie('refreshToken', {
+          httpOnly: true,
+          path: '/',
+          maxAge: refreshTokenExpiration,
+          sameSite: 'none',
+          secure: true,
+          signed: true
+        })
+        .status(200)
+        .send({
+          message: 'User signed out successfully'
+        });
+    } catch (error) {
+      throw req.server.httpErrors.unauthorized(error instanceof Error ? error.message : 'Invalid refresh token');
+    }
   }
 }

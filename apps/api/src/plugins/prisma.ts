@@ -1,11 +1,14 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@src/generated/prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import fp from 'fastify-plugin';
+import type { envType } from '@config/envSchema';
 
 export default fp(
-  (fastify: FastifyTypeBox) => {
+  (fastify: FastifyTypeBox, opts: envType) => {
     fastify.log.debug('Registering Prisma plugin');
 
-    const prisma = new PrismaClient();
+    const adapter = new PrismaPg({ connectionString: opts.DATABASE_URL });
+    const prisma = new PrismaClient({ adapter });
     fastify.decorate('prisma', prisma);
 
     fastify.addHook('onClose', async () => {

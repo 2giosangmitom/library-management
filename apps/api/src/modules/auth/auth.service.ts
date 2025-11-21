@@ -1,52 +1,89 @@
+import { Role } from '@src/generated/prisma/enums';
 import { generateHash, verifyHash } from '@utils/hash';
-import { UserModel } from '@modules/user/user.model';
+import { JWTUtils } from '@utils/jwt';
+import { nanoid } from 'nanoid';
 
-export class AuthService {
-  private static instance: AuthService | null = null;
-  private userModel: UserModel;
+export default class AuthService {
+  private static instance: AuthService;
+  private fastify: FastifyTypeBox;
+  private jwtUtils: JWTUtils;
 
-  private constructor(userModel: UserModel) {
-    this.userModel = userModel;
+  private constructor(fastify: FastifyTypeBox) {
+    this.fastify = fastify;
+    this.jwtUtils = JWTUtils.getInstance(fastify.redis);
   }
 
-  public static getInstance(fastify: FastifyTypeBox, userModel = UserModel.getInstance(fastify)) {
+  public static getInstance(fastify: FastifyTypeBox): AuthService {
     if (!AuthService.instance) {
-      AuthService.instance = new AuthService(userModel);
+      AuthService.instance = new AuthService(fastify);
     }
     return AuthService.instance;
   }
 
-  /**
-   * Sign up a new user
-   * @param data User data for signing up
-   * @returns The created user
-   */
-  public async signUp(data: { email: string; password: string; name: string }) {
-    const { hash, salt } = await generateHash(data.password);
+  public async createUserAccount(data: { email: string; password: string; fullName: string; role: Role }) {
+    const { email, password, fullName, role } = data;
 
-    return this.userModel.createUser({
-      email: data.email,
-      password_hash: hash,
-      salt,
-      name: data.name
+    // Check if email already exists
+    const existingUser = await this.fastify.prisma.user.findUnique({
+      where: { email }
     });
-  }
-
-  /**
-   * Sign in with email and password
-   * @param data The email and password for signing in
-   * @returns True and the user ID if the credentials are correct, otherwise false and null
-   */
-  public async signIn(data: { email: string; password: string }) {
-    const user = await this.userModel.findUserByEmail(data.email);
-
-    // Fails if email not exists
-    if (!user) {
-      return { verifyResult: false, user_id: null, role: null };
+    if (existingUser) {
+      throw this.fastify.httpErrors.conflict('Email is already in use');
     }
 
-    const verifyResult = await verifyHash(data.password, user.password_hash, user.salt);
+    const { hash, salt } = await generateHash(password);
 
-    return { verifyResult, user_id: verifyResult ? user.user_id : null, role: verifyResult ? user.role : null };
+    const user = await this.fastify.prisma.user.create({
+      omit: { password_hash: true, salt: true },
+      data: {
+        email,
+        password_hash: hash,
+        salt,
+        role,
+        name: fullName
+      }
+    });
+
+    return user;
+  }
+
+  public async validateUserCredentials(data: { email: string; password: string }) {
+    const { email, password } = data;
+
+    // Validate email
+    const user = await this.fastify.prisma.user.findUnique({
+      where: { email }
+    });
+    const invalidCredentialsError = this.fastify.httpErrors.unauthorized('Invalid credentials');
+
+    if (!user) {
+      throw invalidCredentialsError;
+    }
+
+    // Validate password
+    const isPasswordValid = await verifyHash(password, user.password_hash, user.salt);
+
+    if (!isPasswordValid) {
+      throw invalidCredentialsError;
+    }
+
+    const refreshTokenJwtId = nanoid();
+    const accessTokenJwtId = nanoid();
+
+    const promises = [
+      this.jwtUtils.storeRefreshToken(user.user_id, refreshTokenJwtId),
+      this.jwtUtils.storeAccessToken(user.user_id, accessTokenJwtId, refreshTokenJwtId)
+    ];
+    await Promise.all(promises);
+
+    return { user, refreshTokenJwtId, accessTokenJwtId };
+  }
+
+  public async storeAccessToken(userId: string, accessTokenId: string, refreshTokenId: string) {
+    await this.jwtUtils.storeAccessToken(userId, accessTokenId, refreshTokenId);
+  }
+
+  public async revokeUserRefreshToken(userId: string, refreshTokenId: string) {
+    await this.jwtUtils.revokeRefreshToken(userId, refreshTokenId);
   }
 }
