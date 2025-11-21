@@ -9,7 +9,6 @@ import jwtPlugin from '@plugins/jwt';
 import sensible from '@plugins/sensible';
 import cookie from '@plugins/cookie';
 
-import authHooks from '@modules/auth/auth.hooks';
 import authRoutes from '@modules/auth/auth.routes';
 
 export async function build(): Promise<FastifyTypeBox> {
@@ -34,7 +33,6 @@ export async function build(): Promise<FastifyTypeBox> {
       // it must have the same context.
       apiInstance.register(
         (instance) => {
-          instance.register(fp(authHooks));
           instance.register(fp(authRoutes));
         },
         { prefix: '/auth' }
