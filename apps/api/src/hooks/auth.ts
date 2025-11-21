@@ -9,23 +9,11 @@ export async function authHook(req: FastifyRequest) {
 }
 
 /**
- * Verify refresh token hook.
- * @param req Fastify request object
- */
-export async function verifyRefreshTokenHook(req: FastifyRequest) {
-  try {
-    await req.jwtVerify({ onlyCookie: true });
-  } catch (error) {
-    throw req.server.httpErrors.unauthorized(error instanceof Error ? error.message : 'Invalid refresh token');
-  }
-}
-
-/**
  * Hook to check if the user has a 'LIBRARIAN' role.
  * @param req Fastify request object
  */
 export async function isLibrarianHook(req: FastifyRequest) {
-  const data = req.user as JWTPayload;
+  const data = req.user as AccessToken;
   if (data.role !== 'LIBRARIAN') {
     throw req.server.httpErrors.forbidden('Librarian access required');
   }
@@ -37,7 +25,7 @@ export async function isLibrarianHook(req: FastifyRequest) {
  * @param reply Fastify reply object
  */
 export async function isAdminHook(req: FastifyRequest) {
-  const data = req.user as JWTPayload;
+  const data = req.user as AccessToken;
   if (data.role !== 'ADMIN') {
     throw req.server.httpErrors.forbidden('Admin access required');
   }

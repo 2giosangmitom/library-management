@@ -8,7 +8,7 @@ export default fp(
   async (fastify: FastifyTypeBox, opts: envType) => {
     fastify.log.debug('Registering JWT plugin');
 
-    const redisTokenUtils = JWTUtils.getInstance(fastify.redis);
+    const jwtUtils = JWTUtils.getInstance(fastify.redis);
 
     await fastify.register(fastifyJwt, {
       secret: opts.JWT_SECRET,
@@ -16,8 +16,7 @@ export default fp(
         expiresIn: accessTokenExpiration
       },
       trusted: async (_, decodedToken) => {
-        const token = await redisTokenUtils.getTokenData('access_token', decodedToken.jti);
-        return !!token;
+        return jwtUtils.isTokenValid(decodedToken.typ, decodedToken.jti);
       },
       cookie: {
         cookieName: 'refreshToken',

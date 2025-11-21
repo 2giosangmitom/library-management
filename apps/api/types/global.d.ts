@@ -42,9 +42,18 @@ declare global {
     TypeBoxTypeProvider
   >;
 
-  type JWTPayload = {
+  type AccessToken = {
+    typ: 'access_token';
     sub: string;
     role: Role;
     jti: string;
   };
+
+  type RefreshToken = {
+    typ: 'refresh_token';
+    sub: string;
+    jti: string;
+  };
+
+  type TokenType = 'access_token' | 'refresh_token';
 }

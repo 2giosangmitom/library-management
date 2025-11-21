@@ -1,34 +1,11 @@
-import { fastify, FastifyRequest } from 'fastify';
-import fp from 'fastify-plugin';
-import { type envType } from '@config/envSchema';
-import jwt from '@plugins/jwt';
-import cookie from '@plugins/cookie';
-import auth from '@plugins/auth';
-import { authHook, isLibrarianHook, isAdminHook, isAdminOrLibrarianHook, verifyRefreshTokenHook } from '@hooks/auth';
-import { type FastifyRedis } from '@fastify/redis';
-import sensible from '@plugins/sensible';
+import { Role } from '@src/generated/prisma/enums';
+import { buildMockFastify } from '../helpers/mockFastify';
+import { authHook, isLibrarianHook, isAdminHook, isAdminOrLibrarianHook } from '@hooks/auth';
 
-describe('auth hooks', () => {
-  const app = fastify();
+describe('auth hooks', async () => {
+  const app = await buildMockFastify();
 
   beforeAll(async () => {
-    await app.register(
-      fp(
-        async (instance) => {
-          instance.decorate('redis', {
-            get: vi.fn().mockResolvedValue('something')
-          } as unknown as FastifyRedis);
-        },
-        {
-          name: 'Redis'
-        }
-      )
-    );
-    await app.register(cookie, { COOKIE_SECRET: 'testsecret' } as envType);
-    await app.register(jwt, { JWT_SECRET: 'testsecret' } as envType);
-    await app.register(auth);
-    await app.register(sensible);
-
     app.get('/protected', { preHandler: [authHook] }, async () => {
       return { message: 'Access granted' };
     });
@@ -50,15 +27,24 @@ describe('auth hooks', () => {
         return { message: 'Admin or Librarian access granted' };
       }
     );
+  });
 
-    app.get('/verify-refresh-token', { preHandler: [verifyRefreshTokenHook] }, async () => {
-      return { message: 'Refresh token valid' };
-    });
+  beforeEach(() => {
+    vi.mocked(app.redis.exists).mockResolvedValue(1);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
+  });
+
+  afterAll(async () => {
+    await app.close();
   });
 
   describe('authHook', () => {
     it('should verify JWT token successfully', async () => {
-      const token = app.jwt.sign({ role: 'MEMBER' });
+      const token = app.jwt.sign({ role: Role.MEMBER });
       const response = await app.inject({
         path: '/protected',
         headers: {
@@ -104,11 +90,33 @@ describe('auth hooks', () => {
         }
       `);
     });
+
+    it('should fail verification with revoked token', async () => {
+      vi.mocked(app.redis.exists).mockResolvedValue(0);
+
+      const token = app.jwt.sign({ role: Role.MEMBER });
+      const response = await app.inject({
+        path: '/protected',
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+
+      expect(response.statusCode).toBe(401);
+      expect(response.json()).toMatchInlineSnapshot(`
+        {
+          "code": "FST_JWT_AUTHORIZATION_TOKEN_UNTRUSTED",
+          "error": "Unauthorized",
+          "message": "Untrusted authorization token",
+          "statusCode": 401,
+        }
+      `);
+    });
   });
 
   describe('isLibrarianHook', () => {
     it('should allow access for LIBRARIAN role', async () => {
-      const token = app.jwt.sign({ role: 'LIBRARIAN' });
+      const token = app.jwt.sign({ role: Role.LIBRARIAN });
       const response = await app.inject({
         path: '/librarian-only',
         headers: {
@@ -121,7 +129,7 @@ describe('auth hooks', () => {
     });
 
     it('should deny access for MEMBER role', async () => {
-      const token = app.jwt.sign({ role: 'MEMBER' });
+      const token = app.jwt.sign({ role: Role.MEMBER });
       const response = await app.inject({
         path: '/librarian-only',
         headers: {
@@ -140,7 +148,7 @@ describe('auth hooks', () => {
     });
 
     it('should deny access for ADMIN role', async () => {
-      const token = app.jwt.sign({ role: 'ADMIN' });
+      const token = app.jwt.sign({ role: Role.ADMIN });
       const response = await app.inject({
         path: '/librarian-only',
         headers: {
@@ -161,7 +169,7 @@ describe('auth hooks', () => {
 
   describe('isAdminHook', () => {
     it('should allow access for ADMIN role', async () => {
-      const token = app.jwt.sign({ role: 'ADMIN' });
+      const token = app.jwt.sign({ role: Role.ADMIN });
       const response = await app.inject({
         path: '/admin-only',
         headers: {
@@ -174,7 +182,7 @@ describe('auth hooks', () => {
     });
 
     it('should deny access for MEMBER role', async () => {
-      const token = app.jwt.sign({ role: 'MEMBER' });
+      const token = app.jwt.sign({ role: Role.MEMBER });
       const response = await app.inject({
         path: '/admin-only',
         headers: {
@@ -193,7 +201,7 @@ describe('auth hooks', () => {
     });
 
     it('should deny access for LIBRARIAN role', async () => {
-      const token = app.jwt.sign({ role: 'LIBRARIAN' });
+      const token = app.jwt.sign({ role: Role.LIBRARIAN });
       const response = await app.inject({
         path: '/admin-only',
         headers: {
@@ -214,7 +222,7 @@ describe('auth hooks', () => {
 
   describe('Admin or Librarian access', () => {
     it('should allow access for ADMIN role', async () => {
-      const token = app.jwt.sign({ role: 'ADMIN' });
+      const token = app.jwt.sign({ role: Role.ADMIN });
       const response = await app.inject({
         path: '/admin-or-librarian',
         headers: {
@@ -227,7 +235,7 @@ describe('auth hooks', () => {
     });
 
     it('should allow access for LIBRARIAN role', async () => {
-      const token = app.jwt.sign({ role: 'LIBRARIAN' });
+      const token = app.jwt.sign({ role: Role.LIBRARIAN });
       const response = await app.inject({
         path: '/admin-or-librarian',
         headers: {
@@ -240,9 +248,7 @@ describe('auth hooks', () => {
     });
 
     it('should deny access for MEMBER role', async () => {
-      const token = app.jwt.sign({
-        role: 'MEMBER'
-      });
+      const token = app.jwt.sign({ role: Role.MEMBER });
       const response = await app.inject({
         path: '/admin-or-librarian',
         headers: {
@@ -258,87 +264,6 @@ describe('auth hooks', () => {
           "statusCode": 403,
         }
       `);
-    });
-  });
-
-  describe('verifyRefreshTokenHook', () => {
-    it('should verify refresh token successfully', async () => {
-      const token = app.jwt.sign({ sub: 'some-user-id' }, { expiresIn: '7d' });
-      const refreshToken = app.signCookie(token);
-      const response = await app.inject({
-        path: '/verify-refresh-token',
-        cookies: {
-          refreshToken
-        }
-      });
-
-      expect(response.statusCode).toBe(200);
-      expect(response.json()).toEqual({ message: 'Refresh token valid' });
-    });
-
-    it('should fail verification with missing refresh token', async () => {
-      const response = await app.inject({
-        path: '/verify-refresh-token'
-      });
-
-      expect(response.statusCode).toBe(401);
-      expect(response.json()).toMatchInlineSnapshot(`
-        {
-          "error": "Unauthorized",
-          "message": "No Authorization was found in request.cookies",
-          "statusCode": 401,
-        }
-      `);
-    });
-
-    it('should fail verification with invalid refresh token', async () => {
-      const response = await app.inject({
-        path: '/verify-refresh-token',
-        cookies: {
-          refreshToken: 'invalid-token'
-        }
-      });
-
-      expect(response.statusCode).toBe(401);
-      expect(response.json()).toMatchInlineSnapshot(`
-        {
-          "error": "Unauthorized",
-          "message": "missing token",
-          "statusCode": 401,
-        }
-      `);
-    });
-
-    it('should throw an error if the token is malformed', async () => {
-      const response = await app.inject({
-        path: '/verify-refresh-token',
-        cookies: {
-          refreshToken: app.signCookie('valid-token-but-we-force-error')
-        }
-      });
-
-      expect(response.statusCode).toBe(401);
-      expect(response.json()).toMatchInlineSnapshot(`
-        {
-          "error": "Unauthorized",
-          "message": "Authorization token is invalid: The token is malformed.",
-          "statusCode": 401,
-        }
-      `);
-    });
-
-    it("should throw the default error message if the error isn't an instance of Error", async () => {
-      const mockReq = {
-        jwtVerify: vi.fn().mockRejectedValue('some string error'),
-        server: {
-          httpErrors: app.httpErrors
-        }
-      } as unknown as FastifyRequest;
-
-      await expect(verifyRefreshTokenHook(mockReq)).rejects.toMatchObject({
-        statusCode: 401,
-        message: 'Invalid refresh token'
-      });
     });
   });
 });

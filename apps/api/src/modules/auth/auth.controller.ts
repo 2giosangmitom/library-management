@@ -1,6 +1,7 @@
 import AuthService from './auth.service';
-import { SignInSchema, SignUpSchema } from './auth.schema';
+import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './auth.schema';
 import { refreshTokenExpiration } from '@src/constants';
+import { nanoid } from 'nanoid';
 
 export default class AuthController {
   private static instance: AuthController;
@@ -44,16 +45,18 @@ export default class AuthController {
     const validateResult = await this.authService.validateUserCredentials(req.body);
 
     const accessToken = await reply.jwtSign({
+      typ: 'access_token',
       sub: validateResult.user.user_id,
       role: validateResult.user.role,
       jti: validateResult.accessTokenJwtId
-    });
+    } satisfies AccessToken);
 
     const refreshToken = await reply.jwtSign(
       {
+        typ: 'refresh_token',
         sub: validateResult.user.user_id,
         jti: validateResult.refreshTokenJwtId
-      },
+      } satisfies RefreshToken,
       {
         expiresIn: refreshTokenExpiration
       }
@@ -75,5 +78,64 @@ export default class AuthController {
           access_token: accessToken
         }
       });
+  }
+
+  public async refreshToken(
+    req: FastifyRequestTypeBox<typeof RefreshTokenSchema>,
+    reply: FastifyReplyTypeBox<typeof RefreshTokenSchema>
+  ) {
+    try {
+      const data = await req.jwtVerify<RefreshToken>({ onlyCookie: true });
+
+      const newAccessTokenJwtId = nanoid();
+      const { role } = await this.fastify.prisma.user.findUniqueOrThrow({
+        where: { user_id: data.sub },
+        select: { role: true }
+      });
+
+      await this.authService.storeAccessToken(data.sub, newAccessTokenJwtId, data.jti);
+      const newAccessToken = await reply.jwtSign({
+        typ: 'access_token',
+        sub: data.sub,
+        jti: newAccessTokenJwtId,
+        role
+      } satisfies AccessToken);
+
+      return reply.status(200).send({
+        message: 'Access token refreshed successfully',
+        data: {
+          access_token: newAccessToken
+        }
+      });
+    } catch (error) {
+      throw req.server.httpErrors.unauthorized(error instanceof Error ? error.message : 'Invalid refresh token');
+    }
+  }
+
+  public async signOut(
+    req: FastifyRequestTypeBox<typeof SignOutSchema>,
+    reply: FastifyReplyTypeBox<typeof SignOutSchema>
+  ) {
+    try {
+      const data = await req.jwtVerify<RefreshToken>({ onlyCookie: true });
+
+      await this.authService.revokeUserRefreshToken(data.sub, data.jti);
+
+      return reply
+        .clearCookie('refreshToken', {
+          httpOnly: true,
+          path: '/',
+          maxAge: refreshTokenExpiration,
+          sameSite: 'none',
+          secure: true,
+          signed: true
+        })
+        .status(200)
+        .send({
+          message: 'User signed out successfully'
+        });
+    } catch (error) {
+      throw req.server.httpErrors.unauthorized(error instanceof Error ? error.message : 'Invalid refresh token');
+    }
   }
 }

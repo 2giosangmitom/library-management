@@ -4,14 +4,13 @@ import { faker } from '@faker-js/faker';
 import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
 import { HttpError } from '@fastify/sensible';
 import * as hashUtils from '@utils/hash';
-import { JWTUtils } from '@utils/jwt';
 
 describe('AuthService', async () => {
   const app = await buildMockFastify();
   const authService = AuthService.getInstance(app);
-  const jwtUtils = vi.mockObject(JWTUtils.getInstance(app.redis));
 
-  beforeEach(() => {
+  afterEach(() => {
+    vi.restoreAllMocks();
     vi.clearAllMocks();
   });
 
@@ -160,8 +159,6 @@ describe('AuthService', async () => {
 
       // Mock password verification to succeed
       vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(true);
-      vi.spyOn(jwtUtils, 'storeToken').mockResolvedValueOnce();
-      vi.spyOn(jwtUtils, 'storeToken').mockResolvedValueOnce();
 
       const result = await authService.validateUserCredentials({
         email: fakeUser.email,

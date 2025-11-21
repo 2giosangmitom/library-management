@@ -42,3 +42,26 @@ export const SignInSchema = {
     })
   }
 } as const satisfies FastifySchema;
+
+export const RefreshTokenSchema = {
+  summary: 'Refresh access token',
+  description: 'Generates a new access token using a valid refresh token.',
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        access_token: Type.String()
+      })
+    })
+  }
+} satisfies FastifySchema;
+
+export const SignOutSchema = {
+  summary: 'Sign out a user',
+  description: 'Signs out a user by revoking their tokens.',
+  response: {
+    200: Type.Object({
+      message: Type.String()
+    })
+  }
+} as const satisfies FastifySchema;

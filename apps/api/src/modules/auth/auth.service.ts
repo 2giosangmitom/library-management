@@ -1,8 +1,7 @@
 import { Role } from '@src/generated/prisma/enums';
 import { generateHash, verifyHash } from '@utils/hash';
-import { JWTUtils, TokenType } from '@utils/jwt';
+import { JWTUtils } from '@utils/jwt';
 import { nanoid } from 'nanoid';
-import { accessTokenExpiration, refreshTokenExpiration } from '@src/constants';
 
 export default class AuthService {
   private static instance: AuthService;
@@ -72,15 +71,19 @@ export default class AuthService {
     const accessTokenJwtId = nanoid();
 
     const promises = [
-      this.jwtUtils.storeToken(user.user_id, 'refresh_token', refreshTokenJwtId, refreshTokenExpiration),
-      this.jwtUtils.storeToken(user.user_id, 'access_token', accessTokenJwtId, accessTokenExpiration)
+      this.jwtUtils.storeRefreshToken(user.user_id, refreshTokenJwtId),
+      this.jwtUtils.storeAccessToken(user.user_id, accessTokenJwtId, refreshTokenJwtId)
     ];
     await Promise.all(promises);
 
     return { user, refreshTokenJwtId, accessTokenJwtId };
   }
 
-  public async revokeUserTokens(tokenType: TokenType, userId: string) {
-    await this.jwtUtils.deleteAllTokens(tokenType, userId);
+  public async storeAccessToken(userId: string, accessTokenId: string, refreshTokenId: string) {
+    await this.jwtUtils.storeAccessToken(userId, accessTokenId, refreshTokenId);
+  }
+
+  public async revokeUserRefreshToken(userId: string, refreshTokenId: string) {
+    await this.jwtUtils.revokeRefreshToken(userId, refreshTokenId);
   }
 }
