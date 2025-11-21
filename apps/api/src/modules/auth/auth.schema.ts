@@ -25,3 +25,20 @@ export const SignUpSchema = {
     })
   }
 } as const satisfies FastifySchema;
+
+export const SignInSchema = {
+  summary: 'Authenticate a user',
+  description: 'Authenticates a user with the provided email and password.',
+  body: Type.Object({
+    email: Type.String({ format: 'email' }),
+    password: Type.String({ minLength: passwordMinLength, maxLength: passwordMaxLength })
+  }),
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        access_token: Type.String()
+      })
+    })
+  }
+} as const satisfies FastifySchema;

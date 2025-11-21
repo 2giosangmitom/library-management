@@ -68,16 +68,16 @@ export default class AuthService {
       throw invalidCredentialsError;
     }
 
-    const refreshTokenJti = nanoid();
-    const accessTokenJti = nanoid();
+    const refreshTokenJwtId = nanoid();
+    const accessTokenJwtId = nanoid();
 
     const promises = [
-      this.jwtUtils.storeToken(user.user_id, 'refresh_token', refreshTokenJti, refreshTokenExpiration),
-      this.jwtUtils.storeToken(user.user_id, 'access_token', accessTokenJti, accessTokenExpiration)
+      this.jwtUtils.storeToken(user.user_id, 'refresh_token', refreshTokenJwtId, refreshTokenExpiration),
+      this.jwtUtils.storeToken(user.user_id, 'access_token', accessTokenJwtId, accessTokenExpiration)
     ];
     await Promise.all(promises);
 
-    return { user, refreshTokenJti, accessTokenJti };
+    return { user, refreshTokenJwtId, accessTokenJwtId };
   }
 
   public async revokeUserTokens(tokenType: TokenType, userId: string) {

@@ -4,10 +4,12 @@ import { faker } from '@faker-js/faker';
 import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
 import { HttpError } from '@fastify/sensible';
 import * as hashUtils from '@utils/hash';
+import { JWTUtils } from '@utils/jwt';
 
 describe('AuthService', async () => {
   const app = await buildMockFastify();
   const authService = AuthService.getInstance(app);
+  const jwtUtils = vi.mockObject(JWTUtils.getInstance(app.redis));
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -97,6 +99,78 @@ describe('AuthService', async () => {
           })
         })
       );
+    });
+  });
+
+  describe('validateUserCredentials', () => {
+    it('should throw unauthorized error if email does not exist', async () => {
+      // Mock no existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(null);
+
+      await expect(
+        authService.validateUserCredentials({
+          email: faker.internet.email(),
+          password: faker.internet.password()
+        })
+      ).rejects.toThrow(HttpError);
+      expect(app.httpErrors.unauthorized).toHaveBeenCalledWith('Invalid credentials');
+    });
+
+    it('should throw unauthorized error if password is incorrect', async () => {
+      const fakeUser = {
+        user_id: faker.string.uuid(),
+        email: faker.internet.email(),
+        password_hash: 'hashedpassword',
+        salt: 'salt',
+        role: Role.MEMBER,
+        name: faker.person.fullName(),
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      };
+
+      // Mock existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(fakeUser);
+
+      // Mock password verification to fail
+      vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(false);
+
+      await expect(
+        authService.validateUserCredentials({
+          email: fakeUser.email,
+          password: faker.internet.password()
+        })
+      ).rejects.toThrow(HttpError);
+      expect(app.httpErrors.unauthorized).toHaveBeenCalledWith('Invalid credentials');
+    });
+
+    it('should return user and JWT IDs if credentials are valid', async () => {
+      const fakeUser = {
+        user_id: faker.string.uuid(),
+        email: faker.internet.email(),
+        password_hash: 'hashedpassword',
+        salt: 'salt',
+        role: Role.MEMBER,
+        name: faker.person.fullName(),
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      };
+
+      // Mock existing user
+      vi.mocked(app.prisma.user.findUnique).mockResolvedValueOnce(fakeUser);
+
+      // Mock password verification to succeed
+      vi.spyOn(hashUtils, 'verifyHash').mockResolvedValueOnce(true);
+      vi.spyOn(jwtUtils, 'storeToken').mockResolvedValueOnce();
+      vi.spyOn(jwtUtils, 'storeToken').mockResolvedValueOnce();
+
+      const result = await authService.validateUserCredentials({
+        email: fakeUser.email,
+        password: 'correctpassword'
+      });
+
+      expect(result).toHaveProperty('user', fakeUser);
+      expect(result).toHaveProperty('accessTokenJwtId');
+      expect(result).toHaveProperty('refreshTokenJwtId');
     });
   });
 

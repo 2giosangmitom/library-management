@@ -1,5 +1,6 @@
 import AuthService from './auth.service';
-import { SignUpSchema } from './auth.schema';
+import { SignInSchema, SignUpSchema } from './auth.schema';
+import { refreshTokenExpiration } from '@src/constants';
 
 export default class AuthController {
   private static instance: AuthController;
@@ -34,5 +35,45 @@ export default class AuthController {
         updated_at: user.updated_at.toISOString()
       }
     });
+  }
+
+  public async signIn(
+    req: FastifyRequestTypeBox<typeof SignInSchema>,
+    reply: FastifyReplyTypeBox<typeof SignInSchema>
+  ) {
+    const validateResult = await this.authService.validateUserCredentials(req.body);
+
+    const accessToken = await reply.jwtSign({
+      sub: validateResult.user.user_id,
+      role: validateResult.user.role,
+      jti: validateResult.accessTokenJwtId
+    });
+
+    const refreshToken = await reply.jwtSign(
+      {
+        sub: validateResult.user.user_id,
+        jti: validateResult.refreshTokenJwtId
+      },
+      {
+        expiresIn: refreshTokenExpiration
+      }
+    );
+
+    return reply
+      .setCookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        path: '/',
+        maxAge: refreshTokenExpiration,
+        sameSite: 'none',
+        secure: true,
+        signed: true
+      })
+      .status(200)
+      .send({
+        message: 'User signed in successfully',
+        data: {
+          access_token: accessToken
+        }
+      });
   }
 }
