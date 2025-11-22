@@ -40,12 +40,15 @@ export default async function globalSetup() {
 
   // Close the app instance
   console.log('Integration test database setup complete.');
-  await app.close();
 
-  return () => {
+  return async () => {
     console.log('Tearing down integration test database...');
 
     // Drop the test database
     execSync('pnpm prisma:migrate:reset:test', { stdio: 'inherit' });
+    await app.redis.flushall();
+    await app.close();
+
+    console.log('Integration test database torn down.');
   };
 }
