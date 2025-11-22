@@ -223,4 +223,130 @@ describe('AuthorService', async () => {
       );
     });
   });
+
+  describe('updateAuthor', () => {
+    it('should call prisma.author.update with correct author_id and data', async () => {
+      const authorId = faker.string.uuid();
+      const updateData = {
+        name: faker.person.fullName(),
+        short_biography: faker.lorem.sentence(),
+        biography: faker.lorem.paragraphs(2),
+        date_of_birth: faker.date.past().toISOString(),
+        date_of_death: null,
+        slug: faker.lorem.slug(),
+        nationality: faker.location.country()
+      };
+
+      await authorService.updateAuthor(authorId, updateData);
+
+      expect(app.prisma.author.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            author_id: authorId
+          },
+          data: {
+            ...updateData
+          }
+        })
+      );
+    });
+
+    it('should return the updated author', async () => {
+      const authorId = faker.string.uuid();
+      const updateData = {
+        name: faker.person.fullName(),
+        short_biography: faker.lorem.sentence(),
+        biography: faker.lorem.paragraphs(2),
+        date_of_birth: faker.date.past().toISOString(),
+        date_of_death: null,
+        slug: faker.lorem.slug(),
+        nationality: faker.location.country()
+      };
+
+      const updatedAuthor = {
+        ...updateData,
+        author_id: authorId,
+        date_of_birth: new Date(updateData.date_of_birth),
+        date_of_death: null,
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime(),
+        image_url: null
+      } as unknown as Awaited<ReturnType<typeof app.prisma.author.update>>;
+
+      // Mock Prisma to return the updated author
+      vi.mocked(app.prisma.author.update).mockResolvedValueOnce(updatedAuthor);
+
+      const result = await authorService.updateAuthor(authorId, updateData);
+
+      expect(result).toEqual(updatedAuthor);
+    });
+
+    it('should throw 404 error if author to update does not exist', async () => {
+      const authorId = faker.string.uuid();
+      const updateData = {
+        name: faker.person.fullName(),
+        short_biography: faker.lorem.sentence(),
+        biography: faker.lorem.paragraphs(2),
+        date_of_birth: faker.date.past().toISOString(),
+        date_of_death: null,
+        slug: faker.lorem.slug(),
+        nationality: faker.location.country()
+      };
+
+      // Mock Prisma to throw not found error
+      vi.mocked(app.prisma.author.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(authorService.updateAuthor(authorId, updateData)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[NotFoundError: Author with the given ID does not exist.]`
+      );
+    });
+
+    it('should throw 409 error if slug conflicts with existing author', async () => {
+      const authorId = faker.string.uuid();
+      const updateData = {
+        name: faker.person.fullName(),
+        short_biography: faker.lorem.sentence(),
+        biography: faker.lorem.paragraphs(2),
+        date_of_birth: faker.date.past().toISOString(),
+        date_of_death: null,
+        slug: faker.lorem.slug(),
+        nationality: faker.location.country()
+      };
+
+      // Mock Prisma to throw unique constraint violation error
+      vi.mocked(app.prisma.author.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(authorService.updateAuthor(authorId, updateData)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[ConflictError: Author with the given slug already exists.]`
+      );
+    });
+
+    it('should rethrow other errors from prisma', async () => {
+      const authorId = faker.string.uuid();
+      const updateData = {
+        name: faker.person.fullName(),
+        short_biography: faker.lorem.sentence(),
+        biography: faker.lorem.paragraphs(2),
+        date_of_birth: faker.date.past().toISOString(),
+        date_of_death: null,
+        slug: faker.lorem.slug(),
+        nationality: faker.location.country()
+      };
+
+      // Mock Prisma to throw a generic error
+      vi.mocked(app.prisma.author.update).mockRejectedValueOnce(new Error('Some other error'));
+
+      await expect(authorService.updateAuthor(authorId, updateData)).rejects.toThrowError('Some other error');
+    });
+  });
 });

@@ -71,4 +71,38 @@ export default class AuthorService {
 
     return author;
   }
+
+  public async updateAuthor(
+    author_id: string,
+    data: {
+      name: string;
+      short_biography: string;
+      biography: string;
+      date_of_birth: string | null;
+      date_of_death: string | null;
+      nationality: string | null;
+      slug: string;
+    }
+  ) {
+    try {
+      const updatedAuthor = await this.fastify.prisma.author.update({
+        where: { author_id },
+        data: {
+          ...data
+        }
+      });
+
+      return updatedAuthor;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case 'P2025':
+            throw this.fastify.httpErrors.notFound('Author with the given ID does not exist.');
+          case 'P2002':
+            throw this.fastify.httpErrors.conflict('Author with the given slug already exists.');
+        }
+      }
+      throw error;
+    }
+  }
 }

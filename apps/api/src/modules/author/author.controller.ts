@@ -1,4 +1,4 @@
-import { CreateAuthorSchema, DeleteAuthorSchema, GetAuthorBySlugSchema } from './author.schema';
+import { CreateAuthorSchema, DeleteAuthorSchema, GetAuthorBySlugSchema, UpdateAuthorSchema } from './author.schema';
 import AuthorService from './author.service';
 
 export default class AuthorController {
@@ -76,6 +76,35 @@ export default class AuthorController {
         date_of_death: author.date_of_death?.toISOString() || null,
         created_at: author.created_at.toISOString(),
         updated_at: author.updated_at.toISOString()
+      }
+    });
+  }
+
+  public async updateAuthor(
+    req: FastifyRequestTypeBox<typeof UpdateAuthorSchema>,
+    reply: FastifyReplyTypeBox<typeof UpdateAuthorSchema>
+  ) {
+    const { author_id } = req.params;
+    const { name, short_biography, biography, date_of_birth, date_of_death, nationality, slug } = req.body;
+
+    const updatedAuthor = await this.authorService.updateAuthor(author_id, {
+      name,
+      short_biography,
+      biography,
+      date_of_birth,
+      date_of_death,
+      nationality,
+      slug
+    });
+
+    return reply.status(200).send({
+      message: 'Author updated successfully',
+      data: {
+        ...updatedAuthor,
+        date_of_birth: updatedAuthor.date_of_birth?.toISOString() || null,
+        date_of_death: updatedAuthor.date_of_death?.toISOString() || null,
+        created_at: updatedAuthor.created_at.toISOString(),
+        updated_at: updatedAuthor.updated_at.toISOString()
       }
     });
   }
