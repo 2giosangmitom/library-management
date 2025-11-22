@@ -1,4 +1,4 @@
-import { CreateAuthorSchema } from './author.schema';
+import { CreateAuthorSchema, DeleteAuthorSchema } from './author.schema';
 import AuthorService from './author.service';
 
 export default class AuthorController {
@@ -43,6 +43,20 @@ export default class AuthorController {
         created_at: createdAuthor.created_at.toISOString(),
         updated_at: createdAuthor.updated_at.toISOString()
       }
+    });
+  }
+
+  public async deleteAuthor(
+    req: FastifyRequestTypeBox<typeof DeleteAuthorSchema>,
+    reply: FastifyReplyTypeBox<typeof DeleteAuthorSchema>
+  ) {
+    const { author_id } = req.params;
+
+    const deletedAuthor = await this.authorService.deleteAuthor(author_id);
+
+    return reply.status(200).send({
+      message: 'Author deleted successfully',
+      data: deletedAuthor
     });
   }
 }

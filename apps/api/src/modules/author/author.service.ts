@@ -41,4 +41,22 @@ export default class AuthorService {
       throw error;
     }
   }
+
+  public async deleteAuthor(author_id: string) {
+    try {
+      const deletedAuthor = await this.fastify.prisma.author.delete({
+        select: { author_id: true, name: true },
+        where: { author_id }
+      });
+
+      return deletedAuthor;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw this.fastify.httpErrors.notFound('Author with the given ID does not exist.');
+        }
+      }
+      throw error;
+    }
+  }
 }

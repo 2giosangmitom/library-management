@@ -113,4 +113,60 @@ describe('AuthorService', async () => {
       );
     });
   });
+
+  describe('deleteAuthor', () => {
+    it('should call prisma.author.delete with correct author_id', async () => {
+      const authorId = faker.string.uuid();
+
+      await authorService.deleteAuthor(authorId);
+
+      expect(app.prisma.author.delete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            author_id: authorId
+          }
+        })
+      );
+    });
+
+    it('should return the deleted author', async () => {
+      const authorId = faker.string.uuid();
+      const deletedAuthor = {
+        author_id: authorId,
+        name: faker.person.fullName()
+      } as unknown as Awaited<ReturnType<typeof app.prisma.author.delete>>;
+
+      // Mock Prisma to return the deleted author
+      vi.mocked(app.prisma.author.delete).mockResolvedValueOnce(deletedAuthor);
+
+      const result = await authorService.deleteAuthor(authorId);
+
+      expect(result).toEqual(deletedAuthor);
+    });
+
+    it("should throw 404 error if author doesn't exist", async () => {
+      const authorId = faker.string.uuid();
+
+      // Mock Prisma to throw not found error
+      vi.mocked(app.prisma.author.delete).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(authorService.deleteAuthor(authorId)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[NotFoundError: Author with the given ID does not exist.]`
+      );
+    });
+
+    it('should rethrow other errors from prisma', async () => {
+      const authorId = faker.string.uuid();
+
+      // Mock Prisma to throw a generic error
+      vi.mocked(app.prisma.author.delete).mockRejectedValueOnce(new Error('Some other error'));
+
+      await expect(authorService.deleteAuthor(authorId)).rejects.toThrowError('Some other error');
+    });
+  });
 });

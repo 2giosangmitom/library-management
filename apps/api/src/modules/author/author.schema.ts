@@ -36,3 +36,24 @@ export const CreateAuthorSchema = {
     500: { $ref: 'HttpError' }
   }
 } satisfies FastifySchema;
+
+export const DeleteAuthorSchema = {
+  summary: 'Delete an author',
+  description: 'Endpoint to delete an author by their ID.',
+  params: Type.Object({
+    author_id: Type.String({ format: 'uuid' })
+  }),
+  security: [{ JWT: [] }],
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        author_id: Type.String({ format: 'uuid' }),
+        name: Type.String()
+      })
+    }),
+    403: { $ref: 'HttpError' },
+    404: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
+  }
+} satisfies FastifySchema;

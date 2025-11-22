@@ -1,6 +1,6 @@
-import { isAdminOrLibrarianHook } from '@src/hooks/auth';
+import { isAdminOrLibrarianHook } from '@hooks/auth';
 import AuthorController from './author.controller';
-import { CreateAuthorSchema } from './author.schema';
+import { CreateAuthorSchema, DeleteAuthorSchema } from './author.schema';
 
 export default function authorRoutes(fastify: FastifyTypeBox) {
   const authorController = AuthorController.getInstance(fastify);
@@ -10,5 +10,10 @@ export default function authorRoutes(fastify: FastifyTypeBox) {
     instance.addHook('preHandler', isAdminOrLibrarianHook(fastify));
 
     instance.post('/', { schema: CreateAuthorSchema }, authorController.createAuthor.bind(authorController));
+    instance.delete(
+      '/:author_id',
+      { schema: DeleteAuthorSchema },
+      authorController.deleteAuthor.bind(authorController)
+    );
   });
 }
