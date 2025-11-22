@@ -1,6 +1,6 @@
 import { isAdminOrLibrarianHook } from '@hooks/auth';
 import AuthorController from './author.controller';
-import { CreateAuthorSchema, DeleteAuthorSchema } from './author.schema';
+import { CreateAuthorSchema, DeleteAuthorSchema, GetAuthorBySlugSchema } from './author.schema';
 
 export default function authorRoutes(fastify: FastifyTypeBox) {
   const authorController = AuthorController.getInstance(fastify);
@@ -16,4 +16,7 @@ export default function authorRoutes(fastify: FastifyTypeBox) {
       authorController.deleteAuthor.bind(authorController)
     );
   });
+
+  // Public routes
+  fastify.get('/:slug', { schema: GetAuthorBySlugSchema }, authorController.getAuthorBySlug.bind(authorController));
 }

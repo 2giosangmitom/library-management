@@ -59,4 +59,16 @@ export default class AuthorService {
       throw error;
     }
   }
+
+  public async getAuthorBySlug(slug: string) {
+    const author = await this.fastify.prisma.author.findUnique({
+      where: { slug }
+    });
+
+    if (!author) {
+      throw this.fastify.httpErrors.notFound('Author with the given slug does not exist.');
+    }
+
+    return author;
+  }
 }
