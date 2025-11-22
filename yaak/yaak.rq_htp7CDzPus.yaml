@@ -2,7 +2,7 @@ type: http_request
 model: http_request
 id: rq_htp7CDzPus
 createdAt: 2025-11-21T14:28:02.927435114
-updatedAt: 2025-11-21T14:38:02.512240957
+updatedAt: 2025-11-22T06:32:21.023837307
 workspaceId: wk_nUPATyuKk9
 folderId: null
 authentication: {}
@@ -27,12 +27,12 @@ headers:
   id: UYneEd2x2u
 - enabled: true
   name: Authorization
-  value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzdWIiOiIxNjE5NmNkMi1hNTlmLTRiZWItYjU1My1mNzk4YTY2ZGRlYzYiLCJyb2xlIjoiTUVNQkVSIiwianRpIjoiREx6WFlhd3RZbEhYb09sYzFldy1XIiwiaWF0IjoxNzYzNzM1ODY2LCJleHAiOjE3NjM3MzY0NjZ9.NErBjgM8MjJp6zW4N16TlqgWiTAOqBZa-8YwFBG7r5s
+  value: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXAiOiJhY2Nlc3NfdG9rZW4iLCJzdWIiOiIxNjE5NmNkMi1hNTlmLTRiZWItYjU1My1mNzk4YTY2ZGRlYzYiLCJyb2xlIjoiQURNSU4iLCJqdGkiOiJRX3F4N2lNdGhZVGZsVGs5WjI3NmsiLCJpYXQiOjE3NjM3OTMwMTksImV4cCI6MTc2Mzc5MzYxOX0.XnybWVCeGIM0mvJVyNSpj8fPQmz-7IfB7fIOPBFh3U4
   id: qkIwAfRsju
 - enabled: true
   name: ''
   value: ''
-  id: a0tKKtE30f
+  id: bRFJth4hhw
 method: POST
 name: ''
 sortPriority: 4000.0
