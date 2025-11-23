@@ -238,3 +238,19 @@ export default class ModuleController {
   }
 }
 ```
+
+- Example of defining routes:
+
+```ts
+import { ModuleController } from './module.controller';
+
+export default function moduleRoutes(fastify: FastifyTypeBox) {
+  const moduleController = ModuleController.getInstance(fastify);
+
+  fastify.get('/', async (request, reply) => {
+    return moduleController.getModules(request, reply);
+  });
+
+  // Define other routes...
+}
+```
