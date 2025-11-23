@@ -184,18 +184,18 @@ describe('Authentication tests', async () => {
 ```
 src/modules/
 └── user/
-    ├── user.controller.ts
-    ├── user.hooks.ts
-    ├── user.routes.ts
-    ├── user.schema.ts
-    └── user.service.ts
+    ├── controllers.ts
+    ├── autohooks.ts
+    ├── routes.ts
+    ├── schemas.ts
+    └── services.ts
 ```
 
-- `*.routes.ts`: A Fastify plugin for defining module routes.
-- `*.controller.ts`: Handles incoming requests and responses.
-- `*.service.ts`: Contains business logic and interacts with the database.
-- `*.schema.ts`: Defines Fastify schema for a route, using TypeBox.
-- `*.hooks.ts`: A Fastify plugin for adding hooks to the module.
+- `routes.ts`: A Fastify plugin for defining module routes.
+- `controllers.ts`: Handles incoming requests and responses.
+- `services.ts`: Contains business logic and interacts with the database.
+- `schemas.ts`: Defines Fastify schema for a route, using TypeBox.
+- `autohooks.ts`: A Fastify plugin for adding hooks to the module.
 
 The controller and service should encapsulate in a class structure for better organization and testability. Using dependency injection is encouraged for managing dependencies within modules, and using the Singleton pattern is recommended to ensure a single instance throughout the application.
 
