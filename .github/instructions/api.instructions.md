@@ -216,6 +216,8 @@ export default class ModuleService {
     }
     return ModuleService.instance;
   }
+
+  // Service methods go here
 }
 ```
 
@@ -236,6 +238,8 @@ export default class ModuleController {
     }
     return ModuleController.instance;
   }
+
+  // Controller methods go here
 }
 ```
 
@@ -247,9 +251,7 @@ import { ModuleController } from './module.controller';
 export default function moduleRoutes(fastify: FastifyTypeBox) {
   const moduleController = ModuleController.getInstance(fastify);
 
-  fastify.get('/', async (request, reply) => {
-    return moduleController.getModules(request, reply);
-  });
+  fastify.get('/', moduleController.getAll.bind(moduleController));
 
   // Define other routes...
 }
