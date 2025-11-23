@@ -1,4 +1,4 @@
-import AuthController from '@modules/auth/auth.controller';
+import AuthController from '@modules/auth/controllers';
 import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
 
 describe('AuthController', async () => {

@@ -1,5 +1,5 @@
-import AuthService from './auth.service';
-import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './auth.schema';
+import AuthService from './services';
+import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './schemas';
 import { refreshTokenExpiration } from '@src/constants';
 import { nanoid } from 'nanoid';
 

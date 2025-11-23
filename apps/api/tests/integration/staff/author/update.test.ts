@@ -1,7 +1,7 @@
-import { build, users } from '../helpers/build';
+import { build, users } from '@tests/integration/helpers/build';
 import { faker } from '@faker-js/faker';
 
-describe('PUT /api/author/:author_id', async () => {
+describe('PUT /api/staff/author/:author_id', async () => {
   const app = await build();
   let admin_token: string;
 
@@ -36,7 +36,7 @@ describe('PUT /api/author/:author_id', async () => {
     // First, create an author to update later
     const createResponse = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       headers: {
         authorization: `Bearer ${admin_token}`
       },
@@ -59,7 +59,7 @@ describe('PUT /api/author/:author_id', async () => {
 
     const updateResponse = await app.inject({
       method: 'PUT',
-      url: `/api/author/${createdAuthor.author_id}`,
+      url: `/api/staff/author/${createdAuthor.author_id}`,
       headers: {
         authorization: `Bearer ${admin_token}`
       },
@@ -94,7 +94,7 @@ describe('PUT /api/author/:author_id', async () => {
 
     const updateResponse = await app.inject({
       method: 'PUT',
-      url: `/api/author/${nonExistingAuthorId}`,
+      url: `/api/staff/author/${nonExistingAuthorId}`,
       headers: {
         authorization: `Bearer ${admin_token}`
       },

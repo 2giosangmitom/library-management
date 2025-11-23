@@ -1,21 +1,24 @@
-import { CreateAuthorSchema, DeleteAuthorSchema, GetAuthorBySlugSchema, UpdateAuthorSchema } from './author.schema';
-import AuthorService from './author.service';
+import { CreateAuthorSchema, DeleteAuthorSchema, UpdateAuthorSchema } from './schemas';
+import StaffAuthorService from './services';
 
-export default class AuthorController {
-  private static instance: AuthorController;
-  private authorService: AuthorService;
+export default class StaffAuthorController {
+  private static instance: StaffAuthorController;
+  private staffAuthorService: StaffAuthorService;
   private fastify: FastifyTypeBox;
 
-  private constructor(fastify: FastifyTypeBox, authorService: AuthorService) {
+  private constructor(fastify: FastifyTypeBox, staffAuthorService: StaffAuthorService) {
     this.fastify = fastify;
-    this.authorService = authorService;
+    this.staffAuthorService = staffAuthorService;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, authorService = AuthorService.getInstance(fastify)) {
-    if (!AuthorController.instance) {
-      AuthorController.instance = new AuthorController(fastify, authorService);
+  public static getInstance(
+    fastify: FastifyTypeBox,
+    staffAuthorService = StaffAuthorService.getInstance(fastify)
+  ): StaffAuthorController {
+    if (!StaffAuthorController.instance) {
+      StaffAuthorController.instance = new StaffAuthorController(fastify, staffAuthorService);
     }
-    return AuthorController.instance;
+    return StaffAuthorController.instance;
   }
 
   public async createAuthor(
@@ -24,7 +27,7 @@ export default class AuthorController {
   ) {
     const { name, short_biography, biography, date_of_birth, date_of_death, nationality, slug } = req.body;
 
-    const createdAuthor = await this.authorService.createAuthor({
+    const createdAuthor = await this.staffAuthorService.createAuthor({
       name,
       short_biography,
       biography,
@@ -52,31 +55,11 @@ export default class AuthorController {
   ) {
     const { author_id } = req.params;
 
-    const deletedAuthor = await this.authorService.deleteAuthor(author_id);
+    const deletedAuthor = await this.staffAuthorService.deleteAuthor(author_id);
 
     return reply.status(200).send({
       message: 'Author deleted successfully',
       data: deletedAuthor
-    });
-  }
-
-  public async getAuthorBySlug(
-    req: FastifyRequestTypeBox<typeof GetAuthorBySlugSchema>,
-    reply: FastifyReplyTypeBox<typeof GetAuthorBySlugSchema>
-  ) {
-    const { slug } = req.params;
-
-    const author = await this.authorService.getAuthorBySlug(slug);
-
-    return reply.status(200).send({
-      message: 'Author retrieved successfully',
-      data: {
-        ...author,
-        date_of_birth: author.date_of_birth?.toISOString() || null,
-        date_of_death: author.date_of_death?.toISOString() || null,
-        created_at: author.created_at.toISOString(),
-        updated_at: author.updated_at.toISOString()
-      }
     });
   }
 
@@ -87,7 +70,7 @@ export default class AuthorController {
     const { author_id } = req.params;
     const { name, short_biography, biography, date_of_birth, date_of_death, nationality, slug } = req.body;
 
-    const updatedAuthor = await this.authorService.updateAuthor(author_id, {
+    const updatedAuthor = await this.staffAuthorService.updateAuthor(author_id, {
       name,
       short_biography,
       biography,

@@ -29,9 +29,9 @@ export async function buildApp() {
     dir: `${__dirname}/modules`,
     encapsulate: true,
     ignorePattern: /.*.(ts|js)/,
-    indexPattern: /.*.routes.(ts|js)/,
+    indexPattern: /routes.(ts|js)/,
     autoHooks: true,
-    autoHooksPattern: /.*.hooks.(ts|js)/,
+    autoHooksPattern: /autohooks.(ts|js)/,
     cascadeHooks: true,
     options: {
       prefix: '/api'

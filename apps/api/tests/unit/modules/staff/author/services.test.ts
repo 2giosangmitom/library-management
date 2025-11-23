@@ -1,11 +1,11 @@
-import AuthorService from '@modules/author/author.service';
+import StaffAuthorService from '@modules/staff/author/services';
 import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
 import { faker } from '@faker-js/faker';
 import { Prisma } from '@src/generated/prisma/client';
 
-describe('AuthorService', async () => {
+describe('StaffAuthorService', async () => {
   const app = await buildMockFastify();
-  const authorService = AuthorService.getInstance(app);
+  const staffAuthorService = StaffAuthorService.getInstance(app);
 
   afterEach(() => {
     vi.restoreAllMocks();
@@ -24,7 +24,7 @@ describe('AuthorService', async () => {
         nationality: faker.location.country()
       };
 
-      await authorService.createAuthor(authorData);
+      await staffAuthorService.createAuthor(authorData);
 
       expect(app.prisma.author.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -54,7 +54,7 @@ describe('AuthorService', async () => {
         })
       );
 
-      await expect(authorService.createAuthor(authorData)).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(staffAuthorService.createAuthor(authorData)).rejects.toThrowErrorMatchingInlineSnapshot(
         `[ConflictError: Author with the given slug already exists.]`
       );
     });
@@ -73,7 +73,7 @@ describe('AuthorService', async () => {
       // Mock Prisma to throw a generic error
       vi.mocked(app.prisma.author.create).mockRejectedValueOnce(new Error('Some other error'));
 
-      await expect(authorService.createAuthor(authorData)).rejects.toThrowError('Some other error');
+      await expect(staffAuthorService.createAuthor(authorData)).rejects.toThrowError('Some other error');
     });
 
     it('should return the created author on success', async () => {
@@ -98,7 +98,7 @@ describe('AuthorService', async () => {
         image_url: null
       });
 
-      const result = await authorService.createAuthor(authorData);
+      const result = await staffAuthorService.createAuthor(authorData);
 
       expect(result).toEqual(
         expect.objectContaining({
@@ -118,7 +118,7 @@ describe('AuthorService', async () => {
     it('should call prisma.author.delete with correct author_id', async () => {
       const authorId = faker.string.uuid();
 
-      await authorService.deleteAuthor(authorId);
+      await staffAuthorService.deleteAuthor(authorId);
 
       expect(app.prisma.author.delete).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -139,7 +139,7 @@ describe('AuthorService', async () => {
       // Mock Prisma to return the deleted author
       vi.mocked(app.prisma.author.delete).mockResolvedValueOnce(deletedAuthor);
 
-      const result = await authorService.deleteAuthor(authorId);
+      const result = await staffAuthorService.deleteAuthor(authorId);
 
       expect(result).toEqual(deletedAuthor);
     });
@@ -155,7 +155,7 @@ describe('AuthorService', async () => {
         })
       );
 
-      await expect(authorService.deleteAuthor(authorId)).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(staffAuthorService.deleteAuthor(authorId)).rejects.toThrowErrorMatchingInlineSnapshot(
         `[NotFoundError: Author with the given ID does not exist.]`
       );
     });
@@ -166,61 +166,7 @@ describe('AuthorService', async () => {
       // Mock Prisma to throw a generic error
       vi.mocked(app.prisma.author.delete).mockRejectedValueOnce(new Error('Some other error'));
 
-      await expect(authorService.deleteAuthor(authorId)).rejects.toThrowError('Some other error');
-    });
-  });
-
-  describe('getAuthorBySlug', () => {
-    it('should call prisma.author.findUnique with correct slug', async () => {
-      const slug = faker.lorem.slug();
-
-      vi.mocked(app.prisma.author.findUnique).mockResolvedValueOnce(
-        {} as unknown as Awaited<ReturnType<typeof app.prisma.author.findUnique>> // Prevent undefined return
-      );
-      await authorService.getAuthorBySlug(slug);
-
-      expect(app.prisma.author.findUnique).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            slug
-          }
-        })
-      );
-    });
-
-    it('should return the author if found', async () => {
-      const slug = faker.lorem.slug();
-      const author = {
-        author_id: faker.string.uuid(),
-        name: faker.person.fullName(),
-        short_biography: faker.lorem.sentence(),
-        biography: faker.lorem.paragraphs(2),
-        date_of_birth: faker.date.past(),
-        date_of_death: null,
-        slug,
-        nationality: faker.location.country(),
-        created_at: faker.date.anytime(),
-        updated_at: faker.date.anytime(),
-        image_url: null
-      } as unknown as Awaited<ReturnType<typeof app.prisma.author.findUnique>>;
-
-      // Mock Prisma to return the author
-      vi.mocked(app.prisma.author.findUnique).mockResolvedValueOnce(author);
-
-      const result = await authorService.getAuthorBySlug(slug);
-
-      expect(result).toEqual(author);
-    });
-
-    it("should throw 404 error if author with given slug doesn't exist", async () => {
-      const slug = faker.lorem.slug();
-
-      // Mock Prisma to return null (not found)
-      vi.mocked(app.prisma.author.findUnique).mockResolvedValueOnce(null);
-
-      await expect(authorService.getAuthorBySlug(slug)).rejects.toThrowErrorMatchingInlineSnapshot(
-        `[NotFoundError: Author with the given slug does not exist.]`
-      );
+      await expect(staffAuthorService.deleteAuthor(authorId)).rejects.toThrowError('Some other error');
     });
   });
 
@@ -237,7 +183,7 @@ describe('AuthorService', async () => {
         nationality: faker.location.country()
       };
 
-      await authorService.updateAuthor(authorId, updateData);
+      await staffAuthorService.updateAuthor(authorId, updateData);
 
       expect(app.prisma.author.update).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -276,7 +222,7 @@ describe('AuthorService', async () => {
       // Mock Prisma to return the updated author
       vi.mocked(app.prisma.author.update).mockResolvedValueOnce(updatedAuthor);
 
-      const result = await authorService.updateAuthor(authorId, updateData);
+      const result = await staffAuthorService.updateAuthor(authorId, updateData);
 
       expect(result).toEqual(updatedAuthor);
     });
@@ -301,7 +247,7 @@ describe('AuthorService', async () => {
         })
       );
 
-      await expect(authorService.updateAuthor(authorId, updateData)).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(staffAuthorService.updateAuthor(authorId, updateData)).rejects.toThrowErrorMatchingInlineSnapshot(
         `[NotFoundError: Author with the given ID does not exist.]`
       );
     });
@@ -326,7 +272,7 @@ describe('AuthorService', async () => {
         })
       );
 
-      await expect(authorService.updateAuthor(authorId, updateData)).rejects.toThrowErrorMatchingInlineSnapshot(
+      await expect(staffAuthorService.updateAuthor(authorId, updateData)).rejects.toThrowErrorMatchingInlineSnapshot(
         `[ConflictError: Author with the given slug already exists.]`
       );
     });
@@ -346,7 +292,7 @@ describe('AuthorService', async () => {
       // Mock Prisma to throw a generic error
       vi.mocked(app.prisma.author.update).mockRejectedValueOnce(new Error('Some other error'));
 
-      await expect(authorService.updateAuthor(authorId, updateData)).rejects.toThrowError('Some other error');
+      await expect(staffAuthorService.updateAuthor(authorId, updateData)).rejects.toThrowError('Some other error');
     });
   });
 });

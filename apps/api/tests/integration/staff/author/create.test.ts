@@ -1,7 +1,7 @@
-import { build, users } from '../helpers/build';
+import { build, users } from '@tests/integration/helpers/build';
 import { faker } from '@faker-js/faker';
 
-describe('POST /api/author', async () => {
+describe('POST /api/staff/author', async () => {
   const app = await build();
   let admin_token: string;
   let member_token: string;
@@ -48,7 +48,7 @@ describe('POST /api/author', async () => {
   it('should reject unauthenticated requests', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       payload: {
         name: faker.person.fullName(),
         short_biography: faker.lorem.sentence(),
@@ -74,7 +74,7 @@ describe('POST /api/author', async () => {
   it('should reject create request for MEMBER role', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       headers: {
         authorization: `Bearer ${member_token}`
       },
@@ -112,7 +112,7 @@ describe('POST /api/author', async () => {
 
     const response = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       headers: {
         authorization: `Bearer ${librarian_token}`
       },
@@ -135,7 +135,7 @@ describe('POST /api/author', async () => {
 
     const response = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       headers: {
         authorization: `Bearer ${admin_token}`
       },
@@ -161,7 +161,7 @@ describe('POST /api/author', async () => {
 
     const firstResponse = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       headers: {
         authorization: `Bearer ${admin_token}`
       },
@@ -183,7 +183,7 @@ describe('POST /api/author', async () => {
 
     const secondResponse = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       headers: {
         authorization: `Bearer ${admin_token}`
       },

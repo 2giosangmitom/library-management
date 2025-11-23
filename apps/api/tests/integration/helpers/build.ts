@@ -10,8 +10,12 @@ import sensible from '@plugins/sensible';
 import cookie from '@plugins/cookie';
 import auth from '@plugins/auth';
 
-import authRoutes from '@modules/auth/auth.routes';
-import authorRoutes from '@modules/author/author.routes';
+import authRoutes from '@modules/auth/routes';
+import authHooks from '@modules/auth/autohooks';
+import authorRoutes from '@modules/author/routes';
+import authorHooks from '@modules/author/autohooks';
+import staffAuthorRoutes from '@modules/staff/author/routes';
+import staffHooks from '@modules/staff/autohooks';
 
 export async function build(): Promise<FastifyTypeBox> {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -36,6 +40,7 @@ export async function build(): Promise<FastifyTypeBox> {
       // it must have the same context.
       apiInstance.register(
         (instance) => {
+          instance.register(fp(authHooks));
           instance.register(fp(authRoutes));
         },
         { prefix: '/auth' }
@@ -43,9 +48,24 @@ export async function build(): Promise<FastifyTypeBox> {
 
       apiInstance.register(
         (instance) => {
+          instance.register(fp(authorHooks));
           instance.register(fp(authorRoutes));
         },
         { prefix: '/author' }
+      );
+
+      apiInstance.register(
+        (staffInstance) => {
+          staffInstance.register(fp(staffHooks));
+
+          staffInstance.register(
+            (instance) => {
+              instance.register(fp(staffAuthorRoutes));
+            },
+            { prefix: '/author' }
+          );
+        },
+        { prefix: '/staff' }
       );
     },
     { prefix: '/api' }

@@ -1,4 +1,4 @@
-import AuthService from '@modules/auth/auth.service';
+import AuthService from '@modules/auth/services';
 import { Role } from '@src/generated/prisma/enums';
 import { faker } from '@faker-js/faker';
 import { buildMockFastify } from '@tests/unit/helpers/mockFastify';

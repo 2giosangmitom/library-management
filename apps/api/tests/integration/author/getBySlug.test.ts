@@ -36,7 +36,7 @@ describe('GET /api/author/:slug', async () => {
     // First, create an author to retrieve later
     const createResponse = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       headers: {
         authorization: `Bearer ${admin_token}`
       },

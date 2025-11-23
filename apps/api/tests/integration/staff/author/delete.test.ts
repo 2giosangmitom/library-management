@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
-import { build, users } from '../helpers/build';
+import { build, users } from '@tests/integration/helpers/build';
 
-describe('DELETE /api/author/:author_id', async () => {
+describe('DELETE /api/staff/author/:author_id', async () => {
   const app = await build();
   let adminToken: string;
   let librarianToken: string;
@@ -49,7 +49,7 @@ describe('DELETE /api/author/:author_id', async () => {
   it('should reject deletion when no token is provided', async () => {
     const response = await app.inject({
       method: 'DELETE',
-      url: `/api/author/${faker.string.uuid()}`
+      url: `/api/staff/author/${faker.string.uuid()}`
     });
 
     expect(response.statusCode).toBe(401);
@@ -58,7 +58,7 @@ describe('DELETE /api/author/:author_id', async () => {
   it('should reject deletion when the provided author id is not a valid uuid', async () => {
     const response = await app.inject({
       method: 'DELETE',
-      url: `/api/author/invalid-uuid`,
+      url: `/api/staff/author/invalid-uuid`,
       headers: {
         Authorization: `Bearer ${adminToken}`
       }
@@ -78,7 +78,7 @@ describe('DELETE /api/author/:author_id', async () => {
   it('should reject deletion when the user is a member', async () => {
     const response = await app.inject({
       method: 'DELETE',
-      url: `/api/author/${faker.string.uuid()}`,
+      url: `/api/staff/author/${faker.string.uuid()}`,
       headers: {
         Authorization: `Bearer ${memberToken}`
       }
@@ -91,7 +91,7 @@ describe('DELETE /api/author/:author_id', async () => {
     // First, create a new author to delete
     const createAuthorResponse = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       headers: {
         Authorization: `Bearer ${adminToken}`
       },
@@ -111,7 +111,7 @@ describe('DELETE /api/author/:author_id', async () => {
     // Now, delete the created author
     const deleteAuthorResponse = await app.inject({
       method: 'DELETE',
-      url: `/api/author/${authorId}`,
+      url: `/api/staff/author/${authorId}`,
       headers: {
         Authorization: `Bearer ${adminToken}`
       }
@@ -130,7 +130,7 @@ describe('DELETE /api/author/:author_id', async () => {
     // First, create a new author to delete
     const createAuthorResponse = await app.inject({
       method: 'POST',
-      url: '/api/author',
+      url: '/api/staff/author',
       headers: {
         Authorization: `Bearer ${librarianToken}`
       },
@@ -150,7 +150,7 @@ describe('DELETE /api/author/:author_id', async () => {
     // Now, delete the created author
     const deleteAuthorResponse = await app.inject({
       method: 'DELETE',
-      url: `/api/author/${authorId}`,
+      url: `/api/staff/author/${authorId}`,
       headers: {
         Authorization: `Bearer ${librarianToken}`
       }
@@ -168,7 +168,7 @@ describe('DELETE /api/author/:author_id', async () => {
   it('should return 404 when trying to delete a non-existing author', async () => {
     const response = await app.inject({
       method: 'DELETE',
-      url: `/api/author/${faker.string.uuid()}`,
+      url: `/api/staff/author/${faker.string.uuid()}`,
       headers: {
         Authorization: `Bearer ${adminToken}`
       }

@@ -1,4 +1,4 @@
-import AuthorController from '@modules/author/author.controller';
+import AuthorController from '@modules/author/controllers';
 import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
 
 describe('AuthorController', async () => {

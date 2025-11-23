@@ -1,18 +1,18 @@
 import { Prisma } from '@src/generated/prisma/client';
 
-export default class AuthorService {
-  private static instance: AuthorService;
+export default class StaffAuthorService {
+  private static instance: StaffAuthorService;
   private fastify: FastifyTypeBox;
 
   private constructor(fastify: FastifyTypeBox) {
     this.fastify = fastify;
   }
 
-  public static getInstance(fastify: FastifyTypeBox): AuthorService {
-    if (!AuthorService.instance) {
-      AuthorService.instance = new AuthorService(fastify);
+  public static getInstance(fastify: FastifyTypeBox): StaffAuthorService {
+    if (!StaffAuthorService.instance) {
+      StaffAuthorService.instance = new StaffAuthorService(fastify);
     }
-    return AuthorService.instance;
+    return StaffAuthorService.instance;
   }
 
   public async createAuthor(data: {
@@ -58,18 +58,6 @@ export default class AuthorService {
       }
       throw error;
     }
-  }
-
-  public async getAuthorBySlug(slug: string) {
-    const author = await this.fastify.prisma.author.findUnique({
-      where: { slug }
-    });
-
-    if (!author) {
-      throw this.fastify.httpErrors.notFound('Author with the given slug does not exist.');
-    }
-
-    return author;
   }
 
   public async updateAuthor(
