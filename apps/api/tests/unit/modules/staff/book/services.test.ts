@@ -112,6 +112,55 @@ describe('StaffBookService', async () => {
       expect(app.prisma.book.delete).toHaveBeenCalledWith(expect.objectContaining({ where: { book_id: id } }));
     });
 
+    it('should create relations when authors and categories provided', async () => {
+      const data = {
+        title: faker.lorem.sentence(),
+        description: faker.lorem.paragraphs(2),
+        isbn: faker.string.numeric(13),
+        published_at: faker.date.past().toISOString(),
+        publisher_id: null,
+        authors: [faker.string.uuid(), faker.string.uuid()],
+        categories: [faker.string.uuid()]
+      };
+
+      vi.mocked(app.prisma.book.create).mockResolvedValueOnce({
+        ...data,
+        book_id: faker.string.uuid(),
+        published_at: new Date(data.published_at),
+        authors: data.authors.map((author_id) => ({ author_id })),
+        categories: data.categories.map((category_id) => ({ category_id })),
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      } as unknown as Awaited<ReturnType<typeof app.prisma.book.create>>);
+
+      const result = await service.createBook(data);
+
+      expect(app.prisma.book.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            authors: expect.objectContaining({
+              create: expect.arrayContaining([
+                expect.objectContaining({ author: { connect: { author_id: data.authors[0] } } })
+              ])
+            }),
+            categories: expect.objectContaining({
+              create: expect.arrayContaining([
+                expect.objectContaining({ category: { connect: { category_id: data.categories[0] } } })
+              ])
+            })
+          })
+        })
+      );
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          book_id: expect.any(String),
+          authors: expect.any(Array),
+          categories: expect.any(Array)
+        })
+      );
+    });
+
     it('should return deleted book', async () => {
       const id = faker.string.uuid();
       const deleted = { book_id: id, title: faker.lorem.sentence() } as unknown as Awaited<
