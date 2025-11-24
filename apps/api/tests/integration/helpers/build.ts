@@ -18,6 +18,7 @@ import staffAuthorRoutes from '@modules/staff/author/routes';
 import staffCategoryRoutes from '@modules/staff/category/routes';
 import staffHooks from '@modules/staff/autohooks';
 import staffPublisherRoutes from '@modules/staff/publisher/routes';
+import staffBookRoutes from '@modules/staff/book/routes';
 
 export async function build(): Promise<FastifyTypeBox> {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -79,6 +80,13 @@ export async function build(): Promise<FastifyTypeBox> {
               instance.register(fp(staffPublisherRoutes));
             },
             { prefix: '/publisher' }
+          );
+
+          staffInstance.register(
+            (instance) => {
+              instance.register(fp(staffBookRoutes));
+            },
+            { prefix: '/book' }
           );
         },
         { prefix: '/staff' }

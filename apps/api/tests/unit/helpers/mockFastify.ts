@@ -23,6 +23,10 @@ export async function buildMockFastify() {
       update: vi.fn(),
       delete: vi.fn()
     },
+    book: {
+      create: vi.fn(),
+      delete: vi.fn()
+    },
     publisher: {
       create: vi.fn(),
       delete: vi.fn()
