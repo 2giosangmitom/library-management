@@ -15,6 +15,7 @@ import authHooks from '@modules/auth/autohooks';
 import authorRoutes from '@modules/author/routes';
 import authorHooks from '@modules/author/autohooks';
 import staffAuthorRoutes from '@modules/staff/author/routes';
+import staffCategoryRoutes from '@modules/staff/category/routes';
 import staffHooks from '@modules/staff/autohooks';
 
 export async function build(): Promise<FastifyTypeBox> {
@@ -63,6 +64,13 @@ export async function build(): Promise<FastifyTypeBox> {
               instance.register(fp(staffAuthorRoutes));
             },
             { prefix: '/author' }
+          );
+
+          staffInstance.register(
+            (instance) => {
+              instance.register(fp(staffCategoryRoutes));
+            },
+            { prefix: '/category' }
           );
         },
         { prefix: '/staff' }
