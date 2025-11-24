@@ -72,7 +72,7 @@ pnpm --filter api test:coverage
 - To run a single test file:
 
 ```bash
-pnpm --filter api test:file path/to/test/file.ts
+pnpm --filter api test:{unit,integration} path/to/test/file.ts
 ```
 
 ## Writing Tests
@@ -278,3 +278,7 @@ export const ExampleSchema = {
 ## Notes
 
 - An autohook can be cascaded deeply into modules by registering the autohook plugin in the parent of the module. For example, the `isAdminOrLibrarianHook` is registered in the `staff` module, so all child modules under `staff` will have this hook applied automatically. No needed to register it again in child modules.
+- Follow strict TypeScript rules and Fastify best practices for better maintainability and performance.
+- Use `pnpm --filter api typecheck` to check for type errors in the API application.
+- Use `pnpm lint` to run ESLint and ensure code quality.
+- When writing tests for new modules, don't forget to create corresponding mock functions in `mockFastify.ts` to simulate database interactions, register new routes and autohooks in the `build.ts` helper for integration tests.
