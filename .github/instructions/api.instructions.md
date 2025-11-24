@@ -281,4 +281,4 @@ export const ExampleSchema = {
 - Follow strict TypeScript rules and Fastify best practices for better maintainability and performance.
 - Use `pnpm --filter api typecheck` to check for type errors in the API application.
 - Use `pnpm lint` to run ESLint and ensure code quality.
-- When writing tests for new modules, don't forget to create corresponding mock functions in `mockFastify.ts` to simulate database interactions, register new routes and autohooks in the `build.ts` helper for integration tests.
+- When writing tests for new modules, don't forget to create corresponding mock functions in `mockFastify.ts` to simulate database interactions, and register new routes and autohooks in the `build.ts` helper for integration tests.
