@@ -49,13 +49,7 @@ This directory contains the source code for the BookWise API application. The AP
 - `tests/`: Contains unit and integration tests.
 - `types/`: Custom TypeScript type definitions.
 
-## Build and Run
-
-- To build and run the API application, use the following commands in the root directory:
-
-```bash
-pnpm --filter api build
-```
+## Running tests
 
 - To run unit tests:
 
@@ -256,3 +250,31 @@ export default function moduleRoutes(fastify: FastifyTypeBox) {
   // Define other routes...
 }
 ```
+
+- Example of defining schemas using TypeBox:
+
+```ts
+import { Type } from 'typebox';
+import { FastifySchema } from 'fastify';
+
+export const ExampleSchema = {
+  summary: 'Example endpoint',
+  description: 'An example endpoint schema',
+  tags: ['Example'],
+  body: Type.Object({
+    exampleField: Type.String()
+  }),
+  params: Type.Object({
+    id: Type.String({ format: 'uuid' })
+  }),
+  response: {
+    200: Type.Object({
+      message: Type.String()
+    })
+  }
+} as const satisfies FastifySchema;
+```
+
+## Notes
+
+- An autohook can be cascaded deeply into modules by registering the autohook plugin in the parent of the module. For example, the `isAdminOrLibrarianHook` is registered in the `staff` module, so all child modules under `staff` will have this hook applied automatically. No needed to register it again in child modules.
