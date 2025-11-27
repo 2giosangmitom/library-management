@@ -197,4 +197,12 @@ describe('StaffBookService', async () => {
       await expect(service.deleteBook(id)).rejects.toThrowError('Some other error');
     });
   });
+
+  describe('getInstance', () => {
+    it('should return the same instance', () => {
+      const instance1 = StaffBookService.getInstance(app);
+      const instance2 = StaffBookService.getInstance(app);
+      expect(instance1).toBe(instance2);
+    });
+  });
 });

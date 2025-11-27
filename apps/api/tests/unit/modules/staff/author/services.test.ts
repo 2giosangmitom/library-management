@@ -295,4 +295,12 @@ describe('StaffAuthorService', async () => {
       await expect(staffAuthorService.updateAuthor(authorId, updateData)).rejects.toThrowError('Some other error');
     });
   });
+
+  describe('getInstance', () => {
+    it('should return the same instance', () => {
+      const instance1 = StaffAuthorService.getInstance(app);
+      const instance2 = StaffAuthorService.getInstance(app);
+      expect(instance1).toBe(instance2);
+    });
+  });
 });
