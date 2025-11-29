@@ -1,5 +1,5 @@
 import StaffCategoryService from './services';
-import { CreateCategorySchema, DeleteCategorySchema } from './schemas';
+import { CreateCategorySchema, DeleteCategorySchema, UpdateCategorySchema } from './schemas';
 
 export default class StaffCategoryController {
   private static instance: StaffCategoryController;
@@ -45,5 +45,24 @@ export default class StaffCategoryController {
     const deleted = await this.categoryService.deleteCategory(category_id);
 
     return reply.status(200).send({ message: 'Category deleted successfully', data: deleted });
+  }
+
+  public async updateCategory(
+    req: FastifyRequestTypeBox<typeof UpdateCategorySchema>,
+    reply: FastifyReplyTypeBox<typeof UpdateCategorySchema>
+  ) {
+    const { category_id } = req.params;
+    const { name, slug } = req.body;
+
+    const updated = await this.categoryService.updateCategory(category_id, { name, slug });
+
+    return reply.status(200).send({
+      message: 'Category updated successfully.',
+      data: {
+        ...updated,
+        created_at: updated.created_at.toISOString(),
+        updated_at: updated.updated_at.toISOString()
+      }
+    });
   }
 }

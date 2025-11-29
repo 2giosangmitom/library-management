@@ -38,7 +38,8 @@ export async function buildMockFastify() {
     },
     category: {
       create: vi.fn(),
-      delete: vi.fn()
+      delete: vi.fn(),
+      update: vi.fn()
     }
   } as unknown as PrismaClient);
 

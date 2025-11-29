@@ -115,4 +115,55 @@ describe('StaffCategoryService', async () => {
       await expect(service.deleteCategory(id)).rejects.toThrowError('Some other error');
     });
   });
+
+  describe('updateCategory', () => {
+    it('should call prisma.category.update with correct data', async () => {
+      const id = faker.string.uuid();
+      const data = { name: faker.lorem.word() };
+
+      await service.updateCategory(id, data);
+
+      expect(app.prisma.category.update).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { category_id: id }, data: { ...data } })
+      );
+    });
+
+    it('should return updated category', async () => {
+      const id = faker.string.uuid();
+      const data = { name: faker.lorem.word() };
+      const updated = { category_id: id, ...data } as unknown as Awaited<ReturnType<typeof app.prisma.category.update>>;
+
+      vi.mocked(app.prisma.category.update).mockResolvedValueOnce(updated);
+
+      const res = await service.updateCategory(id, data);
+      expect(res).toEqual(updated);
+    });
+
+    it("should throw 404 if category doesn't exist", async () => {
+      const id = faker.string.uuid();
+      const data = { name: faker.lorem.word() };
+
+      vi.mocked(app.prisma.category.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(service.updateCategory(id, data)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `
+        [NotFoundError: Category with the given ID does not exist.]
+      `
+      );
+    });
+
+    it('should rethrow other errors', async () => {
+      const id = faker.string.uuid();
+      const data = { name: faker.lorem.word() };
+
+      vi.mocked(app.prisma.category.update).mockRejectedValueOnce(new Error('Some other error'));
+
+      await expect(service.updateCategory(id, data)).rejects.toThrowError('Some other error');
+    });
+  });
 });

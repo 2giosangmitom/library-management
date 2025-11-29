@@ -51,4 +51,27 @@ export default class StaffCategoryService {
       throw error;
     }
   }
+
+  public async updateCategory(category_id: string, data: { name?: string; slug?: string }) {
+    try {
+      const updated = await this.fastify.prisma.category.update({
+        where: { category_id },
+        data: {
+          ...data
+        }
+      });
+
+      return updated;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw this.fastify.httpErrors.notFound('Category with the given ID does not exist.');
+        }
+        if (error.code === 'P2002') {
+          throw this.fastify.httpErrors.conflict('Category with the given slug already exists.');
+        }
+      }
+      throw error;
+    }
+  }
 }
