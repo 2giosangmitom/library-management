@@ -31,3 +31,24 @@ export const CreateBookCloneSchema = {
     500: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;
+
+export const DeleteBookCloneSchema = {
+  summary: 'Delete a book clone',
+  description: 'Endpoint to delete a book clone by its ID.',
+  params: Type.Object({
+    book_clone_id: Type.String({ format: 'uuid' })
+  }),
+  security: [{ JWT: [] }],
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        book_clone_id: Type.String({ format: 'uuid' }),
+        barcode: Type.String()
+      })
+    }),
+    403: { $ref: 'HttpError' },
+    404: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
+  }
+} as const satisfies FastifySchema;

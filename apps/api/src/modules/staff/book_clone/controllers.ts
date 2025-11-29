@@ -1,4 +1,4 @@
-import { CreateBookCloneSchema } from './schemas';
+import { CreateBookCloneSchema, DeleteBookCloneSchema } from './schemas';
 import StaffBookCloneService from './services';
 
 export default class StaffBookCloneController {
@@ -46,6 +46,20 @@ export default class StaffBookCloneController {
         created_at: createdBookClone.created_at.toISOString(),
         updated_at: createdBookClone.updated_at.toISOString()
       }
+    });
+  }
+
+  public async deleteBookClone(
+    req: FastifyRequestTypeBox<typeof DeleteBookCloneSchema>,
+    reply: FastifyReplyTypeBox<typeof DeleteBookCloneSchema>
+  ) {
+    const { book_clone_id } = req.params;
+
+    const deleted = await this.staffBookCloneService.deleteBookClone(book_clone_id);
+
+    return reply.status(200).send({
+      message: 'Book clone deleted successfully',
+      data: deleted
     });
   }
 }

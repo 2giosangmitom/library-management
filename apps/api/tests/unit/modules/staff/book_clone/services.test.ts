@@ -169,6 +169,70 @@ describe('StaffBookCloneService', async () => {
     });
   });
 
+  describe('deleteBookClone', () => {
+    it('should call prisma.book_Clone.delete with correct book_clone_id', async () => {
+      const id = faker.string.uuid();
+      const mockDeleted = {
+        book_clone_id: id,
+        barcode: faker.string.alphanumeric(10)
+      };
+
+      vi.mocked(app.prisma.book_Clone.delete).mockResolvedValueOnce(
+        mockDeleted as unknown as Awaited<ReturnType<typeof app.prisma.book_Clone.delete>>
+      );
+
+      await service.deleteBookClone(id);
+
+      expect(app.prisma.book_Clone.delete).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { book_clone_id: id } })
+      );
+    });
+
+    it('should throw not found error when book clone does not exist', async () => {
+      const id = faker.string.uuid();
+
+      vi.mocked(app.prisma.book_Clone.delete).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(service.deleteBookClone(id)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[NotFoundError: Book clone with the given ID does not exist.]`
+      );
+    });
+
+    it('should rethrow other errors from prisma', async () => {
+      const id = faker.string.uuid();
+
+      vi.mocked(app.prisma.book_Clone.delete).mockRejectedValueOnce(new Error('Some other error'));
+
+      await expect(service.deleteBookClone(id)).rejects.toThrowError('Some other error');
+    });
+
+    it('should return deleted book clone on success', async () => {
+      const id = faker.string.uuid();
+      const mockDeleted = {
+        book_clone_id: id,
+        barcode: faker.string.alphanumeric(10)
+      };
+
+      vi.mocked(app.prisma.book_Clone.delete).mockResolvedValueOnce(
+        mockDeleted as unknown as Awaited<ReturnType<typeof app.prisma.book_Clone.delete>>
+      );
+
+      const result = await service.deleteBookClone(id);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          book_clone_id: id,
+          barcode: expect.any(String)
+        })
+      );
+    });
+  });
+
   describe('getInstance', () => {
     it('should return the same instance', () => {
       const instance1 = StaffBookCloneService.getInstance(app);

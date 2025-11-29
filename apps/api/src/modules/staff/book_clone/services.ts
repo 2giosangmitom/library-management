@@ -44,4 +44,22 @@ export default class StaffBookCloneService {
       throw error;
     }
   }
+
+  public async deleteBookClone(book_clone_id: string) {
+    try {
+      const deleted = await this.fastify.prisma.book_Clone.delete({
+        select: { book_clone_id: true, barcode: true },
+        where: { book_clone_id }
+      });
+
+      return deleted;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw this.fastify.httpErrors.notFound('Book clone with the given ID does not exist.');
+        }
+      }
+      throw error;
+    }
+  }
 }
