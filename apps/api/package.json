@@ -18,7 +18,7 @@
     "test:coverage": "dotenv -e .env.test -- vitest run --coverage"
   },
   "dependencies": {
-    "@fastify/auth": "^5.0.3",
+    "@fastify/auth": "^5.0.4",
     "@fastify/autoload": "^6.3.1",
     "@fastify/cookie": "^11.0.2",
     "@fastify/cors": "^11.1.0",
@@ -37,7 +37,7 @@
     "nanoid": "^5.1.6",
     "node-cron": "^4.2.1",
     "pg": "^8.16.3",
-    "typebox": "^1.0.56",
+    "typebox": "^1.0.58",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
