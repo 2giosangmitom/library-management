@@ -45,4 +45,25 @@ export default class StaffPublisherService {
       throw error;
     }
   }
+
+  public async updatePublisher(publisher_id: string, data: { name: string; website: string; slug: string }) {
+    try {
+      const updated = await this.fastify.prisma.publisher.update({
+        where: { publisher_id },
+        data: { ...data }
+      });
+
+      return updated;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case 'P2025':
+            throw this.fastify.httpErrors.notFound('Publisher with the given ID does not exist.');
+          case 'P2002':
+            throw this.fastify.httpErrors.conflict('Publisher with the given slug already exists.');
+        }
+      }
+      throw error;
+    }
+  }
 }

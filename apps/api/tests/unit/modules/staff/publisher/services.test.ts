@@ -130,4 +130,105 @@ describe('StaffPublisherService', async () => {
       await expect(service.deletePublisher(id)).rejects.toThrowError('Some other error');
     });
   });
+
+  describe('updatePublisher', () => {
+    it('should call prisma.publisher.update with correct data', async () => {
+      const publisher_id = faker.string.uuid();
+      const data = {
+        name: faker.company.name(),
+        website: 'https://example.com',
+        slug: faker.lorem.slug()
+      };
+
+      await service.updatePublisher(publisher_id, data);
+
+      expect(app.prisma.publisher.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { publisher_id },
+          data: { ...data }
+        })
+      );
+    });
+
+    it('should throw not found error if publisher does not exist', async () => {
+      const publisher_id = faker.string.uuid();
+      const data = {
+        name: faker.company.name(),
+        website: 'https://example.com',
+        slug: faker.lorem.slug()
+      };
+
+      vi.mocked(app.prisma.publisher.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(service.updatePublisher(publisher_id, data)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[NotFoundError: Publisher with the given ID does not exist.]`
+      );
+    });
+
+    it('should throw conflict error if slug already exists', async () => {
+      const publisher_id = faker.string.uuid();
+      const data = {
+        name: faker.company.name(),
+        website: 'https://example.com',
+        slug: faker.lorem.slug()
+      };
+
+      vi.mocked(app.prisma.publisher.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(service.updatePublisher(publisher_id, data)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[ConflictError: Publisher with the given slug already exists.]`
+      );
+    });
+
+    it('should rethrow other errors from prisma', async () => {
+      const publisher_id = faker.string.uuid();
+      const data = {
+        name: faker.company.name(),
+        website: 'https://example.com',
+        slug: faker.lorem.slug()
+      };
+
+      vi.mocked(app.prisma.publisher.update).mockRejectedValueOnce(new Error('Some other error'));
+
+      await expect(service.updatePublisher(publisher_id, data)).rejects.toThrowError('Some other error');
+    });
+
+    it('should return updated publisher on success', async () => {
+      const publisher_id = faker.string.uuid();
+      const data = {
+        name: faker.company.name(),
+        website: 'https://example.com',
+        slug: faker.lorem.slug()
+      };
+
+      vi.mocked(app.prisma.publisher.update).mockResolvedValueOnce({
+        publisher_id,
+        ...data,
+        image_url: null,
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      } as unknown as Awaited<ReturnType<typeof app.prisma.publisher.update>>);
+
+      const result = await service.updatePublisher(publisher_id, data);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          publisher_id,
+          ...data,
+          created_at: expect.any(Date),
+          updated_at: expect.any(Date)
+        })
+      );
+    });
+  });
 });

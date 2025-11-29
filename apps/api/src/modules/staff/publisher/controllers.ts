@@ -1,4 +1,4 @@
-import { CreatePublisherSchema, DeletePublisherSchema } from './schemas';
+import { CreatePublisherSchema, DeletePublisherSchema, UpdatePublisherSchema } from './schemas';
 import StaffPublisherService from './services';
 
 export default class StaffPublisherController {
@@ -48,5 +48,28 @@ export default class StaffPublisherController {
     const deleted = await this.staffPublisherService.deletePublisher(publisher_id);
 
     return reply.status(200).send({ message: 'Publisher deleted successfully', data: deleted });
+  }
+
+  public async updatePublisher(
+    req: FastifyRequestTypeBox<typeof UpdatePublisherSchema>,
+    reply: FastifyReplyTypeBox<typeof UpdatePublisherSchema>
+  ) {
+    const { publisher_id } = req.params;
+    const { name, website, slug } = req.body;
+
+    const updated = await this.staffPublisherService.updatePublisher(publisher_id, {
+      name,
+      website,
+      slug
+    });
+
+    return reply.status(200).send({
+      message: 'Publisher updated successfully',
+      data: {
+        ...updated,
+        created_at: updated.created_at.toISOString(),
+        updated_at: updated.updated_at.toISOString()
+      }
+    });
   }
 }

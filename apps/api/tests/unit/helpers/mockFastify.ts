@@ -33,6 +33,7 @@ export async function buildMockFastify() {
     },
     publisher: {
       create: vi.fn(),
+      update: vi.fn(),
       delete: vi.fn()
     },
     category: {
