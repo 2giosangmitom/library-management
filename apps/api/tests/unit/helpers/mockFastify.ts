@@ -29,6 +29,7 @@ export async function buildMockFastify() {
     },
     book_Clone: {
       create: vi.fn(),
+      update: vi.fn(),
       delete: vi.fn()
     },
     publisher: {

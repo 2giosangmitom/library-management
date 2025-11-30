@@ -62,4 +62,35 @@ export default class StaffBookCloneService {
       throw error;
     }
   }
+
+  public async updateBookClone(
+    book_clone_id: string,
+    data: {
+      book_id: string;
+      location_id: string;
+      barcode: string;
+      condition: BookCondition;
+    }
+  ) {
+    try {
+      const updated = await this.fastify.prisma.book_Clone.update({
+        where: { book_clone_id },
+        data
+      });
+
+      return updated;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case 'P2025':
+            throw this.fastify.httpErrors.notFound('Book clone with the given ID does not exist.');
+          case 'P2002':
+            throw this.fastify.httpErrors.conflict('Book clone with the given barcode already exists.');
+          case 'P2003':
+            throw this.fastify.httpErrors.badRequest('Invalid book_id or location_id provided.');
+        }
+      }
+      throw error;
+    }
+  }
 }
