@@ -22,8 +22,7 @@ export default fp(
           { name: 'Category', description: 'Book category management endpoints' },
           { name: 'Rating', description: 'Book rating endpoints' },
           { name: 'Publisher', description: 'Publisher management endpoints' },
-          { name: 'Book Clone', description: 'Book clone management endpoints' },
-          { name: 'Location', description: 'Library location management endpoints' }
+          { name: 'Staff', description: 'Staff related endpoints' }
         ],
         components: {
           securitySchemes: {
