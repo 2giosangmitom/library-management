@@ -20,6 +20,7 @@ import staffHooks from '@modules/staff/autohooks';
 import staffPublisherRoutes from '@modules/staff/publisher/routes';
 import staffBookRoutes from '@modules/staff/book/routes';
 import staffBookCloneRoutes from '@modules/staff/book_clone/routes';
+import staffLocationRoutes from '@modules/staff/location/routes';
 
 export async function build(): Promise<FastifyTypeBox> {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -95,6 +96,13 @@ export async function build(): Promise<FastifyTypeBox> {
               instance.register(fp(staffBookCloneRoutes));
             },
             { prefix: '/book_clone' }
+          );
+
+          staffInstance.register(
+            (instance) => {
+              instance.register(fp(staffLocationRoutes));
+            },
+            { prefix: '/location' }
           );
         },
         { prefix: '/staff' }
