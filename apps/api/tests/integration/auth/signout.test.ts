@@ -1,6 +1,6 @@
-import { authHook } from '@src/hooks/auth';
-import { users } from '../helpers/build';
-import { build } from '../helpers/build';
+import { authHook } from '@/hooks/auth.js';
+import { users } from '../helpers/build.js';
+import { build } from '../helpers/build.js';
 
 describe('POST /api/auth/signout', async () => {
   const app = await build();

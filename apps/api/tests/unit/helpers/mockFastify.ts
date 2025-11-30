@@ -1,10 +1,10 @@
 import fastify from 'fastify';
-import { PrismaClient } from '@src/generated/prisma/client';
-import sensible from '@plugins/sensible';
-import auth from '@plugins/auth';
-import jwt from '@plugins/jwt';
-import cookie from '@plugins/cookie';
-import { envType } from '@config/envSchema';
+import { PrismaClient } from '@/generated/prisma/client.js';
+import sensible from '@/plugins/sensible.js';
+import auth from '@/plugins/auth.js';
+import jwt from '@/plugins/jwt.js';
+import cookie from '@/plugins/cookie.js';
+import { type envType } from '@/config/envSchema.js';
 import fp from 'fastify-plugin';
 
 export async function buildMockFastify() {

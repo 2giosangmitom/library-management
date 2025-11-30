@@ -1,6 +1,6 @@
-import AuthService from './services';
-import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './schemas';
-import { refreshTokenExpiration } from '@src/constants';
+import AuthService from './services.js';
+import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './schemas.js';
+import { refreshTokenExpiration } from '@/constants.js';
 import { nanoid } from 'nanoid';
 
 export default class AuthController {

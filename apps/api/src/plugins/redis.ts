@@ -1,4 +1,4 @@
-import { type envType } from '@config/envSchema';
+import { type envType } from '@/config/envSchema.js';
 import { fastifyRedis } from '@fastify/redis';
 import fp from 'fastify-plugin';
 

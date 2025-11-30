@@ -10,20 +10,14 @@
     "strict": true,
     "esModuleInterop": true,
     "moduleResolution": "nodenext",
-    "verbatimModuleSyntax": false,
+    "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
-    "moduleDetection": "force",
+    "moduleDetection": "auto",
     "useUnknownInCatchVariables": true,
-    "skipLibCheck": true,
     "paths": {
-      "@config/*": ["src/config/*"],
-      "@utils/*": ["src/utils/*"],
-      "@modules/*": ["src/modules/*"],
-      "@plugins/*": ["src/plugins/*"],
-      "@src/*": ["src/*"],
-      "@tests/*": ["tests/*"],
-      "@hooks/*": ["src/hooks/*"]
+      "@/*": ["src/*"],
+      "@tests/*": ["tests/*"]
     }
   },
   "include": ["src/**/*.ts", "tests/**/*.ts", "types/**/*.ts"],

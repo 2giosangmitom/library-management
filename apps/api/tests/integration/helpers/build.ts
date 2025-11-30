@@ -1,26 +1,26 @@
 import { fastify } from 'fastify';
 import fp from 'fastify-plugin';
-import { TypeBoxTypeProvider, TypeBoxValidatorCompiler } from '@fastify/type-provider-typebox';
+import { type TypeBoxTypeProvider, TypeBoxValidatorCompiler } from '@fastify/type-provider-typebox';
 
-import ConfigService from '@config/configService';
-import prismaPlugin from '@plugins/prisma';
-import redisPlugin from '@plugins/redis';
-import jwtPlugin from '@plugins/jwt';
-import sensible from '@plugins/sensible';
-import cookie from '@plugins/cookie';
-import auth from '@plugins/auth';
+import ConfigService from '@/config/configService.js';
+import prismaPlugin from '@/plugins/prisma.js';
+import redisPlugin from '@/plugins/redis.js';
+import jwtPlugin from '@/plugins/jwt.js';
+import sensible from '@/plugins/sensible.js';
+import cookie from '@/plugins/cookie.js';
+import auth from '@/plugins/auth.js';
 
-import authRoutes from '@modules/auth/routes';
-import authHooks from '@modules/auth/autohooks';
-import authorRoutes from '@modules/author/routes';
-import authorHooks from '@modules/author/autohooks';
-import staffAuthorRoutes from '@modules/staff/author/routes';
-import staffCategoryRoutes from '@modules/staff/category/routes';
-import staffHooks from '@modules/staff/autohooks';
-import staffPublisherRoutes from '@modules/staff/publisher/routes';
-import staffBookRoutes from '@modules/staff/book/routes';
-import staffBookCloneRoutes from '@modules/staff/book_clone/routes';
-import staffLocationRoutes from '@modules/staff/location/routes';
+import authRoutes from '@/modules/auth/routes.js';
+import authHooks from '@/modules/auth/autohooks.js';
+import authorRoutes from '@/modules/author/routes.js';
+import authorHooks from '@/modules/author/autohooks.js';
+import staffAuthorRoutes from '@/modules/staff/author/routes.js';
+import staffCategoryRoutes from '@/modules/staff/category/routes.js';
+import staffHooks from '@/modules/staff/autohooks.js';
+import staffPublisherRoutes from '@/modules/staff/publisher/routes.js';
+import staffBookRoutes from '@/modules/staff/book/routes.js';
+import staffBookCloneRoutes from '@/modules/staff/book_clone/routes.js';
+import staffLocationRoutes from '@/modules/staff/location/routes.js';
 
 export async function build(): Promise<FastifyTypeBox> {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);

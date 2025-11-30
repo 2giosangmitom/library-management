@@ -1,6 +1,6 @@
-import { JWTUtils } from '@utils/jwt';
-import { buildMockFastify } from '../helpers/mockFastify';
-import { accessTokenExpiration, refreshTokenExpiration } from '@src/constants';
+import { JWTUtils } from '@/utils/jwt.js';
+import { buildMockFastify } from '../helpers/mockFastify.js';
+import { accessTokenExpiration, refreshTokenExpiration } from '@/constants.js';
 
 describe('JWTUtils', async () => {
   const app = await buildMockFastify();

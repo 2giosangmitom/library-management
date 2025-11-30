@@ -1,5 +1,5 @@
-import { CreateBookCloneSchema, DeleteBookCloneSchema, UpdateBookCloneSchema } from './schemas';
-import StaffBookCloneService from './services';
+import { CreateBookCloneSchema, DeleteBookCloneSchema, UpdateBookCloneSchema } from './schemas.js';
+import StaffBookCloneService from './services.js';
 
 export default class StaffBookCloneController {
   private static instance: StaffBookCloneController;

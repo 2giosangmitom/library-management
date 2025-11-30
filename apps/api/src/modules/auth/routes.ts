@@ -1,5 +1,5 @@
-import AuthController from './controllers';
-import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './schemas';
+import AuthController from './controllers.js';
+import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './schemas.js';
 
 export default function authRoutes(fastify: FastifyTypeBox) {
   const authController = AuthController.getInstance(fastify);

@@ -1,8 +1,8 @@
-import { type envType } from '@config/envSchema';
+import { type envType } from '@/config/envSchema.js';
 import { fastifyJwt } from '@fastify/jwt';
-import { JWTUtils } from '@utils/jwt';
+import { JWTUtils } from '@/utils/jwt.js';
 import fp from 'fastify-plugin';
-import { accessTokenExpiration } from '@src/constants';
+import { accessTokenExpiration } from '@/constants.js';
 
 export default fp(
   async (fastify: FastifyTypeBox, opts: envType) => {

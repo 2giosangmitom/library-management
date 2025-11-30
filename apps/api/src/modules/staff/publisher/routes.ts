@@ -1,5 +1,5 @@
-import StaffPublisherController from './controllers';
-import { CreatePublisherSchema, DeletePublisherSchema, UpdatePublisherSchema } from './schemas';
+import StaffPublisherController from './controllers.js';
+import { CreatePublisherSchema, DeletePublisherSchema, UpdatePublisherSchema } from './schemas.js';
 
 export default function staffPublisherRoutes(fastify: FastifyTypeBox) {
   const controller = StaffPublisherController.getInstance(fastify);

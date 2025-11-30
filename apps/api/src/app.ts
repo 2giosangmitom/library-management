@@ -19,14 +19,14 @@ export async function buildApp() {
 
   // Load all plugins from the plugins directory
   await app.register(fastifyAutoload, {
-    dir: `${__dirname}/plugins`,
+    dir: `${import.meta.dirname}/plugins`,
     options: config,
     encapsulate: false
   });
 
   // Load all modules from the modules directory
   await app.register(fastifyAutoload, {
-    dir: `${__dirname}/modules`,
+    dir: `${import.meta.dirname}/modules`,
     encapsulate: true,
     ignorePattern: /.*.(ts|js)/,
     indexPattern: /routes.(ts|js)/,

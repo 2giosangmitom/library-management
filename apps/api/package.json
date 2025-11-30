@@ -2,9 +2,10 @@
   "name": "@book-wise/api",
   "version": "1.0.0",
   "description": "API service for BookWise application",
+  "type": "module",
   "scripts": {
     "dev": "NODE_ENV=development tsx --env-file .env --watch src/server.ts | pino-pretty",
-    "build": "esbuild 'src/**/*.ts' --outdir=dist --bundle --minify --platform=node --format=cjs --packages=external && tsc-alias -p tsconfig.json",
+    "build": "esbuild 'src/**/*.ts' --outdir=dist --bundle --minify --platform=node --target=esnext,node24 --format=esm --packages=external && tsc-alias -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "prisma:generate": "dotenv -e .env -- prisma generate",
     "prisma:generate:test": "dotenv -e .env.test -- prisma generate",

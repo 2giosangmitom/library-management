@@ -1,7 +1,7 @@
 import { Type } from 'typebox';
-import { FastifySchema } from 'fastify';
-import { nameMinLength, nameMaxLength, passwordMaxLength, passwordMinLength } from '@src/constants';
-import { Role } from '@src/generated/prisma/enums';
+import { type FastifySchema } from 'fastify';
+import { nameMinLength, nameMaxLength, passwordMaxLength, passwordMinLength } from '@/constants.js';
+import { Role } from '@/generated/prisma/enums.js';
 
 export const SignUpSchema = {
   summary: 'Create a new user account',

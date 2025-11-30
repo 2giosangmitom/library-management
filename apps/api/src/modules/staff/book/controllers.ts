@@ -1,6 +1,6 @@
-import { CreateBookSchema, DeleteBookSchema } from './schemas';
-import StaffBookService from './services';
-import { Prisma } from '@src/generated/prisma/client';
+import { CreateBookSchema, DeleteBookSchema } from './schemas.js';
+import StaffBookService from './services.js';
+import { Prisma } from '@/generated/prisma/client.js';
 
 export default class StaffBookController {
   private static instance: StaffBookController;

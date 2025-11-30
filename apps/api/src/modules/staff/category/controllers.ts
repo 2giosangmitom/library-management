@@ -1,5 +1,5 @@
-import StaffCategoryService from './services';
-import { CreateCategorySchema, DeleteCategorySchema, UpdateCategorySchema } from './schemas';
+import StaffCategoryService from './services.js';
+import { CreateCategorySchema, DeleteCategorySchema, UpdateCategorySchema } from './schemas.js';
 
 export default class StaffCategoryController {
   private static instance: StaffCategoryController;

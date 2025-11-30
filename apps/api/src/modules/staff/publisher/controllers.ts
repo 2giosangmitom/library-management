@@ -1,5 +1,5 @@
-import { CreatePublisherSchema, DeletePublisherSchema, UpdatePublisherSchema } from './schemas';
-import StaffPublisherService from './services';
+import { CreatePublisherSchema, DeletePublisherSchema, UpdatePublisherSchema } from './schemas.js';
+import StaffPublisherService from './services.js';
 
 export default class StaffPublisherController {
   private static instance: StaffPublisherController;

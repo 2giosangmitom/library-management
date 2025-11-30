@@ -1,7 +1,7 @@
-import StaffBookCloneService from '@modules/staff/book_clone/services';
-import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
+import StaffBookCloneService from '@/modules/staff/book_clone/services.js';
+import { buildMockFastify } from '../../../helpers/mockFastify.js';
 import { faker } from '@faker-js/faker';
-import { BookCondition, Prisma } from '@src/generated/prisma/client';
+import { BookCondition, Prisma } from '@/generated/prisma/client.js';
 
 describe('StaffBookCloneService', async () => {
   const app = await buildMockFastify();

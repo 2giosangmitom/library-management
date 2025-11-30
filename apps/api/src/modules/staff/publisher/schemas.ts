@@ -1,5 +1,5 @@
 import { Type } from 'typebox';
-import { FastifySchema } from 'fastify';
+import { type FastifySchema } from 'fastify';
 
 export const CreatePublisherSchema = {
   summary: 'Create a new publisher',

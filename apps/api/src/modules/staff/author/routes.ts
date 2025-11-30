@@ -1,5 +1,5 @@
-import StaffAuthorController from './controllers';
-import { CreateAuthorSchema, DeleteAuthorSchema, UpdateAuthorSchema } from './schemas';
+import StaffAuthorController from './controllers.js';
+import { CreateAuthorSchema, DeleteAuthorSchema, UpdateAuthorSchema } from './schemas.js';
 
 export default function staffAuthorRoutes(fastify: FastifyTypeBox) {
   const staffAuthorController = StaffAuthorController.getInstance(fastify);

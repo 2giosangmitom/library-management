@@ -1,4 +1,4 @@
-import { BookCondition, Prisma } from '@src/generated/prisma/client';
+import { BookCondition, Prisma } from '@/generated/prisma/client.js';
 
 export default class StaffBookCloneService {
   private static instance: StaffBookCloneService;

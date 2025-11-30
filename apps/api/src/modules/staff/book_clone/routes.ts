@@ -1,5 +1,5 @@
-import StaffBookCloneController from './controllers';
-import { CreateBookCloneSchema, DeleteBookCloneSchema, UpdateBookCloneSchema } from './schemas';
+import StaffBookCloneController from './controllers.js';
+import { CreateBookCloneSchema, DeleteBookCloneSchema, UpdateBookCloneSchema } from './schemas.js';
 
 export default function staffBookCloneRoutes(fastify: FastifyTypeBox) {
   const staffBookCloneController = StaffBookCloneController.getInstance(fastify);

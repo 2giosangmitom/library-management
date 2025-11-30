@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { build, users } from '@tests/integration/helpers/build';
+import { build, users } from '../../helpers/build.js';
 
 describe('DELETE /api/staff/category/:category_id', async () => {
   const app = await build();

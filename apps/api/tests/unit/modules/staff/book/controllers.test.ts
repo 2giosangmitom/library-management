@@ -1,5 +1,5 @@
-import StaffBookController from '@modules/staff/book/controllers';
-import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
+import StaffBookController from '@/modules/staff/book/controllers.js';
+import { buildMockFastify } from '../../../helpers/mockFastify.js';
 
 describe('StaffBookController', async () => {
   const app = await buildMockFastify();

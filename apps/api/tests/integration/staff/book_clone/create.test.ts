@@ -1,4 +1,4 @@
-import { build, users } from '@tests/integration/helpers/build';
+import { build, users } from '../../helpers/build.js';
 import { faker } from '@faker-js/faker';
 
 describe('POST /api/staff/book_clone', async () => {

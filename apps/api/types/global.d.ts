@@ -7,11 +7,11 @@ import type {
   FastifyRequest,
   RawReplyDefaultExpression,
   RawRequestDefaultExpression,
-  RawServerDefault
+  RawServerDefault,
+  FastifySchema,
+  RouteGenericInterface
 } from 'fastify';
-import type { RouteGenericInterface } from 'fastify/types/route';
-import type { FastifySchema } from 'fastify/types/schema';
-import { Role } from '@prisma/client';
+import { Role } from '@/generated/prisma/client.ts';
 
 export {};
 

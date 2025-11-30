@@ -1,5 +1,5 @@
-import { CreateAuthorSchema, DeleteAuthorSchema, UpdateAuthorSchema } from './schemas';
-import StaffAuthorService from './services';
+import { CreateAuthorSchema, DeleteAuthorSchema, UpdateAuthorSchema } from './schemas.js';
+import StaffAuthorService from './services.js';
 
 export default class StaffAuthorController {
   private static instance: StaffAuthorController;

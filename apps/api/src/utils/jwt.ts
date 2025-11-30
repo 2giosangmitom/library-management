@@ -1,5 +1,5 @@
 import { type FastifyRedis } from '@fastify/redis';
-import { accessTokenExpiration, refreshTokenExpiration } from '@src/constants';
+import { accessTokenExpiration, refreshTokenExpiration } from '@/constants.js';
 
 export class JWTUtils {
   private static instance: JWTUtils | null = null;

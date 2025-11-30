@@ -1,6 +1,6 @@
 import { Type } from 'typebox';
-import { FastifySchema } from 'fastify';
-import { BookCondition } from '@src/generated/prisma/enums';
+import { type FastifySchema } from 'fastify';
+import { BookCondition } from '@/generated/prisma/enums.js';
 
 export const CreateBookCloneSchema = {
   summary: 'Create a new book clone',

@@ -1,4 +1,4 @@
-import { FastifySchema } from 'fastify';
+import { type FastifySchema } from 'fastify';
 import Type from 'typebox';
 
 export const AddLocationSchema = {

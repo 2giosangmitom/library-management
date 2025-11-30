@@ -1,4 +1,4 @@
-import { build, users } from '@tests/integration/helpers/build';
+import { build, users } from '../../helpers/build.js';
 import { faker } from '@faker-js/faker';
 
 describe('DELETE /api/staff/book/:book_id', async () => {
