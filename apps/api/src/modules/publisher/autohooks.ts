@@ -1,6 +1,5 @@
+import { addRouteTags } from '@hooks/onRoute';
+
 export default function publisherHooks(fastify: FastifyTypeBox) {
-  fastify.addHook('onRoute', (routeOptions) => {
-    routeOptions.schema = routeOptions.schema || {};
-    routeOptions.schema.tags = [...(routeOptions.schema.tags || []), 'Publisher'];
-  });
+  fastify.addHook('onRoute', addRouteTags('Publisher'));
 }
