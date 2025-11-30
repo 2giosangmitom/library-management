@@ -35,7 +35,7 @@ jobs:
         run: pnpm install
 
       - name: Run linter
-        run: pnpm lint
+        run: pnpm -r lint
 
   # Type check the codebase with TypeScript
   typecheck:

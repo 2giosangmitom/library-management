@@ -2,15 +2,5 @@
   "name": "book-wise",
   "version": "1.0.0",
   "description": "Monorepo for BookWise application",
-  "private": true,
-  "scripts": {
-    "lint": "eslint ."
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.39.1",
-    "eslint": "^9.39.1",
-    "eslint-plugin-vue": "^10.6.2",
-    "globals": "^16.5.0",
-    "typescript-eslint": "^8.48.0"
-  }
+  "private": true
 }
