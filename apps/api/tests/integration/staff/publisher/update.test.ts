@@ -1,141 +1,73 @@
 import { build, users } from '../../helpers/build';
+import { getAccessToken } from '../../helpers/auth';
+import { Role } from '@/generated/prisma/enums';
 import { faker } from '@faker-js/faker';
 
 describe('PUT /api/staff/publisher/:publisher_id', async () => {
   const app = await build();
-  let admin_token: string;
-  let librarian_token: string;
-  let member_token: string;
+  const accessTokens: Partial<Record<Role, string>> = {};
 
   beforeAll(async () => {
-    // Sign in as Admin
-    const adminSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: users[0].email,
-        password: users[0].password
-      }
-    });
-    admin_token = adminSignInResponse.json().data.access_token;
-
-    // Sign in as Librarian
-    const librarianSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: users[1].email,
-        password: users[1].password
-      }
-    });
-    librarian_token = librarianSignInResponse.json().data.access_token;
-
-    // Sign in as Member
-    const memberSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: users[4].email,
-        password: users[4].password
-      }
-    });
-    member_token = memberSignInResponse.json().data.access_token;
+    accessTokens[Role.ADMIN] = await getAccessToken(app, users[0]);
+    accessTokens[Role.LIBRARIAN] = await getAccessToken(app, users[1]);
+    accessTokens[Role.MEMBER] = await getAccessToken(app, users[4]);
   });
 
   afterAll(async () => {
     await app.close();
   });
 
-  it('should update an existing publisher for ADMIN role', async () => {
-    const publisherData = {
-      name: faker.company.name(),
-      website: 'https://example.com',
-      slug: faker.lorem.slug()
-    };
+  it.each([{ role: Role.ADMIN }, { role: Role.LIBRARIAN }])(
+    'should update an existing publisher for $role role',
+    async ({ role }) => {
+      const publisherData = {
+        name: faker.company.name(),
+        website: 'https://example.com',
+        slug: faker.lorem.slug()
+      };
 
-    // First, create a publisher to update later
-    const createResponse = await app.inject({
-      method: 'POST',
-      url: '/api/staff/publisher',
-      headers: {
-        authorization: `Bearer ${admin_token}`
-      },
-      payload: publisherData
-    });
+      // First, create a publisher to update later
+      const createResponse = await app.inject({
+        method: 'POST',
+        url: '/api/staff/publisher',
+        headers: {
+          Authorization: `Bearer ${accessTokens[role]}`
+        },
+        payload: publisherData
+      });
 
-    expect(createResponse.statusCode).toBe(201);
-    const createdPublisher = createResponse.json().data;
+      expect(createResponse.statusCode).toBe(201);
+      const createdPublisher = createResponse.json().data;
 
-    // Now, update the publisher
-    const updatedPublisherData = {
-      name: faker.company.name(),
-      website: 'https://newexample.com',
-      slug: faker.lorem.slug()
-    };
+      // Now, update the publisher
+      const updatedPublisherData = {
+        name: faker.company.name(),
+        website: 'https://newexample.com',
+        slug: faker.lorem.slug()
+      };
 
-    const updateResponse = await app.inject({
-      method: 'PUT',
-      url: `/api/staff/publisher/${createdPublisher.publisher_id}`,
-      headers: {
-        authorization: `Bearer ${admin_token}`
-      },
-      payload: updatedPublisherData
-    });
+      const updateResponse = await app.inject({
+        method: 'PUT',
+        url: `/api/staff/publisher/${createdPublisher.publisher_id}`,
+        headers: {
+          Authorization: `Bearer ${accessTokens[role]}`
+        },
+        payload: updatedPublisherData
+      });
 
-    expect(updateResponse.statusCode).toBe(200);
-    const updatedPublisher = updateResponse.json().data;
+      expect(updateResponse.statusCode).toBe(200);
+      const updatedPublisher = updateResponse.json().data;
 
-    expect(updatedPublisher).toEqual(
-      expect.objectContaining({
-        publisher_id: createdPublisher.publisher_id,
-        name: updatedPublisherData.name,
-        website: updatedPublisherData.website,
-        slug: updatedPublisherData.slug
-      })
-    );
-  });
-
-  it('should update an existing publisher for LIBRARIAN role', async () => {
-    const publisherData = {
-      name: faker.company.name(),
-      website: 'https://example.com',
-      slug: faker.lorem.slug()
-    };
-
-    // First, create a publisher to update later
-    const createResponse = await app.inject({
-      method: 'POST',
-      url: '/api/staff/publisher',
-      headers: {
-        authorization: `Bearer ${admin_token}`
-      },
-      payload: publisherData
-    });
-
-    expect(createResponse.statusCode).toBe(201);
-    const createdPublisher = createResponse.json().data;
-
-    // Now, update the publisher
-    const updatedPublisherData = {
-      name: faker.company.name(),
-      website: 'https://newexample.com',
-      slug: faker.lorem.slug()
-    };
-
-    const updateResponse = await app.inject({
-      method: 'PUT',
-      url: `/api/staff/publisher/${createdPublisher.publisher_id}`,
-      headers: {
-        authorization: `Bearer ${librarian_token}`
-      },
-      payload: updatedPublisherData
-    });
-
-    expect(updateResponse.statusCode).toBe(200);
-    const updatedPublisher = updateResponse.json().data;
-
-    expect(updatedPublisher.name).toBe(updatedPublisherData.name);
-  });
+      expect(updatedPublisher).toEqual(
+        expect.objectContaining({
+          publisher_id: createdPublisher.publisher_id,
+          name: updatedPublisherData.name,
+          website: updatedPublisherData.website,
+          slug: updatedPublisherData.slug
+        })
+      );
+    }
+  );
 
   it('should reject update for MEMBER role', async () => {
     const publisherData = {
@@ -149,7 +81,7 @@ describe('PUT /api/staff/publisher/:publisher_id', async () => {
       method: 'POST',
       url: '/api/staff/publisher',
       headers: {
-        authorization: `Bearer ${admin_token}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: publisherData
     });
@@ -168,7 +100,7 @@ describe('PUT /api/staff/publisher/:publisher_id', async () => {
       method: 'PUT',
       url: `/api/staff/publisher/${createdPublisher.publisher_id}`,
       headers: {
-        authorization: `Bearer ${member_token}`
+        Authorization: `Bearer ${accessTokens[Role.MEMBER]}`
       },
       payload: updatedPublisherData
     });
@@ -189,7 +121,7 @@ describe('PUT /api/staff/publisher/:publisher_id', async () => {
       method: 'PUT',
       url: `/api/staff/publisher/${nonExistingPublisherId}`,
       headers: {
-        authorization: `Bearer ${admin_token}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: updatedPublisherData
     });
@@ -223,7 +155,7 @@ describe('PUT /api/staff/publisher/:publisher_id', async () => {
       method: 'POST',
       url: '/api/staff/publisher',
       headers: {
-        authorization: `Bearer ${admin_token}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: publisherData1
     });
@@ -236,7 +168,7 @@ describe('PUT /api/staff/publisher/:publisher_id', async () => {
       method: 'POST',
       url: '/api/staff/publisher',
       headers: {
-        authorization: `Bearer ${admin_token}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: publisherData2
     });
@@ -249,7 +181,7 @@ describe('PUT /api/staff/publisher/:publisher_id', async () => {
       method: 'PUT',
       url: `/api/staff/publisher/${publisher2.publisher_id}`,
       headers: {
-        authorization: `Bearer ${admin_token}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: {
         name: publisher2.name,
@@ -275,7 +207,7 @@ describe('PUT /api/staff/publisher/:publisher_id', async () => {
       method: 'POST',
       url: '/api/staff/publisher',
       headers: {
-        authorization: `Bearer ${admin_token}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: publisherData
     });

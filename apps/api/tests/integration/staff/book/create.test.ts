@@ -1,45 +1,20 @@
 import { build, users } from '../../helpers/build';
+import { getAccessToken } from '../../helpers/auth';
+import { Role } from '@/generated/prisma/enums';
 import { faker } from '@faker-js/faker';
 
 describe('POST /api/staff/book', async () => {
   const app = await build();
-  let admin_token: string;
-  let member_token: string;
-  let librarian_token: string;
+  const accessTokens: Partial<Record<Role, string>> = {};
 
   beforeAll(async () => {
-    const adminUser = users[0];
-    const adminSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: adminUser.email,
-        password: adminUser.password
-      }
-    });
-    admin_token = adminSignInResponse.json().data.access_token;
+    accessTokens[Role.ADMIN] = await getAccessToken(app, users[0]);
+    accessTokens[Role.LIBRARIAN] = await getAccessToken(app, users[1]);
+    accessTokens[Role.MEMBER] = await getAccessToken(app, users[4]);
+  });
 
-    const memberUser = users[4];
-    const memberSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: memberUser.email,
-        password: memberUser.password
-      }
-    });
-    member_token = memberSignInResponse.json().data.access_token;
-
-    const librarianUser = users[1];
-    const librarianSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: librarianUser.email,
-        password: librarianUser.password
-      }
-    });
-    librarian_token = librarianSignInResponse.json().data.access_token;
+  afterAll(async () => {
+    await app.close();
   });
 
   it('should reject unauthenticated requests', async () => {
@@ -62,7 +37,7 @@ describe('POST /api/staff/book', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/staff/book',
-      headers: { authorization: `Bearer ${member_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.MEMBER]}` },
       payload: {
         title: faker.lorem.sentence(),
         description: faker.lorem.paragraphs(2),
@@ -75,7 +50,7 @@ describe('POST /api/staff/book', async () => {
     expect(response.statusCode).toBe(403);
   });
 
-  it('should create book for LIBRARIAN role', async () => {
+  it.each([{ role: Role.ADMIN }, { role: Role.LIBRARIAN }])('should create book for $role role', async ({ role }) => {
     const bookData = {
       title: faker.lorem.sentence(),
       description: faker.lorem.paragraphs(2),
@@ -87,26 +62,7 @@ describe('POST /api/staff/book', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/staff/book',
-      headers: { authorization: `Bearer ${librarian_token}` },
-      payload: bookData
-    });
-
-    expect(response.statusCode).toBe(201);
-  });
-
-  it('should create book for ADMIN role', async () => {
-    const bookData = {
-      title: faker.lorem.sentence(),
-      description: faker.lorem.paragraphs(2),
-      isbn: faker.string.numeric(13),
-      published_at: faker.date.past().toISOString(),
-      publisher_id: null
-    };
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/staff/book',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[role]}` },
       payload: bookData
     });
 
@@ -127,7 +83,7 @@ describe('POST /api/staff/book', async () => {
     const firstResponse = await app.inject({
       method: 'POST',
       url: '/api/staff/book',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: firstBookData
     });
 
@@ -144,7 +100,7 @@ describe('POST /api/staff/book', async () => {
     const secondResponse = await app.inject({
       method: 'POST',
       url: '/api/staff/book',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: secondBookData
     });
 

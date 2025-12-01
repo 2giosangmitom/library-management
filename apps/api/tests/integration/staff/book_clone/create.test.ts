@@ -1,47 +1,18 @@
 import { build, users } from '../../helpers/build';
+import { getAccessToken } from '../../helpers/auth';
+import { Role } from '@/generated/prisma/enums';
 import { faker } from '@faker-js/faker';
 
 describe('POST /api/staff/book_clone', async () => {
   const app = await build();
-  let admin_token: string;
-  let member_token: string;
-  let librarian_token: string;
+  const accessTokens: Partial<Record<Role, string>> = {};
   let book_id: string;
   let location_id: string;
 
   beforeAll(async () => {
-    const adminUser = users[0];
-    const adminSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: adminUser.email,
-        password: adminUser.password
-      }
-    });
-    admin_token = adminSignInResponse.json().data.access_token;
-
-    const memberUser = users[4];
-    const memberSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: memberUser.email,
-        password: memberUser.password
-      }
-    });
-    member_token = memberSignInResponse.json().data.access_token;
-
-    const librarianUser = users[1];
-    const librarianSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: librarianUser.email,
-        password: librarianUser.password
-      }
-    });
-    librarian_token = librarianSignInResponse.json().data.access_token;
+    accessTokens[Role.ADMIN] = await getAccessToken(app, users[0]);
+    accessTokens[Role.LIBRARIAN] = await getAccessToken(app, users[1]);
+    accessTokens[Role.MEMBER] = await getAccessToken(app, users[4]);
 
     // Create a book for testing
     const bookData = {
@@ -55,7 +26,7 @@ describe('POST /api/staff/book_clone', async () => {
     const bookResponse = await app.inject({
       method: 'POST',
       url: '/api/staff/book',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: bookData
     });
 
@@ -97,7 +68,7 @@ describe('POST /api/staff/book_clone', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${member_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.MEMBER]}` },
       payload: {
         book_id,
         location_id,
@@ -109,18 +80,21 @@ describe('POST /api/staff/book_clone', async () => {
     expect(response.statusCode).toBe(403);
   });
 
-  it('should create book clone for LIBRARIAN role', async () => {
+  it.each([
+    { role: Role.ADMIN, condition: 'GOOD' },
+    { role: Role.LIBRARIAN, condition: 'NEW' }
+  ])('should create book clone for $role role', async ({ role, condition }) => {
     const bookCloneData = {
       book_id,
       location_id,
       barcode: faker.string.alphanumeric(10),
-      condition: 'NEW'
+      condition
     };
 
     const response = await app.inject({
       method: 'POST',
       url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${librarian_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[role]}` },
       payload: bookCloneData
     });
 
@@ -130,30 +104,8 @@ describe('POST /api/staff/book_clone', async () => {
     expect(body.data.book_id).toBe(book_id);
     expect(body.data.location_id).toBe(location_id);
     expect(body.data.barcode).toBe(bookCloneData.barcode);
-    expect(body.data.condition).toBe('NEW');
+    expect(body.data.condition).toBe(condition);
     expect(body.data.is_available).toBe(true);
-  });
-
-  it('should create book clone for ADMIN role', async () => {
-    const bookCloneData = {
-      book_id,
-      location_id,
-      barcode: faker.string.alphanumeric(10),
-      condition: 'GOOD'
-    };
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${admin_token}` },
-      payload: bookCloneData
-    });
-
-    expect(response.statusCode).toBe(201);
-    const body = response.json();
-    expect(body.message).toBe('Book clone created successfully');
-    expect(body.data.book_id).toBe(book_id);
-    expect(body.data.condition).toBe('GOOD');
   });
 
   it('should reject create book clone with duplicate barcode', async () => {
@@ -169,7 +121,7 @@ describe('POST /api/staff/book_clone', async () => {
     const firstResponse = await app.inject({
       method: 'POST',
       url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: firstBookCloneData
     });
 
@@ -185,7 +137,7 @@ describe('POST /api/staff/book_clone', async () => {
     const secondResponse = await app.inject({
       method: 'POST',
       url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: secondBookCloneData
     });
 
@@ -199,7 +151,7 @@ describe('POST /api/staff/book_clone', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: {
         book_id: invalidBookId,
         location_id,
@@ -218,7 +170,7 @@ describe('POST /api/staff/book_clone', async () => {
     const response = await app.inject({
       method: 'POST',
       url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: {
         book_id,
         location_id: invalidLocationId,
@@ -238,7 +190,7 @@ describe('POST /api/staff/book_clone', async () => {
       const response = await app.inject({
         method: 'POST',
         url: '/api/staff/book_clone',
-        headers: { authorization: `Bearer ${admin_token}` },
+        headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
         payload: {
           book_id,
           location_id,

@@ -1,47 +1,18 @@
 import { build, users } from '../../helpers/build';
+import { getAccessToken } from '../../helpers/auth';
+import { Role } from '@/generated/prisma/enums';
 import { faker } from '@faker-js/faker';
 
 describe('DELETE /api/staff/book_clone/:book_clone_id', async () => {
   const app = await build();
-  let admin_token: string;
-  let member_token: string;
-  let librarian_token: string;
+  const accessTokens: Partial<Record<Role, string>> = {};
   let book_id: string;
   let location_id: string;
 
   beforeAll(async () => {
-    const adminUser = users[0];
-    const adminSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: adminUser.email,
-        password: adminUser.password
-      }
-    });
-    admin_token = adminSignInResponse.json().data.access_token;
-
-    const memberUser = users[4];
-    const memberSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: memberUser.email,
-        password: memberUser.password
-      }
-    });
-    member_token = memberSignInResponse.json().data.access_token;
-
-    const librarianUser = users[1];
-    const librarianSignInResponse = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: librarianUser.email,
-        password: librarianUser.password
-      }
-    });
-    librarian_token = librarianSignInResponse.json().data.access_token;
+    accessTokens[Role.ADMIN] = await getAccessToken(app, users[0]);
+    accessTokens[Role.LIBRARIAN] = await getAccessToken(app, users[1]);
+    accessTokens[Role.MEMBER] = await getAccessToken(app, users[4]);
 
     // Create a book for testing
     const bookData = {
@@ -55,7 +26,7 @@ describe('DELETE /api/staff/book_clone/:book_clone_id', async () => {
     const bookResponse = await app.inject({
       method: 'POST',
       url: '/api/staff/book',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: bookData
     });
 
@@ -78,18 +49,21 @@ describe('DELETE /api/staff/book_clone/:book_clone_id', async () => {
     await app.close();
   });
 
-  it('should delete a book clone for ADMIN role', async () => {
+  it.each([
+    { role: Role.ADMIN, condition: 'NEW' },
+    { role: Role.LIBRARIAN, condition: 'GOOD' }
+  ])('should delete a book clone for $role role', async ({ role, condition }) => {
     const bookCloneData = {
       book_id,
       location_id,
       barcode: faker.string.alphanumeric(10),
-      condition: 'NEW'
+      condition
     };
 
     const createResponse = await app.inject({
       method: 'POST',
       url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[role]}` },
       payload: bookCloneData
     });
 
@@ -99,7 +73,7 @@ describe('DELETE /api/staff/book_clone/:book_clone_id', async () => {
     const deleteResponse = await app.inject({
       method: 'DELETE',
       url: `/api/staff/book_clone/${created.book_clone_id}`,
-      headers: { authorization: `Bearer ${admin_token}` }
+      headers: { Authorization: `Bearer ${accessTokens[role]}` }
     });
 
     expect(deleteResponse.statusCode).toBe(200);
@@ -107,35 +81,6 @@ describe('DELETE /api/staff/book_clone/:book_clone_id', async () => {
     expect(body.message).toBe('Book clone deleted successfully');
     expect(body.data.book_clone_id).toBe(created.book_clone_id);
     expect(body.data.barcode).toBe(bookCloneData.barcode);
-  });
-
-  it('should delete a book clone for LIBRARIAN role', async () => {
-    const bookCloneData = {
-      book_id,
-      location_id,
-      barcode: faker.string.alphanumeric(10),
-      condition: 'GOOD'
-    };
-
-    const createResponse = await app.inject({
-      method: 'POST',
-      url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${admin_token}` },
-      payload: bookCloneData
-    });
-
-    expect(createResponse.statusCode).toBe(201);
-    const created = createResponse.json().data;
-
-    const deleteResponse = await app.inject({
-      method: 'DELETE',
-      url: `/api/staff/book_clone/${created.book_clone_id}`,
-      headers: { authorization: `Bearer ${librarian_token}` }
-    });
-
-    expect(deleteResponse.statusCode).toBe(200);
-    const body = deleteResponse.json();
-    expect(body.message).toBe('Book clone deleted successfully');
   });
 
   it('should reject delete for MEMBER role', async () => {
@@ -149,7 +94,7 @@ describe('DELETE /api/staff/book_clone/:book_clone_id', async () => {
     const createResponse = await app.inject({
       method: 'POST',
       url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: bookCloneData
     });
 
@@ -159,7 +104,7 @@ describe('DELETE /api/staff/book_clone/:book_clone_id', async () => {
     const deleteResponse = await app.inject({
       method: 'DELETE',
       url: `/api/staff/book_clone/${created.book_clone_id}`,
-      headers: { authorization: `Bearer ${member_token}` }
+      headers: { Authorization: `Bearer ${accessTokens[Role.MEMBER]}` }
     });
 
     expect(deleteResponse.statusCode).toBe(403);
@@ -171,7 +116,7 @@ describe('DELETE /api/staff/book_clone/:book_clone_id', async () => {
     const deleteResponse = await app.inject({
       method: 'DELETE',
       url: `/api/staff/book_clone/${randomId}`,
-      headers: { authorization: `Bearer ${admin_token}` }
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` }
     });
 
     expect(deleteResponse.statusCode).toBe(404);
@@ -189,7 +134,7 @@ describe('DELETE /api/staff/book_clone/:book_clone_id', async () => {
     const createResponse = await app.inject({
       method: 'POST',
       url: '/api/staff/book_clone',
-      headers: { authorization: `Bearer ${admin_token}` },
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       payload: bookCloneData
     });
 

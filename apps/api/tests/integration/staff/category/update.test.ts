@@ -1,48 +1,16 @@
 import { build, users } from '../../helpers/build';
+import { getAccessToken } from '../../helpers/auth';
+import { Role } from '@/generated/prisma/enums';
 import { faker } from '@faker-js/faker';
 
 describe('PUT /api/staff/category/:category_id', async () => {
   const app = await build();
-  let memberToken: string;
-  let adminToken: string;
-  let librarianToken: string;
+  const accessTokens: Partial<Record<Role, string>> = {};
 
   beforeAll(async () => {
-    // Sign in as admin
-    const adminUser = users[0];
-    const adminRes = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: adminUser.email,
-        password: adminUser.password
-      }
-    });
-    adminToken = adminRes.json().data.access_token;
-
-    // Sign in as librarian
-    const librarianUser = users[1];
-    const librarianRes = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: librarianUser.email,
-        password: librarianUser.password
-      }
-    });
-    librarianToken = librarianRes.json().data.access_token;
-
-    // Sign in as member
-    const memberUser = users[4];
-    const memberRes = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: memberUser.email,
-        password: memberUser.password
-      }
-    });
-    memberToken = memberRes.json().data.access_token;
+    accessTokens[Role.ADMIN] = await getAccessToken(app, users[0]);
+    accessTokens[Role.LIBRARIAN] = await getAccessToken(app, users[1]);
+    accessTokens[Role.MEMBER] = await getAccessToken(app, users[4]);
   });
 
   afterAll(async () => {
@@ -67,7 +35,7 @@ describe('PUT /api/staff/category/:category_id', async () => {
       method: 'PUT',
       url: `/api/staff/category/${faker.string.uuid()}`,
       headers: {
-        Authorization: `Bearer ${memberToken}`
+        Authorization: `Bearer ${accessTokens[Role.MEMBER]}`
       },
       payload: {
         name: faker.lorem.word(),
@@ -78,106 +46,62 @@ describe('PUT /api/staff/category/:category_id', async () => {
     expect(res.statusCode).toBe(403);
   });
 
-  it('should update category for librarian users', async () => {
-    // First, create a category to update
-    const createRes = await app.inject({
-      method: 'POST',
-      url: '/api/staff/category',
-      headers: {
-        Authorization: `Bearer ${librarianToken}`
-      },
-      payload: {
-        name: faker.lorem.word(),
-        slug: faker.lorem.slug()
-      }
-    });
+  it.each([{ role: Role.ADMIN }, { role: Role.LIBRARIAN }])(
+    'should update category for $role role',
+    async ({ role }) => {
+      // First, create a category to update
+      const createRes = await app.inject({
+        method: 'POST',
+        url: '/api/staff/category',
+        headers: {
+          Authorization: `Bearer ${accessTokens[role]}`
+        },
+        payload: {
+          name: faker.lorem.word(),
+          slug: faker.lorem.slug()
+        }
+      });
 
-    expect(createRes.statusCode).toBe(201);
-    const createdCategory = createRes.json().data;
+      expect(createRes.statusCode).toBe(201);
+      const createdCategory = createRes.json().data;
 
-    // Now, update the created category
-    const updatedName = faker.lorem.word();
-    const updatedSlug = faker.lorem.slug();
+      // Now, update the created category
+      const updatedName = faker.lorem.word();
+      const updatedSlug = faker.lorem.slug();
 
-    const updateRes = await app.inject({
-      method: 'PUT',
-      url: `/api/staff/category/${createdCategory.category_id}`,
-      headers: {
-        Authorization: `Bearer ${librarianToken}`
-      },
-      payload: {
-        name: updatedName,
-        slug: updatedSlug
-      }
-    });
+      const updateRes = await app.inject({
+        method: 'PUT',
+        url: `/api/staff/category/${createdCategory.category_id}`,
+        headers: {
+          Authorization: `Bearer ${accessTokens[role]}`
+        },
+        payload: {
+          name: updatedName,
+          slug: updatedSlug
+        }
+      });
 
-    expect(updateRes.statusCode).toBe(200);
-    const updatedCategory = updateRes.json().data;
+      expect(updateRes.statusCode).toBe(200);
+      const updatedCategory = updateRes.json().data;
 
-    expect(updatedCategory).toEqual(
-      expect.objectContaining({
-        category_id: createdCategory.category_id,
-        name: updatedName,
-        slug: updatedSlug,
-        created_at: expect.any(String),
-        updated_at: expect.any(String)
-      })
-    );
-  });
-
-  it('should update category for admin users', async () => {
-    // First, create a category to update
-    const createRes = await app.inject({
-      method: 'POST',
-      url: '/api/staff/category',
-      headers: {
-        Authorization: `Bearer ${adminToken}`
-      },
-      payload: {
-        name: faker.lorem.word(),
-        slug: faker.lorem.slug()
-      }
-    });
-
-    expect(createRes.statusCode).toBe(201);
-    const createdCategory = createRes.json().data;
-
-    // Now, update the created category
-    const updatedName = faker.lorem.word();
-    const updatedSlug = faker.lorem.slug();
-
-    const updateRes = await app.inject({
-      method: 'PUT',
-      url: `/api/staff/category/${createdCategory.category_id}`,
-      headers: {
-        Authorization: `Bearer ${adminToken}`
-      },
-      payload: {
-        name: updatedName,
-        slug: updatedSlug
-      }
-    });
-
-    expect(updateRes.statusCode).toBe(200);
-    const updatedCategory = updateRes.json().data;
-
-    expect(updatedCategory).toEqual(
-      expect.objectContaining({
-        category_id: createdCategory.category_id,
-        name: updatedName,
-        slug: updatedSlug,
-        created_at: expect.any(String),
-        updated_at: expect.any(String)
-      })
-    );
-  });
+      expect(updatedCategory).toEqual(
+        expect.objectContaining({
+          category_id: createdCategory.category_id,
+          name: updatedName,
+          slug: updatedSlug,
+          created_at: expect.any(String),
+          updated_at: expect.any(String)
+        })
+      );
+    }
+  );
 
   it('should return 404 when updating a non-existent category', async () => {
     const res = await app.inject({
       method: 'PUT',
       url: `/api/staff/category/${faker.string.uuid()}`,
       headers: {
-        Authorization: `Bearer ${adminToken}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: {
         name: faker.lorem.word(),
@@ -194,7 +118,7 @@ describe('PUT /api/staff/category/:category_id', async () => {
       method: 'POST',
       url: '/api/staff/category',
       headers: {
-        Authorization: `Bearer ${adminToken}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: {
         name: faker.lorem.word(),
@@ -209,7 +133,7 @@ describe('PUT /api/staff/category/:category_id', async () => {
       method: 'POST',
       url: '/api/staff/category',
       headers: {
-        Authorization: `Bearer ${adminToken}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: {
         name: faker.lorem.word(),
@@ -225,7 +149,7 @@ describe('PUT /api/staff/category/:category_id', async () => {
       method: 'PUT',
       url: `/api/staff/category/${category2.category_id}`,
       headers: {
-        Authorization: `Bearer ${adminToken}`
+        Authorization: `Bearer ${accessTokens[Role.ADMIN]}`
       },
       payload: {
         name: faker.lorem.word(),
