@@ -166,6 +166,61 @@ describe('Authentication tests', async () => {
 
 - `users[0]` is ADMIN, `users[1...3]` are LIBRARIAN, and `users[4...]` are MEMBER roles.
 - Each user object contains `email`, `password`, and `fullName` properties for testing purposes.
+- **Important:** When testing authentication and authorization scenarios with multiple roles (e.g., testing that both ADMIN and LIBRARIAN can perform an action), use `it.each` to reduce code duplication and improve test maintainability.
+
+- Example of using `it.each` for permission tests:
+
+```ts
+import { build, users } from '../helpers/build';
+import { getAccessToken } from '../helpers/auth';
+import { Role } from '@/generated/prisma/enums';
+
+describe('Permission tests', async () => {
+  const app = await build();
+  const accessTokens: Partial<Record<Role, string>> = {};
+
+  beforeAll(async () => {
+    accessTokens[Role.ADMIN] = await getAccessToken(app, users[0]);
+    accessTokens[Role.LIBRARIAN] = await getAccessToken(app, users[1]);
+    accessTokens[Role.MEMBER] = await getAccessToken(app, users[4]);
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  // Use it.each for testing multiple roles that should succeed
+  it.each([
+    { role: Role.ADMIN, data: 'admin-specific-data' },
+    { role: Role.LIBRARIAN, data: 'librarian-specific-data' }
+  ])('should allow $role to perform the action', async ({ role, data }) => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/resource',
+      headers: {
+        Authorization: `Bearer ${accessTokens[role]}`
+      },
+      payload: { data }
+    });
+
+    expect(response.statusCode).toBe(201);
+  });
+
+  // Test unauthorized access
+  it('should reject when the user is a member', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/resource',
+      headers: {
+        Authorization: `Bearer ${accessTokens[Role.MEMBER]}`
+      },
+      payload: { data: 'test' }
+    });
+
+    expect(response.statusCode).toBe(403);
+  });
+});
+```
 
 ## Implement New Features in Modules
 

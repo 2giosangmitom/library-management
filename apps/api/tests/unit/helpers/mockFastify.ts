@@ -45,7 +45,8 @@ export async function buildMockFastify() {
     location: {
       findUnique: vi.fn(),
       create: vi.fn(),
-      delete: vi.fn()
+      delete: vi.fn(),
+      update: vi.fn()
     }
   } as unknown as PrismaClient);
 

@@ -1,4 +1,4 @@
-import { AddLocationSchema, DeleteLocationSchema } from './schemas';
+import { AddLocationSchema, DeleteLocationSchema, UpdateLocationSchema } from './schemas';
 import StaffLocationService from './services';
 
 export default class StaffLocationController {
@@ -45,6 +45,30 @@ export default class StaffLocationController {
     return res.status(200).send({
       message: 'Location deleted successfully',
       data: deletedLocation
+    });
+  }
+
+  public async updateLocation(
+    req: FastifyRequestTypeBox<typeof UpdateLocationSchema>,
+    res: FastifyReplyTypeBox<typeof UpdateLocationSchema>
+  ) {
+    const { location_id } = req.params;
+    const { room, floor, shelf, row } = req.body;
+
+    const updatedLocation = await this.staffLocationService.updateLocation(location_id, {
+      room,
+      floor,
+      shelf,
+      row
+    });
+
+    return res.status(200).send({
+      message: 'Location updated successfully',
+      data: {
+        ...updatedLocation,
+        created_at: updatedLocation.created_at.toISOString(),
+        updated_at: updatedLocation.updated_at.toISOString()
+      }
     });
   }
 }

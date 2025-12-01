@@ -55,4 +55,33 @@ export default class StaffLocationService {
       throw error;
     }
   }
+
+  public async updateLocation(location_id: string, data: { room: string; floor: number; shelf: number; row: number }) {
+    try {
+      const new_location_id = this.calculateLocationId(data);
+
+      const updatedLocation = await this.fastify.prisma.location.update({
+        where: { location_id },
+        data: {
+          location_id: new_location_id,
+          room: data.room,
+          floor: data.floor,
+          shelf: data.shelf,
+          row: data.row
+        }
+      });
+
+      return updatedLocation;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case 'P2025':
+            throw this.fastify.httpErrors.notFound('Location with the given ID does not exist.');
+          case 'P2002':
+            throw this.fastify.httpErrors.conflict('Location with the same ID already exists.');
+        }
+      }
+      throw error;
+    }
+  }
 }

@@ -49,3 +49,36 @@ export const AddLocationSchema = {
     500: { $ref: 'HttpError' }
   }
 } satisfies FastifySchema;
+
+export const UpdateLocationSchema = {
+  summary: 'Update a location',
+  description: 'Endpoint to update an existing location by its ID',
+  params: Type.Object({
+    location_id: Type.String({ minLength: 1 })
+  }),
+  body: Type.Object({
+    room: Type.String({ minLength: 1, maxLength: 50 }),
+    floor: Type.Integer({ minimum: 1 }),
+    shelf: Type.Integer({ minimum: 1 }),
+    row: Type.Integer({ minimum: 1 })
+  }),
+  security: [{ JWT: [] }],
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        location_id: Type.String(),
+        room: Type.String(),
+        floor: Type.Integer(),
+        shelf: Type.Integer(),
+        row: Type.Integer(),
+        created_at: Type.String({ format: 'date-time' }),
+        updated_at: Type.String({ format: 'date-time' })
+      })
+    }),
+    403: { $ref: 'HttpError' },
+    404: { $ref: 'HttpError' },
+    409: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
+  }
+} satisfies FastifySchema;

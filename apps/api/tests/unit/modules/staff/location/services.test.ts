@@ -134,4 +134,89 @@ describe('StaffLocationService', async () => {
       await expect(staffLocationService.deleteLocation(locationId)).rejects.toThrowError('Some other error');
     });
   });
+
+  describe('updateLocation', () => {
+    it('should call prisma.location.update with correct location_id and data', async () => {
+      const locationId = 'A-1-2-3';
+      const updateData = { room: 'B', floor: 2, shelf: 3, row: 4 };
+
+      await staffLocationService.updateLocation(locationId, updateData);
+
+      expect(app.prisma.location.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { location_id: locationId },
+          data: {
+            location_id: 'B-2-3-4',
+            room: 'B',
+            floor: 2,
+            shelf: 3,
+            row: 4
+          }
+        })
+      );
+    });
+
+    it('should return the updated location', async () => {
+      const locationId = 'A-1-2-3';
+      const updateData = { room: 'B', floor: 2, shelf: 3, row: 4 };
+      const updatedLocation = {
+        location_id: 'B-2-3-4',
+        room: 'B',
+        floor: 2,
+        shelf: 3,
+        row: 4,
+        created_at: new Date(),
+        updated_at: new Date()
+      } as unknown as Awaited<ReturnType<typeof app.prisma.location.update>>;
+
+      vi.mocked(app.prisma.location.update).mockResolvedValueOnce(updatedLocation);
+
+      const result = await staffLocationService.updateLocation(locationId, updateData);
+
+      expect(result).toEqual(updatedLocation);
+    });
+
+    it('should throw 404 error if location to update does not exist', async () => {
+      const locationId = 'NON-EXISTING';
+      const updateData = { room: 'B', floor: 2, shelf: 3, row: 4 };
+
+      vi.mocked(app.prisma.location.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(
+        staffLocationService.updateLocation(locationId, updateData)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[NotFoundError: Location with the given ID does not exist.]`);
+    });
+
+    it('should throw 409 error if new location_id conflicts with existing location', async () => {
+      const locationId = 'A-1-2-3';
+      const updateData = { room: 'B', floor: 2, shelf: 3, row: 4 };
+
+      vi.mocked(app.prisma.location.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+          code: 'P2002',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(
+        staffLocationService.updateLocation(locationId, updateData)
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[ConflictError: Location with the same ID already exists.]`);
+    });
+
+    it('should rethrow other errors from prisma', async () => {
+      const locationId = 'A-1-2-3';
+      const updateData = { room: 'B', floor: 2, shelf: 3, row: 4 };
+
+      vi.mocked(app.prisma.location.update).mockRejectedValueOnce(new Error('Some other error'));
+
+      await expect(staffLocationService.updateLocation(locationId, updateData)).rejects.toThrowError(
+        'Some other error'
+      );
+    });
+  });
 });
