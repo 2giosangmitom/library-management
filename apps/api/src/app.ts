@@ -6,7 +6,18 @@ import ConfigService from './config/configService';
 export async function buildApp() {
   const app = fastify({
     logger: {
-      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug'
+      level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+      transport:
+        process.env.NODE_ENV === 'production'
+          ? undefined
+          : {
+              target: 'pino-pretty',
+              options: {
+                colorize: true,
+                translateTime: 'SYS:standard',
+                ignore: 'pid,hostname'
+              }
+            }
     }
   })
     .withTypeProvider<TypeBoxTypeProvider>()

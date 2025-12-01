@@ -1,5 +1,14 @@
 import { defineConfig } from 'vitest/config';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import process from 'node:process';
+
+const isTest = process.env.NODE_ENV === 'test';
+
+if (isTest) {
+  process.loadEnvFile('.env.test');
+} else {
+  process.loadEnvFile('.env');
+}
 
 export default defineConfig({
   plugins: [tsconfigPaths()],

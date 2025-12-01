@@ -51,7 +51,7 @@ jobs:
         run: pnpm install
 
       - name: Generate Prisma client
-        run: pnpm --filter api prisma:generate:test
+        run: NODE_ENV=test pnpm --filter api prisma:generate
 
       - name: Run type checking for API
         run: pnpm --filter api typecheck
@@ -73,7 +73,7 @@ jobs:
         run: mise compose-up-dev
 
       - name: Generate Prisma client
-        run: pnpm --filter api prisma:generate:test
+        run: NODE_ENV=test pnpm --filter api prisma:generate
 
       - name: Run coverage report
         run: pnpm --filter api test:coverage
