@@ -4,28 +4,70 @@ applyTo: 'apps/api/**/*.ts'
 
 # BookWise API Application
 
-This directory contains the source code for the BookWise API application. The API is built using Fastify and TypeScript.
+This directory contains the source code for the BookWise API application. The API is built using Fastify with TypeBox type provider and TypeScript.
 
 ## Project Structure
 
 ```
 .
 ├── prisma/
-│   ├── migrations
+│   ├── migrations/
 │   └── schema.prisma
 ├── src/
 │   ├── config/
+│   │   ├── configService.ts
+│   │   └── envSchema.ts
 │   ├── generated/
+│   │   └── prisma/
 │   ├── hooks/
+│   │   ├── auth.ts
+│   │   └── onRoute.ts
 │   ├── modules/
+│   │   ├── admin/
+│   │   ├── auth/
+│   │   ├── author/
+│   │   ├── book/
+│   │   ├── category/
+│   │   ├── loan/
+│   │   ├── publisher/
+│   │   ├── rating/
+│   │   ├── staff/
+│   │   │   ├── author/
+│   │   │   ├── book/
+│   │   │   ├── book_clone/
+│   │   │   ├── category/
+│   │   │   ├── location/
+│   │   │   ├── loan/
+│   │   │   ├── publisher/
+│   │   │   └── autohooks.ts
+│   │   └── user/
 │   ├── plugins/
+│   │   ├── auth.ts
+│   │   ├── cookie.ts
+│   │   ├── cors.ts
+│   │   ├── jwt.ts
+│   │   ├── prisma.ts
+│   │   ├── redis.ts
+│   │   ├── sensible.ts
+│   │   └── swagger.ts
 │   ├── utils/
+│   │   ├── hash.ts
+│   │   └── jwt.ts
 │   ├── app.ts
 │   ├── constants.ts
 │   └── server.ts
 ├── tests/
 │   ├── integration/
+│   │   ├── helpers/
+│   │   │   ├── auth.ts
+│   │   │   └── build.ts
+│   │   ├── setup/
+│   │   │   └── globalSetup.ts
+│   │   └── staff/
 │   └── unit/
+│       ├── helpers/
+│       │   └── mockFastify.ts
+│       └── modules/
 ├── types/
 │   └── global.d.ts
 ├── package.json
@@ -36,43 +78,37 @@ This directory contains the source code for the BookWise API application. The AP
 
 ## Key Components
 
-- `prisma/`: Contains the Prisma schema and migration files for database management.
-- `src/`: Main source code directory.
-  - `config/`: Configuration settings for the application.
-  - `generated/`: Auto-generated files, such as Prisma client.
-  - `hooks/`: Fastify hooks.
-  - `modules/`: Application modules, each encapsulating specific functionality.
-  - `plugins/`: Fastify plugins used in the application.
-  - `utils/`: Utility functions and helpers.
-  - `app.ts`: Initializes the Fastify application.
-  - `server.ts`: Starts the Fastify server.
-- `tests/`: Contains unit and integration tests.
-- `types/`: Custom TypeScript type definitions.
+- `prisma/`: Prisma schema and migration files for PostgreSQL database management.
+- `src/config/`: Configuration management using `@fastify/env` with TypeBox schema validation.
+  - `configService.ts`: Service class for registering and accessing environment configuration.
+  - `envSchema.ts`: TypeBox schema defining required environment variables (`DATABASE_URL`, `REDIS_URL`, `JWT_SECRET`, `COOKIE_SECRET`).
+- `src/generated/`: Auto-generated files (Prisma client with `@prisma/client`).
+- `src/hooks/`: Reusable Fastify hooks for authentication and route modification.
+  - `auth.ts`: Authentication hooks (`authHook`, `isLibrarianHook`, `isAdminHook`, `isAdminOrLibrarianHook`).
+  - `onRoute.ts`: Route modification hooks (e.g., adding tags for Swagger).
+- `src/modules/`: Application modules organized by feature domain.
+- `src/plugins/`: Fastify plugins wrapped with `fastify-plugin` for proper encapsulation.
+- `src/utils/`: Utility functions for hashing, JWT operations, etc.
+- `src/app.ts`: Application factory using `@fastify/autoload` for automatic plugin and route loading.
+- `src/server.ts`: Server entry point with graceful shutdown handling.
+- `tests/`: Test suites using Vitest with separate unit and integration configurations.
+- `types/global.d.ts`: Global TypeScript declarations for `FastifyTypeBox`, `FastifyRequestTypeBox`, `FastifyReplyTypeBox`, `AccessToken`, and `RefreshToken` types.
 
-## Running tests
-
-- To run unit tests:
+## Running Tests
 
 ```bash
+# Run unit tests
 pnpm --filter api test:unit
-```
 
-- To run integration tests:
-
-```bash
+# Run integration tests
 pnpm --filter api test:integration
-```
 
-- To run the coverage report:
-
-```bash
+# Run coverage report
 pnpm --filter api test:coverage
-```
 
-- To run a single test file:
-
-```bash
-pnpm --filter api test:{unit,integration} path/to/test/file.ts
+# Run a single test file
+pnpm --filter api test:unit path/to/test/file.ts
+pnpm --filter api test:integration path/to/test/file.ts
 ```
 
 ## Writing Tests
@@ -80,102 +116,52 @@ pnpm --filter api test:{unit,integration} path/to/test/file.ts
 ### Unit Tests
 
 - Located in `tests/unit/`.
-- Use Vitest for writing unit tests.
-- Helper functions for unit tests can be found in `tests/unit/helpers/`.
-- To build mock Fastify application for unit tests, use this snippet:
+- Use Vitest with mocked dependencies.
+- Use `buildMockFastify()` from `tests/unit/helpers/mockFastify.ts` to create a mock Fastify instance with mocked Prisma and Redis.
 
 ```ts
 import { buildMockFastify } from '@tests/unit/helpers/mockFastify';
+import { Prisma } from '@/generated/prisma/client';
 
-describe('Your test suite', async () => {
+describe('YourService', async () => {
   const app = await buildMockFastify();
+  const service = YourService.getInstance(app);
 
-  afterEach(async () => {
-    vi.clearAllMocks(); // Reset mocks after each test
-    vi.resetAllMocks(); // Reset mock implementations after each test
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
-  afterAll(async () => {
-    await app.close();
-  });
+  it('should handle Prisma errors correctly', async () => {
+    // Mock Prisma to throw a specific error
+    vi.mocked(app.prisma.model.create).mockRejectedValueOnce(
+      new Prisma.PrismaClientKnownRequestError('Unique constraint failed', {
+        code: 'P2002',
+        clientVersion: Prisma.prismaVersion.client
+      })
+    );
 
-  it('should do something', async () => {
-    // Your test logic here
+    await expect(service.create(data)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `[ConflictError: Resource already exists.]`
+    );
   });
 });
 ```
+
+**Important:** When adding new Prisma models to test, update `mockFastify.ts` to include mock functions for the new model.
 
 ### Integration Tests
 
 - Located in `tests/integration/`.
-- Use Vitest for writing integration tests.
-- Helper functions for integration tests can be found in `tests/integration/helpers/`.
-- To build the Fastify application for integration tests, use this snippet:
+- Use the real Fastify application with a test database.
+- Global setup in `tests/integration/setup/globalSetup.ts` creates test users and handles database migrations.
 
 ```ts
-import { build } from '@tests/integration/helpers/build';
-
-describe('Your integration test suite', async () => {
-  const app = await build();
-
-  afterEach(async () => {
-    vi.clearAllMocks(); // Reset mocks after each test
-    vi.resetAllMocks(); // Reset mock implementations after each test
-  });
-
-  afterAll(async () => {
-    await app.close();
-  });
-
-  it('should do something', async () => {
-    // Your test logic here
-  });
-});
-```
-
-- The `build.ts` helper also provides a `users` array with pre-registered users for testing authentication and authorization scenarios.
-- Example usage of pre-registered users:
-
-```ts
-import { users, build } from '@tests/integration/helpers/build';
-
-describe('Authentication tests', async () => {
-  const app = await build();
-
-  afterAll(async () => {
-    await app.close();
-  });
-
-  it('should authenticate a pre-registered user', async () => {
-    const user = users[0]; // Access the first pre-registered user
-
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/auth/signin',
-      payload: {
-        email: user.email,
-        password: user.password
-      }
-    });
-
-    expect(response.statusCode).toBe(200);
-    // Additional assertions...
-  });
-});
-```
-
-- `users[0]` is ADMIN, `users[1...3]` are LIBRARIAN, and `users[4...]` are MEMBER roles.
-- Each user object contains `email`, `password`, and `fullName` properties for testing purposes.
-- **Important:** When testing authentication and authorization scenarios with multiple roles (e.g., testing that both ADMIN and LIBRARIAN can perform an action), use `it.each` to reduce code duplication and improve test maintainability.
-
-- Example of using `it.each` for permission tests:
-
-```ts
-import { build, users } from '../helpers/build';
-import { getAccessToken } from '../helpers/auth';
+import { build, users } from '../../helpers/build';
+import { getAccessToken } from '../../helpers/auth';
 import { Role } from '@/generated/prisma/enums';
 
-describe('Permission tests', async () => {
+describe('POST /api/staff/resource', async () => {
   const app = await build();
   const accessTokens: Partial<Record<Role, string>> = {};
 
@@ -189,151 +175,301 @@ describe('Permission tests', async () => {
     await app.close();
   });
 
-  // Use it.each for testing multiple roles that should succeed
-  it.each([
-    { role: Role.ADMIN, data: 'admin-specific-data' },
-    { role: Role.LIBRARIAN, data: 'librarian-specific-data' }
-  ])('should allow $role to perform the action', async ({ role, data }) => {
-    const response = await app.inject({
-      method: 'POST',
-      url: '/api/resource',
-      headers: {
-        Authorization: `Bearer ${accessTokens[role]}`
-      },
-      payload: { data }
-    });
+  // Test cases here...
+});
+```
 
-    expect(response.statusCode).toBe(201);
+### Pre-registered Test Users
+
+The `users` array provides 10 pre-registered users with the following roles:
+
+| Index | Role      | Email               |
+| ----- | --------- | ------------------- |
+| 0     | ADMIN     | user0@example.com   |
+| 1-3   | LIBRARIAN | user1-3@example.com |
+| 4-9   | MEMBER    | user4-9@example.com |
+
+Each user has `{ email, password: 'Password123!', fullName }` properties.
+
+### Using `it.each` for Role-Based Permission Tests
+
+When testing endpoints accessible by multiple roles, use `it.each` to reduce duplication:
+
+```ts
+import { build, users } from '../../helpers/build';
+import { getAccessToken } from '../../helpers/auth';
+import { Role } from '@/generated/prisma/enums';
+
+describe('POST /api/staff/resource', async () => {
+  const app = await build();
+  const accessTokens: Partial<Record<Role, string>> = {};
+
+  beforeAll(async () => {
+    accessTokens[Role.ADMIN] = await getAccessToken(app, users[0]);
+    accessTokens[Role.LIBRARIAN] = await getAccessToken(app, users[1]);
+    accessTokens[Role.MEMBER] = await getAccessToken(app, users[4]);
   });
 
-  // Test unauthorized access
-  it('should reject when the user is a member', async () => {
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('should reject unauthenticated requests', async () => {
     const response = await app.inject({
       method: 'POST',
-      url: '/api/resource',
-      headers: {
-        Authorization: `Bearer ${accessTokens[Role.MEMBER]}`
-      },
-      payload: { data: 'test' }
+      url: '/api/staff/resource',
+      payload: { name: 'test' }
+    });
+
+    expect(response.statusCode).toBe(401);
+  });
+
+  it('should reject MEMBER role', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/staff/resource',
+      headers: { Authorization: `Bearer ${accessTokens[Role.MEMBER]}` },
+      payload: { name: 'test' }
     });
 
     expect(response.statusCode).toBe(403);
   });
+
+  it.each([{ role: Role.ADMIN }, { role: Role.LIBRARIAN }])(
+    'should allow $role to create resource',
+    async ({ role }) => {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/api/staff/resource',
+        headers: { Authorization: `Bearer ${accessTokens[role]}` },
+        payload: { name: 'test' }
+      });
+
+      expect(response.statusCode).toBe(201);
+    }
+  );
 });
 ```
 
-## Implement New Features in Modules
+**Important:** When adding new modules, register the routes and autohooks in `tests/integration/helpers/build.ts`.
 
-- New features should be implemented within the `src/modules/` directory.
-- Each module should encapsulate related functionality.
-- Each module can have its own routes, services, schemas, autohooks, and controllers.
-- Follow the existing module structure for consistency and maintainability.
-- Example module structure:
+## Implementing New Features
+
+### Module Structure
+
+Each module should follow this structure:
 
 ```
 src/modules/
-└── user/
-    ├── controllers.ts
-    ├── autohooks.ts
-    ├── routes.ts
-    ├── schemas.ts
-    └── services.ts
+└── feature/
+    ├── autohooks.ts   # Route hooks (tags, authentication)
+    ├── controllers.ts # Request/response handling
+    ├── routes.ts      # Route definitions
+    ├── schemas.ts     # TypeBox request/response schemas
+    └── services.ts    # Business logic and database operations
 ```
 
-- `routes.ts`: A Fastify plugin for defining module routes.
-- `controllers.ts`: Handles incoming requests and responses.
-- `services.ts`: Contains business logic and interacts with the database.
-- `schemas.ts`: Defines Fastify schema for a route, using TypeBox.
-- `autohooks.ts`: A Fastify plugin for adding hooks to the module.
-
-The controller and service should encapsulate in a class structure for better organization and testability. Using dependency injection is encouraged for managing dependencies within modules, and using the Singleton pattern is recommended to ensure a single instance throughout the application.
-
-- Example of a controller and service using classes:
+### Service Pattern (Singleton with Dependency Injection)
 
 ```ts
-export default class ModuleService {
-  private static instance: ModuleService;
+import { Prisma } from '@/generated/prisma/client';
+
+export default class FeatureService {
+  private static instance: FeatureService;
   private fastify: FastifyTypeBox;
 
   private constructor(fastify: FastifyTypeBox) {
     this.fastify = fastify;
   }
 
-  public static getInstance(fastify: FastifyTypeBox) {
-    if (!ModuleService.instance) {
-      ModuleService.instance = new ModuleService(fastify);
+  public static getInstance(fastify: FastifyTypeBox): FeatureService {
+    if (!FeatureService.instance) {
+      FeatureService.instance = new FeatureService(fastify);
     }
-    return ModuleService.instance;
+    return FeatureService.instance;
   }
 
-  // Service methods go here
+  public async createResource(data: CreateResourceInput) {
+    try {
+      const resource = await this.fastify.prisma.resource.create({ data });
+      return resource;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case 'P2002':
+            throw this.fastify.httpErrors.conflict('Resource already exists.');
+          case 'P2025':
+            throw this.fastify.httpErrors.notFound('Resource not found.');
+          case 'P2003':
+            throw this.fastify.httpErrors.badRequest('Invalid foreign key reference.');
+        }
+      }
+      throw error;
+    }
+  }
 }
 ```
+
+### Controller Pattern
 
 ```ts
-export default class ModuleController {
-  private static instance: ModuleController;
-  private moduleService: ModuleService;
-  private fastify: FastifyTypeBox;
+import { CreateResourceSchema } from './schemas';
+import FeatureService from './services';
 
-  private constructor(fastify: FastifyTypeBox, moduleService: ModuleService) {
-    this.fastify = fastify;
-    this.moduleService = moduleService;
+export default class FeatureController {
+  private static instance: FeatureController;
+  private featureService: FeatureService;
+
+  private constructor(fastify: FastifyTypeBox, featureService: FeatureService) {
+    this.featureService = featureService;
   }
 
-  public static getInstance(fastify: FastifyTypeBox, moduleService = ModuleService.getInstance(fastify)) {
-    if (!ModuleController.instance) {
-      ModuleController.instance = new ModuleController(fastify, moduleService);
+  public static getInstance(
+    fastify: FastifyTypeBox,
+    featureService = FeatureService.getInstance(fastify)
+  ): FeatureController {
+    if (!FeatureController.instance) {
+      FeatureController.instance = new FeatureController(fastify, featureService);
     }
-    return ModuleController.instance;
+    return FeatureController.instance;
   }
 
-  // Controller methods go here
+  public async createResource(
+    req: FastifyRequestTypeBox<typeof CreateResourceSchema>,
+    reply: FastifyReplyTypeBox<typeof CreateResourceSchema>
+  ) {
+    const resource = await this.featureService.createResource(req.body);
+
+    return reply.status(201).send({
+      message: 'Resource created successfully',
+      data: resource
+    });
+  }
 }
 ```
 
-- Example of defining routes:
+### Routes Definition
 
 ```ts
-import { ModuleController } from './module.controller';
+import FeatureController from './controllers';
+import { CreateResourceSchema, DeleteResourceSchema } from './schemas';
 
-export default function moduleRoutes(fastify: FastifyTypeBox) {
-  const moduleController = ModuleController.getInstance(fastify);
+export default function featureRoutes(fastify: FastifyTypeBox) {
+  const controller = FeatureController.getInstance(fastify);
 
-  fastify.get('/', moduleController.getAll.bind(moduleController));
-
-  // Define other routes...
+  fastify.post('/', { schema: CreateResourceSchema }, controller.createResource.bind(controller));
+  fastify.delete('/:id', { schema: DeleteResourceSchema }, controller.deleteResource.bind(controller));
 }
 ```
 
-- Example of defining schemas using TypeBox:
+### Schema Definition (TypeBox)
 
 ```ts
 import { Type } from 'typebox';
-import { FastifySchema } from 'fastify';
+import { type FastifySchema } from 'fastify';
 
-export const ExampleSchema = {
-  summary: 'Example endpoint',
-  description: 'An example endpoint schema',
-  tags: ['Example'],
+export const CreateResourceSchema = {
+  summary: 'Create a new resource',
+  description: 'Creates a new resource in the system.',
+  tags: ['Feature'],
+  security: [{ JWT: [] }],
   body: Type.Object({
-    exampleField: Type.String()
-  }),
-  params: Type.Object({
-    id: Type.String({ format: 'uuid' })
+    name: Type.String(),
+    description: Type.Optional(Type.String())
   }),
   response: {
-    200: Type.Object({
-      message: Type.String()
-    })
+    201: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        id: Type.String({ format: 'uuid' }),
+        name: Type.String(),
+        created_at: Type.String({ format: 'date-time' })
+      })
+    }),
+    400: { $ref: 'HttpError' },
+    401: { $ref: 'HttpError' },
+    403: { $ref: 'HttpError' },
+    409: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;
 ```
 
-## Notes
+### Autohooks
 
-- An autohook can be cascaded deeply into modules by registering the autohook plugin in the parent of the module. For example, the `isAdminOrLibrarianHook` is registered in the `staff` module, so all child modules under `staff` will have this hook applied automatically. No needed to register it again in child modules.
-- Follow strict TypeScript rules and Fastify best practices for better maintainability and performance.
-- Use `pnpm --filter api typecheck` to check for type errors in the API application.
-- Use `pnpm lint` to run ESLint and ensure code quality.
-- When writing tests for new modules, don't forget to create corresponding mock functions in `mockFastify.ts` to simulate database interactions, and register new routes and autohooks in the `build.ts` helper for integration tests.
+```ts
+import { addRouteTags } from '@/hooks/onRoute';
+import { isAdminOrLibrarianHook } from '@/hooks/auth';
+
+export default function featureHooks(fastify: FastifyTypeBox) {
+  // Add Swagger tags to all routes in this module
+  fastify.addHook('onRoute', addRouteTags('Feature'));
+
+  // Apply authentication hook to all routes
+  fastify.addHook('preHandler', isAdminOrLibrarianHook(fastify));
+}
+```
+
+## Prisma Error Codes
+
+Common Prisma error codes to handle in services:
+
+| Code  | Meaning                         | HTTP Status |
+| ----- | ------------------------------- | ----------- |
+| P2002 | Unique constraint violation     | 409         |
+| P2025 | Record not found                | 404         |
+| P2003 | Foreign key constraint violated | 400         |
+
+## Available Authentication Hooks
+
+From `src/hooks/auth.ts`:
+
+- `authHook`: Verifies JWT token (use with `req.jwtVerify()`).
+- `isLibrarianHook`: Requires LIBRARIAN role.
+- `isAdminHook`: Requires ADMIN role.
+- `isAdminOrLibrarianHook(app)`: Requires either ADMIN or LIBRARIAN role (uses `@fastify/auth`).
+
+## Cascading Autohooks
+
+Autohooks registered in a parent module cascade to all child modules. For example, `staff/autohooks.ts` applies `isAdminOrLibrarianHook` to all child modules (`staff/author`, `staff/book`, etc.), so individual child modules don't need to register authentication hooks.
+
+## Development Commands
+
+```bash
+# Type checking
+pnpm --filter api typecheck
+
+# Linting
+pnpm lint
+
+# Development server with hot reload
+pnpm --filter api dev
+
+# Generate Prisma client
+pnpm --filter api prisma:generate
+
+# Run database migrations
+pnpm --filter api prisma:migrate
+
+# Open Prisma Studio
+pnpm --filter api prisma:studio
+```
+
+## Important Notes
+
+1. **TypeBox Type Provider**: The application uses `@fastify/type-provider-typebox` for type-safe request/response handling. Always use `FastifyTypeBox`, `FastifyRequestTypeBox`, and `FastifyReplyTypeBox` types.
+
+2. **Global Types**: Custom types are defined in `types/global.d.ts` and are globally available without imports.
+
+3. **Plugin Encapsulation**: All plugins in `src/plugins/` are wrapped with `fastify-plugin` (fp) for proper encapsulation and are registered with `encapsulate: false` in autoload.
+
+4. **Route Autoloading**: Routes are automatically loaded from `src/modules/` with:
+   - Pattern: `routes.ts` files are the entry points.
+   - Autohooks: `autohooks.ts` files are applied to the module and its children.
+   - Prefix: All routes are prefixed with `/api`.
+
+5. **Testing Best Practices**:
+   - Use `getAccessToken()` helper instead of manual signin for cleaner tests.
+   - Use `it.each` for testing multiple roles with similar expected behavior.
+   - Always close the app in `afterAll` to prevent resource leaks.
+   - Update `mockFastify.ts` when adding new Prisma models.
+   - Update `build.ts` when adding new routes for integration tests.
