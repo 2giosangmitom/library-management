@@ -1,5 +1,5 @@
-import AuthorController from '@/modules/author/controllers.js';
-import { buildMockFastify } from '../../helpers/mockFastify.js';
+import AuthorController from '@/modules/author/controllers';
+import { buildMockFastify } from '../../helpers/mockFastify';
 
 describe('AuthorController', async () => {
   const app = await buildMockFastify();

@@ -1,7 +1,7 @@
 import { fastify } from 'fastify';
 import { fastifyAutoload } from '@fastify/autoload';
 import { type TypeBoxTypeProvider, TypeBoxValidatorCompiler } from '@fastify/type-provider-typebox';
-import ConfigService from './config/configService.js';
+import ConfigService from './config/configService';
 
 export async function buildApp() {
   const app = fastify({

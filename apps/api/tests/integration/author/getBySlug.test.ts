@@ -1,4 +1,4 @@
-import { build, users } from '../helpers/build.js';
+import { build, users } from '../helpers/build';
 import { faker } from '@faker-js/faker';
 
 describe('GET /api/author/:slug', async () => {

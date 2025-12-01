@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import { build, users } from '../../helpers/build.js';
+import { build, users } from '../../helpers/build';
 
 describe('DELETE /api/staff/author/:author_id', async () => {
   const app = await build();

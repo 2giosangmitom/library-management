@@ -1,9 +1,9 @@
-import AuthService from '@/modules/auth/services.js';
-import { Role } from '@/generated/prisma/enums.js';
+import AuthService from '@/modules/auth/services';
+import { Role } from '@/generated/prisma/enums';
 import { faker } from '@faker-js/faker';
-import { buildMockFastify } from '../../helpers/mockFastify.js';
+import { buildMockFastify } from '../../helpers/mockFastify';
 import { HttpError } from '@fastify/sensible';
-import * as hashUtils from '@/utils/hash.js';
+import * as hashUtils from '@/utils/hash';
 
 describe('AuthService', async () => {
   const app = await buildMockFastify();

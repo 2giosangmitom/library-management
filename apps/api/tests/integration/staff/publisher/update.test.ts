@@ -1,4 +1,4 @@
-import { build, users } from '../../helpers/build.js';
+import { build, users } from '../../helpers/build';
 import { faker } from '@faker-js/faker';
 
 describe('PUT /api/staff/publisher/:publisher_id', async () => {

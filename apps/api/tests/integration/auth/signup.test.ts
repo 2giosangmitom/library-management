@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
-import { passwordMinLength } from '@/constants.js';
-import { build } from '../helpers/build.js';
+import { passwordMinLength } from '@/constants';
+import { build } from '../helpers/build';
 
 describe('POST /api/auth/signup', async () => {
   const app = await build();

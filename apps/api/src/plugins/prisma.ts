@@ -1,7 +1,7 @@
-import { PrismaClient } from '@/generated/prisma/client.js';
+import { PrismaClient } from '@/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import fp from 'fastify-plugin';
-import type { envType } from '@/config/envSchema.js';
+import type { envType } from '@/config/envSchema';
 
 export default fp(
   (fastify: FastifyTypeBox, opts: envType) => {

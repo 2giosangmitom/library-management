@@ -1,5 +1,5 @@
-import { GetAuthorBySlugSchema } from './schemas.js';
-import AuthorService from './services.js';
+import { GetAuthorBySlugSchema } from './schemas';
+import AuthorService from './services';
 
 export default class AuthorController {
   private static instance: AuthorController;

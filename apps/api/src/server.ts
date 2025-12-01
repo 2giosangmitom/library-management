@@ -1,5 +1,5 @@
-import { JWTUtils } from '@/utils/jwt.js';
-import { buildApp } from './app.js';
+import { JWTUtils } from '@/utils/jwt';
+import { buildApp } from './app';
 import closeWithGrace from 'close-with-grace';
 import cron from 'node-cron';
 

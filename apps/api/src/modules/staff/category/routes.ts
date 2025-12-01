@@ -1,5 +1,5 @@
-import StaffCategoryController from './controllers.js';
-import { CreateCategorySchema, DeleteCategorySchema, UpdateCategorySchema } from './schemas.js';
+import StaffCategoryController from './controllers';
+import { CreateCategorySchema, DeleteCategorySchema, UpdateCategorySchema } from './schemas';
 
 export default function staffCategoryRoutes(fastify: FastifyTypeBox) {
   const controller = StaffCategoryController.getInstance(fastify);

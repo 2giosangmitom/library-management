@@ -1,4 +1,4 @@
-import { generateHash, verifyHash } from '@/utils/hash.js';
+import { generateHash, verifyHash } from '@/utils/hash';
 
 describe('hash utilities', () => {
   it('verifies numeric-only input', async () => {

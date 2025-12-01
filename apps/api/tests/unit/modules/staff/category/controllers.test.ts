@@ -1,5 +1,5 @@
-import StaffCategoryController from '@/modules/staff/category/controllers.js';
-import { buildMockFastify } from '../../../helpers/mockFastify.js';
+import StaffCategoryController from '@/modules/staff/category/controllers';
+import { buildMockFastify } from '../../../helpers/mockFastify';
 
 describe('StaffCategoryController', async () => {
   const app = await buildMockFastify();

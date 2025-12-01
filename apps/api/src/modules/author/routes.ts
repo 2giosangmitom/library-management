@@ -1,5 +1,5 @@
-import AuthorController from './controllers.js';
-import { GetAuthorBySlugSchema } from './schemas.js';
+import AuthorController from './controllers';
+import { GetAuthorBySlugSchema } from './schemas';
 
 export default function authorRoutes(fastify: FastifyTypeBox) {
   const authorController = AuthorController.getInstance(fastify);

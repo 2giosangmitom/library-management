@@ -1,6 +1,6 @@
-import StaffLocationService from '@/modules/staff/location/services.js';
-import { Prisma } from '@/generated/prisma/client.js';
-import { buildMockFastify } from '../../../helpers/mockFastify.js';
+import StaffLocationService from '@/modules/staff/location/services';
+import { Prisma } from '@/generated/prisma/client';
+import { buildMockFastify } from '../../../helpers/mockFastify';
 
 describe('StaffLocationService', async () => {
   const app = await buildMockFastify();

@@ -1,5 +1,5 @@
-import StaffLocationController from '@/modules/staff/location/controllers.js';
-import { buildMockFastify } from '../../../helpers/mockFastify.js';
+import StaffLocationController from '@/modules/staff/location/controllers';
+import { buildMockFastify } from '../../../helpers/mockFastify';
 
 describe('StaffLocationController', async () => {
   const app = await buildMockFastify();

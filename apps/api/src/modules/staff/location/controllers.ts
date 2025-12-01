@@ -1,5 +1,5 @@
-import { AddLocationSchema } from './schemas.js';
-import StaffLocationService from './services.js';
+import { AddLocationSchema } from './schemas';
+import StaffLocationService from './services';
 
 export default class StaffLocationController {
   private static instance: StaffLocationController;

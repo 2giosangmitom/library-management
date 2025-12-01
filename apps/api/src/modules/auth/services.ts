@@ -1,6 +1,6 @@
-import { Role } from '@/generated/prisma/enums.js';
-import { generateHash, verifyHash } from '@/utils/hash.js';
-import { JWTUtils } from '@/utils/jwt.js';
+import { Role } from '@/generated/prisma/enums';
+import { generateHash, verifyHash } from '@/utils/hash';
+import { JWTUtils } from '@/utils/jwt';
 import { nanoid } from 'nanoid';
 
 export default class AuthService {

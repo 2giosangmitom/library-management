@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process';
-import { build, users } from '../helpers/build.js';
+import { build, users } from '../helpers/build';
 
 export default async function globalSetup() {
   console.log('Setting up integration test database...');

@@ -1,4 +1,4 @@
-import { Prisma } from '@/generated/prisma/client.js';
+import { Prisma } from '@/generated/prisma/client';
 
 export default class StaffLocationService {
   private static instance: StaffLocationService;

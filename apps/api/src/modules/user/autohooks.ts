@@ -1,4 +1,4 @@
-import { addRouteTags } from '@/hooks/onRoute.js';
+import { addRouteTags } from '@/hooks/onRoute';
 
 export default function userHooks(fastify: FastifyTypeBox) {
   fastify.addHook('onRoute', addRouteTags('User'));

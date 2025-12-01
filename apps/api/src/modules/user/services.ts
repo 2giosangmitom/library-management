@@ -1,4 +1,4 @@
-import { Prisma, Role } from '@/generated/prisma/client.js';
+import { Prisma, Role } from '@/generated/prisma/client';
 
 export default class UserService {
   private static instance: UserService;

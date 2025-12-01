@@ -1,6 +1,6 @@
-import { build, users } from '../../helpers/build.js';
-import { getAccessToken } from '../../helpers/auth.js';
-import { Role } from '@/generated/prisma/enums.js';
+import { build, users } from '../../helpers/build';
+import { getAccessToken } from '../../helpers/auth';
+import { Role } from '@/generated/prisma/enums';
 
 describe('POST /api/staff/location', async () => {
   const app = await build();

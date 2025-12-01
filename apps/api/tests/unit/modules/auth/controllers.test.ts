@@ -1,5 +1,5 @@
-import AuthController from '@/modules/auth/controllers.js';
-import { buildMockFastify } from '../../helpers/mockFastify.js';
+import AuthController from '@/modules/auth/controllers';
+import { buildMockFastify } from '../../helpers/mockFastify';
 
 describe('AuthController', async () => {
   const app = await buildMockFastify();

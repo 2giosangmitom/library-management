@@ -1,5 +1,5 @@
-import AuthorService from '@/modules/author/services.js';
-import { buildMockFastify } from '../../helpers/mockFastify.js';
+import AuthorService from '@/modules/author/services';
+import { buildMockFastify } from '../../helpers/mockFastify';
 import { faker } from '@faker-js/faker';
 
 describe('AuthorService', async () => {

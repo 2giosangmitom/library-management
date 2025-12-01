@@ -1,7 +1,7 @@
-import StaffAuthorService from '@/modules/staff/author/services.js';
-import { buildMockFastify } from '../../../helpers/mockFastify.js';
+import StaffAuthorService from '@/modules/staff/author/services';
+import { buildMockFastify } from '../../../helpers/mockFastify';
 import { faker } from '@faker-js/faker';
-import { Prisma } from '@/generated/prisma/client.js';
+import { Prisma } from '@/generated/prisma/client';
 
 describe('StaffAuthorService', async () => {
   const app = await buildMockFastify();

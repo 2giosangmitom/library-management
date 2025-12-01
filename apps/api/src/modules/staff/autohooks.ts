@@ -1,5 +1,5 @@
-import { isAdminOrLibrarianHook } from '@/hooks/auth.js';
-import { addRouteTags } from '@/hooks/onRoute.js';
+import { isAdminOrLibrarianHook } from '@/hooks/auth';
+import { addRouteTags } from '@/hooks/onRoute';
 
 export default function staffHooks(fastify: FastifyTypeBox) {
   fastify.addHook('onRoute', addRouteTags('Staff'));

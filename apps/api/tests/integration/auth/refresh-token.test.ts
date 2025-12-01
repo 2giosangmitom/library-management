@@ -1,5 +1,5 @@
-import { JWTUtils } from '@/utils/jwt.js';
-import { users, build } from '../helpers/build.js';
+import { JWTUtils } from '@/utils/jwt';
+import { users, build } from '../helpers/build';
 
 describe('POST /api/auth/refresh-token', async () => {
   const app = await build();

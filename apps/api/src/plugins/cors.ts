@@ -1,5 +1,5 @@
 import { fastifyCors } from '@fastify/cors';
-import { type envType } from '@/config/envSchema.js';
+import { type envType } from '@/config/envSchema';
 import fp from 'fastify-plugin';
 
 export default fp(

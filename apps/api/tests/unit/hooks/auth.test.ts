@@ -1,6 +1,6 @@
-import { Role } from '@/generated/prisma/enums.js';
-import { buildMockFastify } from '../helpers/mockFastify.js';
-import { authHook, isLibrarianHook, isAdminHook, isAdminOrLibrarianHook } from '@/hooks/auth.js';
+import { Role } from '@/generated/prisma/enums';
+import { buildMockFastify } from '../helpers/mockFastify';
+import { authHook, isLibrarianHook, isAdminHook, isAdminOrLibrarianHook } from '@/hooks/auth';
 
 describe('auth hooks', async () => {
   const app = await buildMockFastify();
