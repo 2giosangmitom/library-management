@@ -42,7 +42,7 @@ importers:
         version: 5.2.3
       '@fastify/type-provider-typebox':
         specifier: ^6.1.0
-        version: 6.1.0(typebox@1.0.58)
+        version: 6.1.0(typebox@1.0.59)
       '@prisma/adapter-pg':
         specifier: ^7.0.1
         version: 7.0.1
@@ -68,8 +68,8 @@ importers:
         specifier: ^8.16.3
         version: 8.16.3
       typebox:
-        specifier: ^1.0.58
-        version: 1.0.58
+        specifier: ^1.0.59
+        version: 1.0.59
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
@@ -3415,8 +3415,8 @@ packages:
     resolution: {integrity: sha512-TkRKr9sUTxEH8MdfuCSP7VizJyzRNMjj2J2do2Jr3Kym598JVdEksuzPQCnlFPW4ky9Q+iA+ma9BGm06XQBy8g==}
     engines: {node: '>= 0.6'}
 
-  typebox@1.0.58:
-    resolution: {integrity: sha512-k5zPE5pTAjQRR6KLVn1C09ShIDyBpj2BETPtCFGQL1TFOTAMjLPf/IxE6vogMOdh2e0BJz1SoZ9YlfCEfcC+cw==}
+  typebox@1.0.59:
+    resolution: {integrity: sha512-D8pTcn4yPzUb34OWFyPVITP1fMZjJXV5n7tT5ss/BxHSnzfuMK4rQEFunpk1UOwq9lMCOed2BJ3GXGoIBKl7Rw==}
 
   typed-array-buffer@1.0.3:
     resolution: {integrity: sha512-nAYYwfY3qnzX30IkA6AQZjVbtK6duGontcQm1WSG1MD94YLqK0515GNApXkoxKOWMusVssAHWLh9SeaoefYFGw==}
@@ -4086,9 +4086,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@fastify/type-provider-typebox@6.1.0(typebox@1.0.58)':
+  '@fastify/type-provider-typebox@6.1.0(typebox@1.0.59)':
     dependencies:
-      typebox: 1.0.58
+      typebox: 1.0.59
 
   '@hono/node-server@1.14.2(hono@4.7.10)':
     dependencies:
@@ -5347,7 +5347,7 @@ snapshots:
       eslint: 9.39.1(jiti@2.6.1)
       eslint-import-resolver-node: 0.3.9
       eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-react: 7.37.5(eslint@9.39.1(jiti@2.6.1))
       eslint-plugin-react-hooks: 7.0.1(eslint@9.39.1(jiti@2.6.1))
@@ -5380,7 +5380,7 @@ snapshots:
       tinyglobby: 0.2.15
       unrs-resolver: 1.11.1
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-import: 2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1))
     transitivePeerDependencies:
       - supports-color
 
@@ -5394,7 +5394,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)))(eslint@9.39.1(jiti@2.6.1)):
+  eslint-plugin-import@2.32.0(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.1(jiti@2.6.1)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -7024,7 +7024,7 @@ snapshots:
       media-typer: 0.3.0
       mime-types: 2.1.35
 
-  typebox@1.0.58: {}
+  typebox@1.0.59: {}
 
   typed-array-buffer@1.0.3:
     dependencies:
