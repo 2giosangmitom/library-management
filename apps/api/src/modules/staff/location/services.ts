@@ -15,14 +15,16 @@ export default class StaffLocationService {
     return StaffLocationService.instance;
   }
 
-  public async addLocation(data: { room: string; floor: number; shelf: number; row: number }) {
-    const { room, floor, shelf, row } = data;
+  public calculateLocationId(data: { room: string; floor: number; shelf: number; row: number }) {
+    return `${data.room.toUpperCase()}-${data.floor}-${data.shelf}-${data.row}`;
+  }
 
+  public async addLocation(data: { room: string; floor: number; shelf: number; row: number }) {
     try {
-      const location_id = `${room.toUpperCase()}-${floor}-${shelf}-${row}`;
+      const location_id = this.calculateLocationId(data);
 
       const newLocation = await this.fastify.prisma.location.create({
-        data: { location_id, room, floor, shelf, row }
+        data: { location_id, room: data.room, floor: data.floor, shelf: data.shelf, row: data.row }
       });
 
       return newLocation;
@@ -30,6 +32,24 @@ export default class StaffLocationService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw this.fastify.httpErrors.conflict('Location with the same ID already exists.');
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async deleteLocation(location_id: string) {
+    try {
+      const deletedLocation = await this.fastify.prisma.location.delete({
+        select: { location_id: true, room: true, floor: true, shelf: true, row: true },
+        where: { location_id }
+      });
+
+      return deletedLocation;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw this.fastify.httpErrors.notFound('Location with the given ID does not exist.');
         }
       }
       throw error;

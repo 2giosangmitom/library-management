@@ -1,6 +1,30 @@
 import { type FastifySchema } from 'fastify';
 import Type from 'typebox';
 
+export const DeleteLocationSchema = {
+  summary: 'Delete a location',
+  description: 'Endpoint to delete a location by its ID',
+  params: Type.Object({
+    location_id: Type.String({ minLength: 1 })
+  }),
+  security: [{ JWT: [] }],
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      data: Type.Object({
+        location_id: Type.String(),
+        room: Type.String(),
+        floor: Type.Integer(),
+        shelf: Type.Integer(),
+        row: Type.Integer()
+      })
+    }),
+    403: { $ref: 'HttpError' },
+    404: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
+  }
+} satisfies FastifySchema;
+
 export const AddLocationSchema = {
   summary: 'Add a new location',
   description: 'Endpoint to add a new location to the system',
@@ -10,6 +34,7 @@ export const AddLocationSchema = {
     shelf: Type.Integer({ minimum: 1 }),
     row: Type.Integer({ minimum: 1 })
   }),
+  security: [{ JWT: [] }],
   response: {
     201: Type.Object({
       location_id: Type.String(),

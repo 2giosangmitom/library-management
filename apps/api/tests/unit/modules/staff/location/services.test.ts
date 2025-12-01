@@ -78,4 +78,60 @@ describe('StaffLocationService', async () => {
       ).rejects.toThrowError('Unknown error');
     });
   });
+
+  describe('deleteLocation', () => {
+    it('should call prisma.location.delete with correct location_id', async () => {
+      const locationId = 'A-1-2-3';
+
+      await staffLocationService.deleteLocation(locationId);
+
+      expect(app.prisma.location.delete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            location_id: locationId
+          }
+        })
+      );
+    });
+
+    it('should return the deleted location', async () => {
+      const locationId = 'A-1-2-3';
+      const deletedLocation = {
+        location_id: locationId,
+        room: 'A',
+        floor: 1,
+        shelf: 2,
+        row: 3
+      } as unknown as Awaited<ReturnType<typeof app.prisma.location.delete>>;
+
+      vi.mocked(app.prisma.location.delete).mockResolvedValueOnce(deletedLocation);
+
+      const result = await staffLocationService.deleteLocation(locationId);
+
+      expect(result).toEqual(deletedLocation);
+    });
+
+    it("should throw 404 error if location doesn't exist", async () => {
+      const locationId = 'NON-EXISTING';
+
+      vi.mocked(app.prisma.location.delete).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(staffLocationService.deleteLocation(locationId)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[NotFoundError: Location with the given ID does not exist.]`
+      );
+    });
+
+    it('should rethrow other errors from prisma', async () => {
+      const locationId = 'A-1-2-3';
+
+      vi.mocked(app.prisma.location.delete).mockRejectedValueOnce(new Error('Some other error'));
+
+      await expect(staffLocationService.deleteLocation(locationId)).rejects.toThrowError('Some other error');
+    });
+  });
 });
