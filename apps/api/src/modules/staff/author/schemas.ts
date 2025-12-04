@@ -95,8 +95,8 @@ export const GetAuthorsSchema = {
     limit: Type.Optional(Type.Integer({ minimum: 1, maximum: 50 })),
     search: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
     nationality: Type.Optional(Type.String({ minLength: 1, maxLength: 100 })),
-    sort_by: Type.Optional(Type.Union([Type.Literal('name'), Type.Literal('created_at'), Type.Literal('updated_at')])),
-    order: Type.Optional(Type.Union([Type.Literal('asc'), Type.Literal('desc')])),
+    sort_by: Type.Optional(Type.Enum(['name', 'created_at', 'updated_at'])),
+    order: Type.Optional(Type.Enum(['asc', 'desc'])),
     is_alive: Type.Optional(Type.Boolean())
   }),
   security: [{ JWT: [] }],
