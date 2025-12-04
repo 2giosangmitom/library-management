@@ -1,9 +1,10 @@
 import StaffAuthorController from './controllers';
-import { CreateAuthorSchema, DeleteAuthorSchema, UpdateAuthorSchema } from './schemas';
+import { CreateAuthorSchema, DeleteAuthorSchema, GetAuthorsSchema, UpdateAuthorSchema } from './schemas';
 
 export default function staffAuthorRoutes(fastify: FastifyTypeBox) {
   const staffAuthorController = StaffAuthorController.getInstance(fastify);
 
+  fastify.get('/', { schema: GetAuthorsSchema }, staffAuthorController.getAuthors.bind(staffAuthorController));
   fastify.post('/', { schema: CreateAuthorSchema }, staffAuthorController.createAuthor.bind(staffAuthorController));
   fastify.delete(
     '/:author_id',

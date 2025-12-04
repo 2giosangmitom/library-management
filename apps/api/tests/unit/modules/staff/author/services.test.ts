@@ -296,6 +296,104 @@ describe('StaffAuthorService', async () => {
     });
   });
 
+  describe('findAuthors', () => {
+    it('should query authors with filters, pagination, and sorting', async () => {
+      const search = faker.person.lastName();
+      const nationality = faker.location.country();
+      const authors = Array.from({ length: 2 }, () => ({
+        author_id: faker.string.uuid(),
+        name: faker.person.fullName(),
+        short_biography: faker.lorem.sentence(),
+        biography: faker.lorem.paragraphs(2),
+        date_of_birth: faker.date.past(),
+        date_of_death: null,
+        nationality,
+        image_url: null,
+        slug: faker.lorem.slug(),
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      }));
+
+      vi.mocked(app.prisma.author.findMany).mockResolvedValueOnce(authors);
+      vi.mocked(app.prisma.author.count).mockResolvedValueOnce(11);
+
+      const result = await staffAuthorService.findAuthors(
+        { page: 2, limit: 5 },
+        { search, nationality, isAlive: true },
+        { sortBy: 'updated_at', order: 'desc' }
+      );
+
+      expect(app.prisma.$transaction).toHaveBeenCalledTimes(1);
+      expect(app.prisma.author.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            AND: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { nationality: { equals: nationality, mode: 'insensitive' } },
+              { date_of_death: null }
+            ]
+          },
+          orderBy: [{ updated_at: 'desc' }, { author_id: 'asc' }],
+          skip: 5,
+          take: 5
+        })
+      );
+      expect(app.prisma.author.count).toHaveBeenCalledWith({
+        where: {
+          AND: [
+            { name: { contains: search, mode: 'insensitive' } },
+            { nationality: { equals: nationality, mode: 'insensitive' } },
+            { date_of_death: null }
+          ]
+        }
+      });
+
+      expect(result).toEqual({
+        meta: {
+          total: 11,
+          page: 2,
+          limit: 5,
+          totalPages: 3
+        },
+        data: authors
+      });
+    });
+
+    it('should build default query and handle deceased filter', async () => {
+      const authors: Awaited<ReturnType<typeof staffAuthorService.findAuthors>>['data'] = [];
+
+      vi.mocked(app.prisma.author.findMany).mockResolvedValueOnce(authors);
+      vi.mocked(app.prisma.author.count).mockResolvedValueOnce(0);
+
+      const result = await staffAuthorService.findAuthors(
+        { page: 1, limit: 10 },
+        { isAlive: false },
+        { sortBy: 'name', order: 'asc' }
+      );
+
+      const [findManyArgs] = vi.mocked(app.prisma.author.findMany).mock.calls.at(-1) ?? [];
+
+      expect(findManyArgs).toMatchObject({
+        where: {
+          AND: [{ date_of_death: { not: null } }]
+        },
+        orderBy: [{ name: 'asc' }, { author_id: 'asc' }],
+        skip: 0,
+        take: 10
+      });
+
+      expect(result).toEqual({
+        meta: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 0
+        },
+        data: []
+      });
+    });
+  });
+
   describe('getInstance', () => {
     it('should return the same instance', () => {
       const instance1 = StaffAuthorService.getInstance(app);

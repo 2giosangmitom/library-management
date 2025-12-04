@@ -21,7 +21,8 @@ export async function buildMockFastify() {
       findUnique: vi.fn(),
       findMany: vi.fn(),
       update: vi.fn(),
-      delete: vi.fn()
+      delete: vi.fn(),
+      count: vi.fn()
     },
     book: {
       create: vi.fn(),
@@ -47,7 +48,10 @@ export async function buildMockFastify() {
       create: vi.fn(),
       delete: vi.fn(),
       update: vi.fn()
-    }
+    },
+    $transaction: vi
+      .fn()
+      .mockImplementation(async (operations: unknown[]) => Promise.all(operations as Array<Promise<unknown>>))
   } as unknown as PrismaClient);
 
   // Mock Redis plugin

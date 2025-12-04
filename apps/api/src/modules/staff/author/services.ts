@@ -93,4 +93,87 @@ export default class StaffAuthorService {
       throw error;
     }
   }
+
+  public async findAuthors(
+    paginationOpts: { page: number; limit: number },
+    filterOpts: {
+      search?: string;
+      nationality?: string;
+      isAlive?: boolean;
+    } = {},
+    sortOpts: {
+      sortBy: 'name' | 'created_at' | 'updated_at';
+      order: 'asc' | 'desc';
+    } = { sortBy: 'name', order: 'asc' }
+  ) {
+    const { page, limit } = paginationOpts;
+
+    const andFilters: Prisma.AuthorWhereInput[] = [];
+
+    if (filterOpts.search) {
+      andFilters.push({
+        name: { contains: filterOpts.search, mode: 'insensitive' }
+      });
+    }
+
+    if (filterOpts.nationality) {
+      andFilters.push({
+        nationality: { equals: filterOpts.nationality, mode: 'insensitive' }
+      });
+    }
+
+    if (filterOpts.isAlive === true) {
+      andFilters.push({ date_of_death: null });
+    } else if (filterOpts.isAlive === false) {
+      andFilters.push({ date_of_death: { not: null } });
+    }
+
+    const where: Prisma.AuthorWhereInput = andFilters.length > 0 ? { AND: andFilters } : {};
+
+    const sortFieldMap = {
+      name: 'name',
+      created_at: 'created_at',
+      updated_at: 'updated_at'
+    } as const;
+
+    const orderBy: Prisma.AuthorOrderByWithRelationInput[] = [
+      { [sortFieldMap[sortOpts.sortBy]]: sortOpts.order } as Prisma.AuthorOrderByWithRelationInput,
+      { author_id: 'asc' }
+    ];
+
+    const [authors, total] = await this.fastify.prisma.$transaction([
+      this.fastify.prisma.author.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          author_id: true,
+          name: true,
+          short_biography: true,
+          biography: true,
+          date_of_birth: true,
+          date_of_death: true,
+          nationality: true,
+          image_url: true,
+          slug: true,
+          created_at: true,
+          updated_at: true
+        }
+      }),
+      this.fastify.prisma.author.count({ where })
+    ]);
+
+    const totalPages = total === 0 ? 0 : Math.ceil(total / limit);
+
+    return {
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages
+      },
+      data: authors
+    };
+  }
 }
