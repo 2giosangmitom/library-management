@@ -139,14 +139,10 @@ describe('StaffBookService', async () => {
         expect.objectContaining({
           data: expect.objectContaining({
             authors: expect.objectContaining({
-              create: expect.arrayContaining([
-                expect.objectContaining({ author: { connect: { author_id: data.authors[0] } } })
-              ])
+              create: expect.arrayContaining([expect.objectContaining({ author_id: data.authors[0] })])
             }),
             categories: expect.objectContaining({
-              create: expect.arrayContaining([
-                expect.objectContaining({ category: { connect: { category_id: data.categories[0] } } })
-              ])
+              create: expect.arrayContaining([expect.objectContaining({ category_id: data.categories[0] })])
             })
           })
         })

@@ -32,20 +32,16 @@ export default class StaffBookService {
           isbn: data.isbn,
           published_at: new Date(data.published_at),
           publisher_id: data.publisher_id ?? null,
-          authors: data.authors
-            ? {
-                create: data.authors.map((author_id) => ({
-                  author: { connect: { author_id } }
-                }))
-              }
-            : undefined,
-          categories: data.categories
-            ? {
-                create: data.categories.map((category_id) => ({
-                  category: { connect: { category_id } }
-                }))
-              }
-            : undefined
+          authors: data.authors && {
+            create: data.authors.map((author_id) => ({
+              author_id
+            }))
+          },
+          categories: data.categories && {
+            create: data.categories.map((category_id) => ({
+              category_id
+            }))
+          }
         },
         include: {
           authors: { select: { author_id: true } },
@@ -76,6 +72,56 @@ export default class StaffBookService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
           throw this.fastify.httpErrors.notFound('Book with the given ID does not exist.');
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async updateBook(
+    book_id: string,
+    data: {
+      title: string;
+      description: string;
+      isbn: string;
+      published_at: string;
+      publisher_id: string | null;
+      authors?: string[];
+      categories?: string[];
+    }
+  ) {
+    try {
+      const updatedBook = this.fastify.prisma.book.update({
+        include: {
+          authors: { select: { author_id: true } },
+          categories: { select: { category_id: true } }
+        },
+        data: {
+          title: data.title,
+          description: data.description,
+          isbn: data.isbn,
+          published_at: data.published_at,
+          publisher_id: data.publisher_id,
+          authors: data.authors && {
+            deleteMany: { book_id }, // Delete all authors associated with this book
+            create: data.authors.map((author_id) => ({
+              author_id
+            }))
+          }
+        },
+        where: {
+          book_id
+        }
+      });
+
+      return updatedBook;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        switch (error.code) {
+          case 'P2025':
+            throw this.fastify.httpErrors.notFound('Book with the given ID does not exist.');
+          case 'P2002':
+            throw this.fastify.httpErrors.conflict('Book with the given ISBN already exists.');
         }
       }
       throw error;
