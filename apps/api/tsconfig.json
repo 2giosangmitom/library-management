@@ -16,8 +16,8 @@
     "moduleDetection": "auto",
     "useUnknownInCatchVariables": true,
     "paths": {
-      "@/*": ["src/*"],
-      "@tests/*": ["tests/*"]
+      "@/*": ["./src/*"],
+      "@tests/*": ["./tests/*"]
     }
   },
   "include": ["./**/*.ts"],
