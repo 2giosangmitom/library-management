@@ -91,7 +91,7 @@ export default class StaffBookService {
     }
   ) {
     try {
-      const updatedBook = this.fastify.prisma.book.update({
+      const updatedBook = await this.fastify.prisma.book.update({
         include: {
           authors: { select: { author_id: true } },
           categories: { select: { category_id: true } }
