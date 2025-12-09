@@ -78,7 +78,7 @@ export default class StaffBookController {
     const updated = await this.staffBookService.updateBook(req.params.book_id, req.body);
 
     return reply.status(200).send({
-      message: 'Ok',
+      message: 'Book updated successfully.',
       data: {
         ...updated,
         authors: updated.authors.map((author) => author.author_id),
