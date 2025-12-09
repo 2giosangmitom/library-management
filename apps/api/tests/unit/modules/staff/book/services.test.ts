@@ -203,7 +203,8 @@ describe('StaffBookService', async () => {
         isbn: faker.book.series(),
         published_at: faker.date.anytime().toISOString(),
         publisher_id: faker.book.publisher(),
-        authors: Array.from({ length: 5 }, () => faker.string.uuid())
+        authors: Array.from({ length: 5 }, () => faker.string.uuid()),
+        categories: Array.from({ length: 5 }, () => faker.string.uuid())
       };
 
       await service.updateBook(bookId, bookData);
@@ -217,7 +218,10 @@ describe('StaffBookService', async () => {
             published_at: bookData.published_at,
             publisher_id: bookData.publisher_id,
             authors: expect.objectContaining({
-              create: bookData.authors.map((author) => ({ author_id: author }))
+              create: bookData.authors.map((author_id) => ({ author_id }))
+            }),
+            categories: expect.objectContaining({
+              create: bookData.categories.map((category_id) => ({ category_id }))
             })
           },
           where: {

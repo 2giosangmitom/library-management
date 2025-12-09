@@ -107,6 +107,10 @@ export default class StaffBookService {
             create: data.authors.map((author_id) => ({
               author_id
             }))
+          },
+          categories: data.categories && {
+            deleteMany: { book_id },
+            create: data.categories.map((category_id) => ({ category_id }))
           }
         },
         where: {
