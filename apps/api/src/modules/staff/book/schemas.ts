@@ -82,6 +82,7 @@ export const UpdateBookSchema = {
     }),
     403: { $ref: 'HttpError' },
     404: { $ref: 'HttpError' },
+    409: { $ref: 'HttpError' },
     500: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;
