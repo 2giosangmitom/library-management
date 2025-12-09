@@ -194,6 +194,95 @@ describe('StaffBookService', async () => {
     });
   });
 
+  describe('updateBook', () => {
+    it('should call prisma.book.update with correct data', async () => {
+      const bookId = faker.string.uuid();
+      const bookData = {
+        title: faker.book.title(),
+        description: faker.word.words(5),
+        isbn: faker.book.series(),
+        published_at: faker.date.anytime().toISOString(),
+        publisher_id: faker.book.publisher(),
+        authors: Array.from({ length: 5 }, () => faker.string.uuid())
+      };
+
+      await service.updateBook(bookId, bookData);
+
+      expect(app.prisma.book.update).toBeCalledWith(
+        expect.objectContaining({
+          data: {
+            title: bookData.title,
+            description: bookData.description,
+            isbn: bookData.isbn,
+            published_at: bookData.published_at,
+            publisher_id: bookData.publisher_id,
+            authors: expect.objectContaining({
+              create: bookData.authors.map((author) => ({ author_id: author }))
+            })
+          },
+          where: {
+            book_id: bookId
+          }
+        })
+      );
+    });
+
+    it('should throw not found error if the book does not exist', async () => {
+      vi.mocked(app.prisma.book.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(
+        service.updateBook(faker.string.uuid(), {
+          title: faker.book.title(),
+          description: faker.word.words(5),
+          isbn: faker.book.series(),
+          published_at: faker.date.anytime().toISOString(),
+          publisher_id: faker.book.publisher(),
+          authors: Array.from({ length: 5 }, () => faker.string.uuid())
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[NotFoundError: Book with the given ID does not exist.]`);
+    });
+
+    it('should throw conflict error if the isbn already exist', async () => {
+      vi.mocked(app.prisma.book.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Conflict', {
+          code: 'P2002',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(
+        service.updateBook(faker.string.uuid(), {
+          title: faker.book.title(),
+          description: faker.word.words(5),
+          isbn: faker.book.series(),
+          published_at: faker.date.anytime().toISOString(),
+          publisher_id: faker.book.publisher(),
+          authors: Array.from({ length: 5 }, () => faker.string.uuid())
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`[ConflictError: Book with the given ISBN already exists.]`);
+    });
+
+    it('should rethrow other errors', async () => {
+      vi.mocked(app.prisma.book.update).mockRejectedValueOnce(new Error('Unknown'));
+
+      await expect(
+        service.updateBook(faker.string.uuid(), {
+          title: faker.book.title(),
+          description: faker.word.words(5),
+          isbn: faker.book.series(),
+          published_at: faker.date.anytime().toISOString(),
+          publisher_id: faker.book.publisher(),
+          authors: Array.from({ length: 5 }, () => faker.string.uuid())
+        })
+      ).rejects.toThrowError('Unknown');
+    });
+  });
+
   describe('getInstance', () => {
     it('should return the same instance', () => {
       const instance1 = StaffBookService.getInstance(app);
