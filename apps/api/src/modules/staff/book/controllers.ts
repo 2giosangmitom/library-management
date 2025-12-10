@@ -1,4 +1,4 @@
-import { CreateBookSchema, DeleteBookSchema } from './schemas';
+import { CreateBookSchema, DeleteBookSchema, UpdateBookSchema } from './schemas';
 import StaffBookService from './services';
 import { Prisma } from '@/generated/prisma/client';
 
@@ -68,6 +68,25 @@ export default class StaffBookController {
     return reply.status(200).send({
       message: 'Book deleted successfully',
       data: deleted
+    });
+  }
+
+  public async updateBook(
+    req: FastifyRequestTypeBox<typeof UpdateBookSchema>,
+    reply: FastifyReplyTypeBox<typeof UpdateBookSchema>
+  ) {
+    const updated = await this.staffBookService.updateBook(req.params.book_id, req.body);
+
+    return reply.status(200).send({
+      message: 'Book updated successfully.',
+      data: {
+        ...updated,
+        authors: updated.authors.map((author) => author.author_id),
+        categories: updated.categories.map((category) => category.category_id),
+        created_at: updated.created_at.toISOString(),
+        updated_at: updated.updated_at.toISOString(),
+        published_at: updated.published_at.toISOString()
+      }
     });
   }
 }
