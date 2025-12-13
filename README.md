@@ -87,7 +87,6 @@ erDiagram
     UUID book_clone_id PK
     UUID book_id FK
     UUID location_id FK
-    BOOLEAN is_available
     VARCHAR(50) barcode "UNIQUE"
     ENUM condition "NEW, GOOD, WORN, DAMAGED, LOST"
     TIMESTAMP created_at

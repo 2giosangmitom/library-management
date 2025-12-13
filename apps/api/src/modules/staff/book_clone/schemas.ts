@@ -21,7 +21,6 @@ export const CreateBookCloneSchema = {
         location_id: Type.String(),
         barcode: Type.String(),
         condition: Type.String(),
-        is_available: Type.Boolean(),
         created_at: Type.String({ format: 'date-time' }),
         updated_at: Type.String({ format: 'date-time' })
       })
@@ -75,7 +74,6 @@ export const UpdateBookCloneSchema = {
         location_id: Type.String(),
         barcode: Type.String(),
         condition: Type.String(),
-        is_available: Type.Boolean(),
         created_at: Type.String({ format: 'date-time' }),
         updated_at: Type.String({ format: 'date-time' })
       })
@@ -83,6 +81,43 @@ export const UpdateBookCloneSchema = {
     403: { $ref: 'HttpError' },
     404: { $ref: 'HttpError' },
     409: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
+  }
+} as const satisfies FastifySchema;
+
+export const GetBookClonesSchema = {
+  summary: 'Get all book clones',
+  description: 'Endpoint to retrieve all book clones in the system.',
+  security: [{ JWT: [] }],
+  querystring: Type.Object({
+    page: Type.Optional(Type.Number({ minimum: 1 })),
+    limit: Type.Optional(Type.Number({ minimum: 1, maximum: 100 })),
+    book_id: Type.Optional(Type.String({ format: 'uuid' })),
+    location_id: Type.Optional(Type.String()),
+    condition: Type.Optional(Type.Enum(BookCondition)),
+    is_available: Type.Optional(Type.Boolean()),
+    barcode: Type.Optional(Type.String())
+  }),
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      meta: Type.Object({
+        totalPages: Type.Number()
+      }),
+      data: Type.Array(
+        Type.Object({
+          book_clone_id: Type.String({ format: 'uuid' }),
+          book_id: Type.String({ format: 'uuid' }),
+          location_id: Type.String(),
+          barcode: Type.String(),
+          condition: Type.String(),
+          is_available: Type.Boolean(),
+          created_at: Type.String({ format: 'date-time' }),
+          updated_at: Type.String({ format: 'date-time' })
+        })
+      )
+    }),
+    403: { $ref: 'HttpError' },
     500: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;

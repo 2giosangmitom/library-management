@@ -1,4 +1,6 @@
 import { BookCondition, Prisma } from '@/generated/prisma/client';
+import type { Static } from 'typebox';
+import { GetBookClonesSchema } from './schemas';
 
 export default class StaffBookCloneService {
   private static instance: StaffBookCloneService;
@@ -92,5 +94,52 @@ export default class StaffBookCloneService {
       }
       throw error;
     }
+  }
+
+  public async getBookClones(query: Static<typeof GetBookClonesSchema.querystring> & { page: number; limit: number }) {
+    const filters: Prisma.Book_CloneWhereInput = {};
+
+    if (query.book_id) {
+      filters.book_id = query.book_id;
+    }
+    if (query.location_id) {
+      filters.location_id = query.location_id;
+    }
+    if (query.condition) {
+      filters.condition = query.condition;
+    }
+    if (query.barcode) {
+      filters.barcode = query.barcode;
+    }
+    if (typeof query.is_available === 'boolean') {
+      if (query.is_available) {
+        filters.OR = [{ loan: { is: null } }, { loan: { is: { status: 'RETURNED' } } }];
+      } else {
+        filters.loan = { is: { status: { not: 'RETURNED' } } };
+      }
+    }
+
+    const [bookClones, total] = await this.fastify.prisma.$transaction([
+      this.fastify.prisma.book_Clone.findMany({
+        where: filters,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit,
+        select: {
+          book_clone_id: true,
+          book_id: true,
+          location_id: true,
+          barcode: true,
+          condition: true,
+          created_at: true,
+          updated_at: true,
+          loan: {
+            select: { status: true }
+          }
+        }
+      }),
+      this.fastify.prisma.book_Clone.count({ where: filters })
+    ]);
+
+    return { bookClones, total };
   }
 }

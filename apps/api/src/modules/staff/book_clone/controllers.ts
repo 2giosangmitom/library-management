@@ -1,4 +1,4 @@
-import { CreateBookCloneSchema, DeleteBookCloneSchema, UpdateBookCloneSchema } from './schemas';
+import { CreateBookCloneSchema, DeleteBookCloneSchema, GetBookClonesSchema, UpdateBookCloneSchema } from './schemas';
 import StaffBookCloneService from './services';
 
 export default class StaffBookCloneController {
@@ -42,7 +42,6 @@ export default class StaffBookCloneController {
         location_id: createdBookClone.location_id,
         barcode: createdBookClone.barcode,
         condition: createdBookClone.condition,
-        is_available: createdBookClone.is_available,
         created_at: createdBookClone.created_at.toISOString(),
         updated_at: createdBookClone.updated_at.toISOString()
       }
@@ -84,6 +83,35 @@ export default class StaffBookCloneController {
         created_at: updated.created_at.toISOString(),
         updated_at: updated.updated_at.toISOString()
       }
+    });
+  }
+
+  public async getBookClones(
+    req: FastifyRequestTypeBox<typeof GetBookClonesSchema>,
+    reply: FastifyReplyTypeBox<typeof GetBookClonesSchema>
+  ) {
+    const { bookClones, total } = await this.staffBookCloneService.getBookClones({
+      ...req.query,
+      page: req.query.page ?? 1,
+      limit: req.query.limit ?? 100
+    });
+    const totalPages = Math.ceil(total / (req.query.limit ?? 100));
+
+    return reply.status(200).send({
+      message: 'Book clones retrieved successfully',
+      meta: {
+        totalPages
+      },
+      data: bookClones.map((clone) => ({
+        book_clone_id: clone.book_clone_id,
+        book_id: clone.book_id,
+        location_id: clone.location_id,
+        barcode: clone.barcode,
+        condition: clone.condition,
+        is_available: !clone.loan || clone.loan.status === 'RETURNED',
+        created_at: clone.created_at.toISOString(),
+        updated_at: clone.updated_at.toISOString()
+      }))
     });
   }
 }

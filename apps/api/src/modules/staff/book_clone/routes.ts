@@ -1,9 +1,14 @@
 import StaffBookCloneController from './controllers';
-import { CreateBookCloneSchema, DeleteBookCloneSchema, UpdateBookCloneSchema } from './schemas';
+import { CreateBookCloneSchema, DeleteBookCloneSchema, GetBookClonesSchema, UpdateBookCloneSchema } from './schemas';
 
 export default function staffBookCloneRoutes(fastify: FastifyTypeBox) {
   const staffBookCloneController = StaffBookCloneController.getInstance(fastify);
 
+  fastify.get(
+    '/',
+    { schema: GetBookClonesSchema },
+    staffBookCloneController.getBookClones.bind(staffBookCloneController)
+  );
   fastify.post(
     '/',
     { schema: CreateBookCloneSchema },

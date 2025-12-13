@@ -105,7 +105,6 @@ describe('POST /api/staff/book_clone', async () => {
     expect(body.data.location_id).toBe(location_id);
     expect(body.data.barcode).toBe(bookCloneData.barcode);
     expect(body.data.condition).toBe(condition);
-    expect(body.data.is_available).toBe(true);
   });
 
   it('should reject create book clone with duplicate barcode', async () => {

@@ -28,7 +28,6 @@ describe('StaffBookCloneService', async () => {
       const mockCreatedBookClone = {
         book_clone_id: faker.string.uuid(),
         ...data,
-        is_available: true,
         created_at: faker.date.anytime(),
         updated_at: faker.date.anytime()
       };
@@ -115,7 +114,6 @@ describe('StaffBookCloneService', async () => {
       const mockCreatedBookClone = {
         book_clone_id: faker.string.uuid(),
         ...data,
-        is_available: true,
         created_at: faker.date.anytime(),
         updated_at: faker.date.anytime()
       };
@@ -133,7 +131,6 @@ describe('StaffBookCloneService', async () => {
           location_id: data.location_id,
           barcode: data.barcode,
           condition: data.condition,
-          is_available: true,
           created_at: expect.any(Date),
           updated_at: expect.any(Date)
         })
@@ -152,7 +149,6 @@ describe('StaffBookCloneService', async () => {
         const mockCreatedBookClone = {
           book_clone_id: faker.string.uuid(),
           ...data,
-          is_available: true,
           created_at: faker.date.anytime(),
           updated_at: faker.date.anytime()
         };
@@ -347,7 +343,6 @@ describe('StaffBookCloneService', async () => {
       const mockUpdated = {
         book_clone_id,
         ...data,
-        is_available: true,
         created_at: faker.date.anytime(),
         updated_at: faker.date.anytime()
       };
@@ -365,7 +360,6 @@ describe('StaffBookCloneService', async () => {
           location_id: data.location_id,
           barcode: data.barcode,
           condition: data.condition,
-          is_available: true,
           created_at: expect.any(Date),
           updated_at: expect.any(Date)
         })
