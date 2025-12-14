@@ -42,7 +42,9 @@ export async function buildMockFastify() {
     category: {
       create: vi.fn(),
       delete: vi.fn(),
-      update: vi.fn()
+      update: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn()
     },
     location: {
       findUnique: vi.fn(),

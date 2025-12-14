@@ -74,4 +74,42 @@ export default class StaffCategoryService {
       throw error;
     }
   }
+
+  public async getCategories(query: { page: number; limit: number; name?: string; slug?: string }) {
+    const andFilters: Prisma.CategoryWhereInput[] = [];
+
+    if (query.name) {
+      andFilters.push({ name: { contains: query.name, mode: 'insensitive' } });
+    }
+
+    if (query.slug) {
+      andFilters.push({ slug: { contains: query.slug, mode: 'insensitive' } });
+    }
+
+    const where: Prisma.CategoryWhereInput = andFilters.length > 0 ? { AND: andFilters } : {};
+
+    const [categories, total] = await this.fastify.prisma.$transaction([
+      this.fastify.prisma.category.findMany({
+        where,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit,
+        orderBy: [
+          {
+            created_at: 'desc'
+          },
+          { category_id: 'asc' }
+        ],
+        select: {
+          category_id: true,
+          name: true,
+          slug: true,
+          created_at: true,
+          updated_at: true
+        }
+      }),
+      this.fastify.prisma.category.count({ where })
+    ]);
+
+    return { categories, total };
+  }
 }

@@ -166,4 +166,73 @@ describe('StaffCategoryService', async () => {
       await expect(service.updateCategory(id, data)).rejects.toThrowError('Some other error');
     });
   });
+
+  describe('getCategories', () => {
+    it('should fetch paginated categories with filters', async () => {
+      const categories = [
+        {
+          category_id: faker.string.uuid(),
+          name: 'Fiction',
+          slug: 'fiction',
+          created_at: faker.date.anytime(),
+          updated_at: faker.date.anytime()
+        }
+      ];
+
+      const expectedWhere = {
+        AND: [{ name: { contains: 'fic', mode: 'insensitive' } }, { slug: { contains: 'fic', mode: 'insensitive' } }]
+      };
+
+      vi.mocked(app.prisma.category.findMany).mockResolvedValueOnce(
+        categories as unknown as Awaited<ReturnType<typeof app.prisma.category.findMany>>
+      );
+      vi.mocked(app.prisma.category.count).mockResolvedValueOnce(categories.length);
+
+      const result = await service.getCategories({ page: 2, limit: 1, name: 'fic', slug: 'fic' });
+
+      expect(app.prisma.category.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expectedWhere,
+          skip: 1,
+          take: 1,
+          orderBy: [
+            {
+              created_at: 'desc'
+            },
+            { category_id: 'asc' }
+          ],
+          select: {
+            category_id: true,
+            name: true,
+            slug: true,
+            created_at: true,
+            updated_at: true
+          }
+        })
+      );
+      expect(app.prisma.category.count).toHaveBeenCalledWith({ where: expectedWhere });
+      expect(result).toEqual({ categories, total: categories.length });
+    });
+
+    it('should handle empty filters', async () => {
+      const categories: Awaited<ReturnType<typeof app.prisma.category.findMany>> = [] as unknown as Awaited<
+        ReturnType<typeof app.prisma.category.findMany>
+      >;
+
+      vi.mocked(app.prisma.category.findMany).mockResolvedValueOnce(categories);
+      vi.mocked(app.prisma.category.count).mockResolvedValueOnce(0);
+
+      const result = await service.getCategories({ page: 1, limit: 10 });
+
+      expect(app.prisma.category.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {},
+          skip: 0,
+          take: 10
+        })
+      );
+      expect(app.prisma.category.count).toHaveBeenCalledWith({ where: {} });
+      expect(result).toEqual({ categories, total: 0 });
+    });
+  });
 });

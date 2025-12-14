@@ -1,9 +1,10 @@
 import StaffCategoryController from './controllers';
-import { CreateCategorySchema, DeleteCategorySchema, UpdateCategorySchema } from './schemas';
+import { CreateCategorySchema, DeleteCategorySchema, GetCategoriesSchema, UpdateCategorySchema } from './schemas';
 
 export default function staffCategoryRoutes(fastify: FastifyTypeBox) {
   const controller = StaffCategoryController.getInstance(fastify);
 
+  fastify.get('/', { schema: GetCategoriesSchema }, controller.getCategories.bind(controller));
   fastify.post('/', { schema: CreateCategorySchema }, controller.createCategory.bind(controller));
   fastify.delete('/:category_id', { schema: DeleteCategorySchema }, controller.deleteCategory.bind(controller));
   fastify.put('/:category_id', { schema: UpdateCategorySchema }, controller.updateCategory.bind(controller));
