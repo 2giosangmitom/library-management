@@ -1,4 +1,6 @@
 import { Prisma } from '@/generated/prisma/client';
+import type { Static } from 'typebox';
+import { GetLocationsSchema } from './schemas';
 
 export default class StaffLocationService {
   private static instance: StaffLocationService;
@@ -83,5 +85,42 @@ export default class StaffLocationService {
       }
       throw error;
     }
+  }
+
+  public async getLocations(query: Static<typeof GetLocationsSchema.querystring> & { page: number; limit: number }) {
+    const filters: Prisma.LocationWhereInput = {};
+
+    if (query.room) {
+      filters.room = { contains: query.room, mode: 'insensitive' };
+    }
+    if (query.floor !== undefined) {
+      filters.floor = query.floor;
+    }
+    if (query.shelf !== undefined) {
+      filters.shelf = query.shelf;
+    }
+    if (query.row !== undefined) {
+      filters.row = query.row;
+    }
+
+    const [locations, total] = await this.fastify.prisma.$transaction([
+      this.fastify.prisma.location.findMany({
+        where: filters,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit,
+        select: {
+          location_id: true,
+          room: true,
+          floor: true,
+          shelf: true,
+          row: true,
+          created_at: true,
+          updated_at: true
+        }
+      }),
+      this.fastify.prisma.location.count({ where: filters })
+    ]);
+
+    return { locations, total };
   }
 }

@@ -52,7 +52,9 @@ export async function buildMockFastify() {
       findUnique: vi.fn(),
       create: vi.fn(),
       delete: vi.fn(),
-      update: vi.fn()
+      update: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn()
     },
     $transaction: vi
       .fn()

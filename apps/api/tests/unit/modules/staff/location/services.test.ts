@@ -219,4 +219,131 @@ describe('StaffLocationService', async () => {
       );
     });
   });
+
+  describe('getLocations', () => {
+    it('should call prisma.location.findMany with correct pagination parameters', async () => {
+      const query = { page: 1, limit: 10, room: undefined, floor: undefined, shelf: undefined, row: undefined };
+
+      await staffLocationService.getLocations(query);
+
+      expect(app.prisma.location.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 0,
+          take: 10,
+          where: {}
+        })
+      );
+    });
+
+    it('should apply room filter correctly', async () => {
+      const query = { page: 1, limit: 10, room: 'Archive', floor: undefined, shelf: undefined, row: undefined };
+
+      await staffLocationService.getLocations(query);
+
+      expect(app.prisma.location.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { room: { contains: 'Archive', mode: 'insensitive' } }
+        })
+      );
+    });
+
+    it('should apply floor filter correctly', async () => {
+      const query = { page: 1, limit: 10, room: undefined, floor: 2, shelf: undefined, row: undefined };
+
+      await staffLocationService.getLocations(query);
+
+      expect(app.prisma.location.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { floor: 2 }
+        })
+      );
+    });
+
+    it('should apply shelf filter correctly', async () => {
+      const query = { page: 1, limit: 10, room: undefined, floor: undefined, shelf: 5, row: undefined };
+
+      await staffLocationService.getLocations(query);
+
+      expect(app.prisma.location.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { shelf: 5 }
+        })
+      );
+    });
+
+    it('should apply row filter correctly', async () => {
+      const query = { page: 1, limit: 10, room: undefined, floor: undefined, shelf: undefined, row: 3 };
+
+      await staffLocationService.getLocations(query);
+
+      expect(app.prisma.location.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { row: 3 }
+        })
+      );
+    });
+
+    it('should combine multiple filters', async () => {
+      const query = { page: 2, limit: 20, room: 'Main Hall', floor: 1, shelf: 5, row: 2 };
+
+      await staffLocationService.getLocations(query);
+
+      expect(app.prisma.location.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 20,
+          take: 20,
+          where: {
+            room: { contains: 'Main Hall', mode: 'insensitive' },
+            floor: 1,
+            shelf: 5,
+            row: 2
+          }
+        })
+      );
+    });
+
+    it('should use transaction to fetch locations and count', async () => {
+      const query = { page: 1, limit: 10, room: undefined, floor: undefined, shelf: undefined, row: undefined };
+
+      await staffLocationService.getLocations(query);
+
+      expect(app.prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should return locations and total count', async () => {
+      const mockLocations = [
+        {
+          location_id: 'A-1-2-3',
+          room: 'Main Hall',
+          floor: 1,
+          shelf: 2,
+          row: 3,
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ];
+
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([mockLocations, 1] as [typeof mockLocations, number]);
+
+      const query = { page: 1, limit: 10, room: undefined, floor: undefined, shelf: undefined, row: undefined };
+      const result = await staffLocationService.getLocations(query);
+
+      expect(result).toEqual({
+        locations: mockLocations,
+        total: 1
+      });
+    });
+
+    it('should handle empty results', async () => {
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0] as [never[], number]);
+
+      const query = { page: 1, limit: 10, room: undefined, floor: undefined, shelf: undefined, row: undefined };
+      const result = await staffLocationService.getLocations(query);
+
+      expect(result).toEqual({
+        locations: [],
+        total: 0
+      });
+    });
+  });
 });

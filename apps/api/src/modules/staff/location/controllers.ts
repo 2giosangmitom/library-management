@@ -1,4 +1,4 @@
-import { AddLocationSchema, DeleteLocationSchema, UpdateLocationSchema } from './schemas';
+import { AddLocationSchema, DeleteLocationSchema, UpdateLocationSchema, GetLocationsSchema } from './schemas';
 import StaffLocationService from './services';
 
 export default class StaffLocationController {
@@ -69,6 +69,30 @@ export default class StaffLocationController {
         created_at: updatedLocation.created_at.toISOString(),
         updated_at: updatedLocation.updated_at.toISOString()
       }
+    });
+  }
+
+  public async getLocations(
+    req: FastifyRequestTypeBox<typeof GetLocationsSchema>,
+    reply: FastifyReplyTypeBox<typeof GetLocationsSchema>
+  ) {
+    const { locations, total } = await this.staffLocationService.getLocations({
+      ...req.query,
+      page: req.query.page ?? 1,
+      limit: req.query.limit ?? 100
+    });
+    const totalPages = Math.ceil(total / (req.query.limit ?? 100));
+
+    return reply.status(200).send({
+      message: 'Locations retrieved successfully',
+      meta: {
+        totalPages
+      },
+      data: locations.map((location) => ({
+        ...location,
+        created_at: location.created_at.toISOString(),
+        updated_at: location.updated_at.toISOString()
+      }))
     });
   }
 }

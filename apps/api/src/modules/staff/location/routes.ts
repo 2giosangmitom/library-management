@@ -1,8 +1,16 @@
 import StaffLocationController from './controllers';
-import { AddLocationSchema, DeleteLocationSchema, UpdateLocationSchema } from './schemas';
+import { AddLocationSchema, DeleteLocationSchema, UpdateLocationSchema, GetLocationsSchema } from './schemas';
 
 export default function staffLocationRoutes(fastify: FastifyTypeBox) {
   const staffLocationController = StaffLocationController.getInstance(fastify);
+
+  fastify.get(
+    '/',
+    {
+      schema: GetLocationsSchema
+    },
+    staffLocationController.getLocations.bind(staffLocationController)
+  );
 
   fastify.post(
     '/',
