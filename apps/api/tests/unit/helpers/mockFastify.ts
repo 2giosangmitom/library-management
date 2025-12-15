@@ -14,7 +14,9 @@ export async function buildMockFastify() {
   app.decorate('prisma', {
     user: {
       findUnique: vi.fn(),
-      create: vi.fn()
+      create: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn()
     },
     author: {
       create: vi.fn(),

@@ -24,6 +24,7 @@ import staffBookRoutes from '@/modules/staff/book/routes';
 import staffBookCloneRoutes from '@/modules/staff/book_clone/routes';
 import staffLocationRoutes from '@/modules/staff/location/routes';
 import staffLoanRoutes from '@/modules/staff/loan/routes';
+import staffUserRoutes from '@/modules/staff/user/routes';
 
 export async function build(): Promise<FastifyTypeBox> {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -121,6 +122,13 @@ export async function build(): Promise<FastifyTypeBox> {
               instance.register(fp(staffLoanRoutes));
             },
             { prefix: '/loan' }
+          );
+
+          staffInstance.register(
+            (instance) => {
+              instance.register(fp(staffUserRoutes));
+            },
+            { prefix: '/user' }
           );
         },
         { prefix: '/staff' }
