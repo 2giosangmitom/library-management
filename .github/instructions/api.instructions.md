@@ -439,7 +439,7 @@ Autohooks registered in a parent module cascade to all child modules. For exampl
 pnpm --filter api typecheck
 
 # Linting
-pnpm lint
+pnpm --filter api lint
 
 # Development server with hot reload
 pnpm --filter api dev
