@@ -1,4 +1,6 @@
 import { Prisma } from '@/generated/prisma/client';
+import type { Static } from 'typebox';
+import { GetBooksSchema } from './schemas';
 
 export default class StaffBookService {
   private static instance: StaffBookService;
@@ -130,5 +132,43 @@ export default class StaffBookService {
       }
       throw error;
     }
+  }
+
+  public async getBooks(query: Static<typeof GetBooksSchema.querystring> & { page: number; limit: number }) {
+    const filters: Prisma.BookWhereInput = {};
+
+    if (query.title) {
+      filters.title = { contains: query.title, mode: 'insensitive' };
+    }
+    if (query.isbn) {
+      filters.isbn = { contains: query.isbn, mode: 'insensitive' };
+    }
+    if (query.publisher_id) {
+      filters.publisher_id = query.publisher_id;
+    }
+
+    const [books, total] = await this.fastify.prisma.$transaction([
+      this.fastify.prisma.book.findMany({
+        where: filters,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit,
+        select: {
+          book_id: true,
+          title: true,
+          description: true,
+          isbn: true,
+          published_at: true,
+          publisher_id: true,
+          image_url: true,
+          created_at: true,
+          updated_at: true,
+          authors: { select: { author_id: true } },
+          categories: { select: { category_id: true } }
+        }
+      }),
+      this.fastify.prisma.book.count({ where: filters })
+    ]);
+
+    return { books, total };
   }
 }

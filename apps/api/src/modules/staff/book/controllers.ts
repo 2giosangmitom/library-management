@@ -1,4 +1,4 @@
-import { CreateBookSchema, DeleteBookSchema, UpdateBookSchema } from './schemas';
+import { CreateBookSchema, DeleteBookSchema, UpdateBookSchema, GetBooksSchema } from './schemas';
 import StaffBookService from './services';
 import { Prisma } from '@/generated/prisma/client';
 
@@ -87,6 +87,33 @@ export default class StaffBookController {
         updated_at: updated.updated_at.toISOString(),
         published_at: updated.published_at.toISOString()
       }
+    });
+  }
+
+  public async getBooks(
+    req: FastifyRequestTypeBox<typeof GetBooksSchema>,
+    reply: FastifyReplyTypeBox<typeof GetBooksSchema>
+  ) {
+    const { books, total } = await this.staffBookService.getBooks({
+      ...req.query,
+      page: req.query.page ?? 1,
+      limit: req.query.limit ?? 100
+    });
+    const totalPages = Math.ceil(total / (req.query.limit ?? 100));
+
+    return reply.status(200).send({
+      message: 'Books retrieved successfully',
+      meta: {
+        totalPages
+      },
+      data: books.map((book) => ({
+        ...book,
+        authors: book.authors?.map((a) => a.author_id) ?? [],
+        categories: book.categories?.map((c) => c.category_id) ?? [],
+        published_at: book.published_at.toISOString(),
+        created_at: book.created_at.toISOString(),
+        updated_at: book.updated_at.toISOString()
+      }))
     });
   }
 }

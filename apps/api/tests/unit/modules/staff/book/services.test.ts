@@ -294,4 +294,130 @@ describe('StaffBookService', async () => {
       expect(instance1).toBe(instance2);
     });
   });
+
+  describe('getBooks', () => {
+    it('should call prisma.book.findMany with correct pagination parameters', async () => {
+      const query = { page: 1, limit: 10, title: undefined, isbn: undefined, publisher_id: undefined };
+
+      await service.getBooks(query);
+
+      expect(app.prisma.book.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 0,
+          take: 10,
+          where: {}
+        })
+      );
+    });
+
+    it('should apply title filter correctly', async () => {
+      const query = { page: 1, limit: 10, title: 'The Great Gatsby', isbn: undefined, publisher_id: undefined };
+
+      await service.getBooks(query);
+
+      expect(app.prisma.book.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { title: { contains: 'The Great Gatsby', mode: 'insensitive' } }
+        })
+      );
+    });
+
+    it('should apply isbn filter correctly', async () => {
+      const query = { page: 1, limit: 10, title: undefined, isbn: '978-0-7432-7356-5', publisher_id: undefined };
+
+      await service.getBooks(query);
+
+      expect(app.prisma.book.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { isbn: { contains: '978-0-7432-7356-5', mode: 'insensitive' } }
+        })
+      );
+    });
+
+    it('should apply publisher_id filter correctly', async () => {
+      const publisherId = faker.string.uuid();
+      const query = { page: 1, limit: 10, title: undefined, isbn: undefined, publisher_id: publisherId };
+
+      await service.getBooks(query);
+
+      expect(app.prisma.book.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { publisher_id: publisherId }
+        })
+      );
+    });
+
+    it('should combine multiple filters', async () => {
+      const publisherId = faker.string.uuid();
+      const query = {
+        page: 2,
+        limit: 20,
+        title: 'The Great Gatsby',
+        isbn: '978-0-7432-7356-5',
+        publisher_id: publisherId
+      };
+
+      await service.getBooks(query);
+
+      expect(app.prisma.book.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 20,
+          take: 20,
+          where: {
+            title: { contains: 'The Great Gatsby', mode: 'insensitive' },
+            isbn: { contains: '978-0-7432-7356-5', mode: 'insensitive' },
+            publisher_id: publisherId
+          }
+        })
+      );
+    });
+
+    it('should use transaction to fetch books and count', async () => {
+      const query = { page: 1, limit: 10, title: undefined, isbn: undefined, publisher_id: undefined };
+
+      await service.getBooks(query);
+
+      expect(app.prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should return books and total count', async () => {
+      const mockBooks = [
+        {
+          book_id: faker.string.uuid(),
+          title: faker.lorem.sentence(),
+          description: faker.lorem.paragraphs(2),
+          isbn: faker.string.numeric(13),
+          published_at: faker.date.past(),
+          publisher_id: faker.string.uuid(),
+          image_url: null,
+          created_at: new Date(),
+          updated_at: new Date(),
+          authors: [],
+          categories: []
+        }
+      ];
+
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([mockBooks, 1] as [typeof mockBooks, number]);
+
+      const query = { page: 1, limit: 10, title: undefined, isbn: undefined, publisher_id: undefined };
+      const result = await service.getBooks(query);
+
+      expect(result).toEqual({
+        books: mockBooks,
+        total: 1
+      });
+    });
+
+    it('should handle empty results', async () => {
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0] as [never[], number]);
+
+      const query = { page: 1, limit: 10, title: undefined, isbn: undefined, publisher_id: undefined };
+      const result = await service.getBooks(query);
+
+      expect(result).toEqual({
+        books: [],
+        total: 0
+      });
+    });
+  });
 });
