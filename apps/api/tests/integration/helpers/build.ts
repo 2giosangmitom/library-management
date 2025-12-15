@@ -23,6 +23,7 @@ import staffPublisherRoutes from '@/modules/staff/publisher/routes';
 import staffBookRoutes from '@/modules/staff/book/routes';
 import staffBookCloneRoutes from '@/modules/staff/book_clone/routes';
 import staffLocationRoutes from '@/modules/staff/location/routes';
+import staffLoanRoutes from '@/modules/staff/loan/routes';
 
 export async function build(): Promise<FastifyTypeBox> {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -43,7 +44,7 @@ export async function build(): Promise<FastifyTypeBox> {
   // Register routes
   await app.register(
     (apiInstance) => {
-      // Register modules, hooks and routes should encapsulated in fp() because
+      // Register modules, hooks, and routes should encapsulated in fp() because
       // it must have the same context.
       apiInstance.register(
         (instance) => {
@@ -113,6 +114,13 @@ export async function build(): Promise<FastifyTypeBox> {
               instance.register(fp(staffLocationRoutes));
             },
             { prefix: '/location' }
+          );
+
+          staffInstance.register(
+            (instance) => {
+              instance.register(fp(staffLoanRoutes));
+            },
+            { prefix: '/loan' }
           );
         },
         { prefix: '/staff' }

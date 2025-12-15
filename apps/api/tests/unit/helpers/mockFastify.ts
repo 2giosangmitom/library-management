@@ -59,6 +59,9 @@ export async function buildMockFastify() {
       findMany: vi.fn(),
       count: vi.fn()
     },
+    loan: {
+      create: vi.fn()
+    },
     $transaction: vi
       .fn()
       .mockImplementation(async (operations: unknown[]) => Promise.all(operations as Array<Promise<unknown>>))
