@@ -4,25 +4,26 @@
 ![Codecov](https://img.shields.io/codecov/c/github/2giosangmitom/library-management?style=for-the-badge&logo=codecov&logoColor=F01F7A&labelColor=302D41)
 ![GitHub Repo stars](https://img.shields.io/github/stars/2giosangmitom/library-management?style=for-the-badge&logo=apachespark&color=eed49f&logoColor=D9E0EE&labelColor=302D41)
 
-**BookWise** is a comprehensive library management system designed for university libraries. It streamlines the process of managing books, authors, publishers, and loans, providing a seamless experience for librarians and members alike.
+**BookWise** is a library management platform for universities. It covers cataloging, circulation, and staff workflows with clear separation between an API service and a web client.
+
+## Monorepo layout
+
+- [apps/api](apps/api): Fastify + TypeBox API, Prisma, Redis, PostgreSQL
+- [apps/web](apps/web): Next.js + Ant Design frontend
 
 ## Features
 
-- **User Management:** Role-based access control for Admins, Librarians, and Members.
-- **Cataloging:** Manage books, authors, categories, and publishers with ease.
-- **Inventory Tracking:** Track individual book copies (clones) and their physical locations within the library.
-- **Loan System:** Handle book borrowing, returns, and overdue tracking.
-- **Rating & Reviews:** Allow users to rate and review books.
-- **Search & Discovery:** Efficient search functionality for the library catalog.
+- Role-based access for admins, librarians, and members
+- Catalog management for books, authors, categories, publishers, and locations
+- Inventory tracking for physical copies (book clones)
+- Loan workflows: checkout, return, and overdue handling
+- Ratings and reviews
+- Search and filtering with pagination
 
-## Technologies Used
+## Tech stack
 
-- **Database:** PostgreSQL, Redis
-- **ORM:** Prisma
-- **Authentication:** JWT
-- **Frontend:** Next.js, Ant Design
-- **Backend:** Node.js, Fastify
-- **Containerization:** Docker, Docker Compose
-- **Testing:** Vitest
-- **CI/CD:** GitHub Actions
-- **Programming Language:** TypeScript
+- Fastify, TypeBox, Prisma, PostgreSQL, Redis
+- Next.js, Ant Design
+- Vitest for unit and integration tests
+- Docker for local services
+- TypeScript end to end
