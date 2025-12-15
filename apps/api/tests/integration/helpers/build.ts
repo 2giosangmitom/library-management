@@ -16,6 +16,8 @@ import authorRoutes from '@/modules/author/routes';
 import authorHooks from '@/modules/author/autohooks';
 import publisherRoutes from '@/modules/publisher/routes';
 import publisherHooks from '@/modules/publisher/autohooks';
+import adminHooks from '@/modules/admin/autohooks';
+import adminUserRoutes from '@/modules/admin/user/routes';
 import staffAuthorRoutes from '@/modules/staff/author/routes';
 import staffCategoryRoutes from '@/modules/staff/category/routes';
 import staffHooks from '@/modules/staff/autohooks';
@@ -24,7 +26,6 @@ import staffBookRoutes from '@/modules/staff/book/routes';
 import staffBookCloneRoutes from '@/modules/staff/book_clone/routes';
 import staffLocationRoutes from '@/modules/staff/location/routes';
 import staffLoanRoutes from '@/modules/staff/loan/routes';
-import staffUserRoutes from '@/modules/staff/user/routes';
 
 export async function build(): Promise<FastifyTypeBox> {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -69,6 +70,20 @@ export async function build(): Promise<FastifyTypeBox> {
           instance.register(fp(publisherRoutes));
         },
         { prefix: '/publisher' }
+      );
+
+      apiInstance.register(
+        (adminInstance) => {
+          adminInstance.register(fp(adminHooks));
+
+          adminInstance.register(
+            (instance) => {
+              instance.register(fp(adminUserRoutes));
+            },
+            { prefix: '/user' }
+          );
+        },
+        { prefix: '/admin' }
       );
 
       apiInstance.register(
@@ -122,13 +137,6 @@ export async function build(): Promise<FastifyTypeBox> {
               instance.register(fp(staffLoanRoutes));
             },
             { prefix: '/loan' }
-          );
-
-          staffInstance.register(
-            (instance) => {
-              instance.register(fp(staffUserRoutes));
-            },
-            { prefix: '/user' }
           );
         },
         { prefix: '/staff' }

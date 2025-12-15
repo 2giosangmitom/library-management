@@ -2,7 +2,7 @@ import { build, users } from '../../helpers/build';
 import { getAccessToken } from '../../helpers/auth';
 import { Role } from '@/generated/prisma/enums';
 
-describe('GET /api/staff/user', async () => {
+describe('GET /api/admin/user', async () => {
   const app = await build();
   const accessTokens: Partial<Record<Role, string>> = {};
 
@@ -19,27 +19,27 @@ describe('GET /api/staff/user', async () => {
   it('should reject unauthenticated requests', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api/staff/user'
+      url: '/api/admin/user'
     });
 
     expect(response.statusCode).toBe(401);
   });
 
-  it('should reject member role', async () => {
+  it.each([Role.LIBRARIAN, Role.MEMBER])('should reject non-admin role %s', async (role) => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api/staff/user',
-      headers: { Authorization: `Bearer ${accessTokens[Role.MEMBER]}` }
+      url: '/api/admin/user',
+      headers: { Authorization: `Bearer ${accessTokens[role]}` }
     });
 
     expect(response.statusCode).toBe(403);
   });
 
-  it.each([{ role: Role.ADMIN }, { role: Role.LIBRARIAN }])('should list users for %s', async ({ role }) => {
+  it('should list users for ADMIN', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api/staff/user',
-      headers: { Authorization: `Bearer ${accessTokens[role]}` },
+      url: '/api/admin/user',
+      headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       query: { page: '1', limit: '5' }
     });
 
@@ -60,7 +60,7 @@ describe('GET /api/staff/user', async () => {
   it('should filter users by role', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api/staff/user',
+      url: '/api/admin/user',
       headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       query: { role: Role.LIBRARIAN }
     });
@@ -76,7 +76,7 @@ describe('GET /api/staff/user', async () => {
   it('should filter users by email substring', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/api/staff/user',
+      url: '/api/admin/user',
       headers: { Authorization: `Bearer ${accessTokens[Role.ADMIN]}` },
       query: { email: 'user1' }
     });

@@ -2,19 +2,19 @@ import { Prisma } from '@/generated/prisma/client';
 import type { Static } from 'typebox';
 import { GetUsersSchema } from './schemas';
 
-export default class StaffUserService {
-  private static instance: StaffUserService;
+export default class AdminUserService {
+  private static instance: AdminUserService;
   private fastify: FastifyTypeBox;
 
   private constructor(fastify: FastifyTypeBox) {
     this.fastify = fastify;
   }
 
-  public static getInstance(fastify: FastifyTypeBox): StaffUserService {
-    if (!StaffUserService.instance) {
-      StaffUserService.instance = new StaffUserService(fastify);
+  public static getInstance(fastify: FastifyTypeBox): AdminUserService {
+    if (!AdminUserService.instance) {
+      AdminUserService.instance = new AdminUserService(fastify);
     }
-    return StaffUserService.instance;
+    return AdminUserService.instance;
   }
 
   public async getUsers(query: Static<typeof GetUsersSchema.querystring> & { page: number; limit: number }) {

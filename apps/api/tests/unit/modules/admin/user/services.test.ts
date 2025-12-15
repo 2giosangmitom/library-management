@@ -1,4 +1,4 @@
-import StaffUserService from '@/modules/staff/user/services';
+import AdminUserService from '@/modules/admin/user/services';
 import { buildMockFastify } from '../../../helpers/mockFastify';
 import { faker } from '@faker-js/faker';
 import { Role } from '@/generated/prisma/enums';
@@ -11,9 +11,9 @@ const buildQuery = () => ({
   role: Role.MEMBER
 });
 
-describe('StaffUserService', async () => {
+describe('AdminUserService', async () => {
   const app = await buildMockFastify();
-  const service = StaffUserService.getInstance(app);
+  const service = AdminUserService.getInstance(app);
 
   afterEach(() => {
     vi.restoreAllMocks();

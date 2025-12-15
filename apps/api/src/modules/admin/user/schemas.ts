@@ -30,6 +30,7 @@ export const GetUsersSchema = {
       }),
       data: Type.Array(UserDataSchema)
     }),
+    401: { $ref: 'HttpError' },
     403: { $ref: 'HttpError' },
     500: { $ref: 'HttpError' }
   }

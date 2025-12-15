@@ -1,29 +1,29 @@
-import StaffUserService from './services';
+import AdminUserService from './services';
 import { GetUsersSchema } from './schemas';
 
-export default class StaffUserController {
-  private static instance: StaffUserController;
-  private staffUserService: StaffUserService;
+export default class AdminUserController {
+  private static instance: AdminUserController;
+  private adminUserService: AdminUserService;
 
-  private constructor(fastify: FastifyTypeBox, staffUserService: StaffUserService) {
-    this.staffUserService = staffUserService;
+  private constructor(fastify: FastifyTypeBox, adminUserService: AdminUserService) {
+    this.adminUserService = adminUserService;
   }
 
   public static getInstance(
     fastify: FastifyTypeBox,
-    staffUserService = StaffUserService.getInstance(fastify)
-  ): StaffUserController {
-    if (!StaffUserController.instance) {
-      StaffUserController.instance = new StaffUserController(fastify, staffUserService);
+    adminUserService = AdminUserService.getInstance(fastify)
+  ): AdminUserController {
+    if (!AdminUserController.instance) {
+      AdminUserController.instance = new AdminUserController(fastify, adminUserService);
     }
-    return StaffUserController.instance;
+    return AdminUserController.instance;
   }
 
   public async getUsers(
     req: FastifyRequestTypeBox<typeof GetUsersSchema>,
     reply: FastifyReplyTypeBox<typeof GetUsersSchema>
   ) {
-    const { users, total } = await this.staffUserService.getUsers({
+    const { users, total } = await this.adminUserService.getUsers({
       ...req.query,
       page: req.query.page ?? 1,
       limit: req.query.limit ?? 100
