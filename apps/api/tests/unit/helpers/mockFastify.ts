@@ -41,7 +41,8 @@ export async function buildMockFastify() {
       update: vi.fn(),
       delete: vi.fn(),
       findMany: vi.fn(),
-      count: vi.fn()
+      count: vi.fn(),
+      findUnique: vi.fn()
     },
     category: {
       create: vi.fn(),
@@ -101,7 +102,7 @@ export async function buildMockFastify() {
   // Register cookie plugin
   await app.register(cookie, { COOKIE_SECRET: 'test_cookie_secret' } as envType);
 
-  // Register jwt plugin
+  // Register JWT plugin
   await app.register(jwt, { JWT_SECRET: 'test_jwt_secret' } as envType);
 
   return app;
