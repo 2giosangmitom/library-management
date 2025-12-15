@@ -1,4 +1,6 @@
 import { Prisma } from '@/generated/prisma/client';
+import type { Static } from 'typebox';
+import { GetPublishersSchema } from './schemas';
 
 export default class StaffPublisherService {
   private static instance: StaffPublisherService;
@@ -65,5 +67,39 @@ export default class StaffPublisherService {
       }
       throw error;
     }
+  }
+
+  public async getPublishers(query: Static<typeof GetPublishersSchema.querystring> & { page: number; limit: number }) {
+    const filters: Prisma.PublisherWhereInput = {};
+
+    if (query.name) {
+      filters.name = { contains: query.name, mode: 'insensitive' };
+    }
+    if (query.website) {
+      filters.website = { contains: query.website, mode: 'insensitive' };
+    }
+    if (query.slug) {
+      filters.slug = { contains: query.slug, mode: 'insensitive' };
+    }
+
+    const [publishers, total] = await this.fastify.prisma.$transaction([
+      this.fastify.prisma.publisher.findMany({
+        where: filters,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit,
+        select: {
+          publisher_id: true,
+          name: true,
+          website: true,
+          slug: true,
+          image_url: true,
+          created_at: true,
+          updated_at: true
+        }
+      }),
+      this.fastify.prisma.publisher.count({ where: filters })
+    ]);
+
+    return { publishers, total };
   }
 }

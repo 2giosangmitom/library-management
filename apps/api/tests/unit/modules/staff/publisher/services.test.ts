@@ -231,4 +231,118 @@ describe('StaffPublisherService', async () => {
       );
     });
   });
+
+  describe('getPublishers', () => {
+    it('should call prisma.publisher.findMany with correct pagination parameters', async () => {
+      const query = { page: 1, limit: 10, name: undefined, website: undefined, slug: undefined };
+
+      await service.getPublishers(query);
+
+      expect(app.prisma.publisher.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 0,
+          take: 10,
+          where: {}
+        })
+      );
+    });
+
+    it('should apply name filter correctly', async () => {
+      const query = { page: 1, limit: 10, name: 'penguin', website: undefined, slug: undefined };
+
+      await service.getPublishers(query);
+
+      expect(app.prisma.publisher.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { name: { contains: 'penguin', mode: 'insensitive' } }
+        })
+      );
+    });
+
+    it('should apply website filter correctly', async () => {
+      const query = { page: 1, limit: 10, name: undefined, website: 'penguin.com', slug: undefined };
+
+      await service.getPublishers(query);
+
+      expect(app.prisma.publisher.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { website: { contains: 'penguin.com', mode: 'insensitive' } }
+        })
+      );
+    });
+
+    it('should apply slug filter correctly', async () => {
+      const query = { page: 1, limit: 10, name: undefined, website: undefined, slug: 'penguin-books' };
+
+      await service.getPublishers(query);
+
+      expect(app.prisma.publisher.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { slug: { contains: 'penguin-books', mode: 'insensitive' } }
+        })
+      );
+    });
+
+    it('should combine multiple filters', async () => {
+      const query = { page: 2, limit: 20, name: 'penguin', website: 'penguin.com', slug: 'penguin-books' };
+
+      await service.getPublishers(query);
+
+      expect(app.prisma.publisher.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 20,
+          take: 20,
+          where: {
+            name: { contains: 'penguin', mode: 'insensitive' },
+            website: { contains: 'penguin.com', mode: 'insensitive' },
+            slug: { contains: 'penguin-books', mode: 'insensitive' }
+          }
+        })
+      );
+    });
+
+    it('should use transaction to fetch publishers and count', async () => {
+      const query = { page: 1, limit: 10, name: undefined, website: undefined, slug: undefined };
+
+      await service.getPublishers(query);
+
+      expect(app.prisma.$transaction).toHaveBeenCalled();
+    });
+
+    it('should return publishers and total count', async () => {
+      const mockPublishers = [
+        {
+          publisher_id: faker.string.uuid(),
+          name: faker.company.name(),
+          website: 'https://example1.com',
+          slug: faker.lorem.slug(),
+          image_url: null,
+          created_at: faker.date.anytime(),
+          updated_at: faker.date.anytime()
+        }
+      ];
+
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([mockPublishers, 1] as [typeof mockPublishers, number]);
+
+      const query = { page: 1, limit: 10, name: undefined, website: undefined, slug: undefined };
+      const result = await service.getPublishers(query);
+
+      expect(result).toEqual({
+        publishers: mockPublishers,
+        total: 1
+      });
+    });
+
+    it('should handle empty results', async () => {
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0] as [never[], number]);
+
+      const query = { page: 1, limit: 10, name: undefined, website: undefined, slug: undefined };
+      const result = await service.getPublishers(query);
+
+      expect(result).toEqual({
+        publishers: [],
+        total: 0
+      });
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import { CreatePublisherSchema, DeletePublisherSchema, UpdatePublisherSchema } from './schemas';
+import { CreatePublisherSchema, DeletePublisherSchema, UpdatePublisherSchema, GetPublishersSchema } from './schemas';
 import StaffPublisherService from './services';
 
 export default class StaffPublisherController {
@@ -70,6 +70,30 @@ export default class StaffPublisherController {
         created_at: updated.created_at.toISOString(),
         updated_at: updated.updated_at.toISOString()
       }
+    });
+  }
+
+  public async getPublishers(
+    req: FastifyRequestTypeBox<typeof GetPublishersSchema>,
+    reply: FastifyReplyTypeBox<typeof GetPublishersSchema>
+  ) {
+    const { publishers, total } = await this.staffPublisherService.getPublishers({
+      ...req.query,
+      page: req.query.page ?? 1,
+      limit: req.query.limit ?? 100
+    });
+    const totalPages = Math.ceil(total / (req.query.limit ?? 100));
+
+    return reply.status(200).send({
+      message: 'Publishers retrieved successfully',
+      meta: {
+        totalPages
+      },
+      data: publishers.map((publisher) => ({
+        ...publisher,
+        created_at: publisher.created_at.toISOString(),
+        updated_at: publisher.updated_at.toISOString()
+      }))
     });
   }
 }

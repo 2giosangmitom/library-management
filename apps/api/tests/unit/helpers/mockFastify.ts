@@ -37,7 +37,9 @@ export async function buildMockFastify() {
     publisher: {
       create: vi.fn(),
       update: vi.fn(),
-      delete: vi.fn()
+      delete: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn()
     },
     category: {
       create: vi.fn(),
