@@ -33,6 +33,9 @@ export default defineConfig({
           globalSetup: './tests/integration/setup/globalSetup.ts'
         }
       }
-    ]
+    ],
+    coverage: {
+      exclude: ['autohooks.ts', 'src/plugins/**', 'src/generated/**', 'src/*.ts', 'src/config/**', 'tests/*/helpers/**']
+    }
   }
 });
