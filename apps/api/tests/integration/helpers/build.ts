@@ -19,6 +19,7 @@ import publisherRoutes from '@/modules/publisher/routes';
 import publisherHooks from '@/modules/publisher/autohooks';
 import adminHooks from '@/modules/admin/autohooks';
 import adminUserRoutes from '@/modules/admin/user/routes';
+import adminUserHooks from '@/modules/admin/user/autohooks';
 import staffAuthorRoutes from '@/modules/staff/author/routes';
 import staffCategoryRoutes from '@/modules/staff/category/routes';
 import staffHooks from '@/modules/staff/autohooks';
@@ -80,6 +81,7 @@ export async function build(): Promise<FastifyTypeBox> {
 
           adminInstance.register(
             (instance) => {
+              instance.register(fp(adminUserHooks));
               instance.register(fp(adminUserRoutes));
             },
             { prefix: '/user' }

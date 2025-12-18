@@ -13,7 +13,7 @@ const buildQuery = () => ({
 
 describe('AdminUserService', async () => {
   const app = await buildMockFastify();
-  const service = AdminUserService.getInstance(app);
+  const service = new AdminUserService({ prisma: app.prisma });
 
   afterEach(() => {
     vi.restoreAllMocks();
@@ -39,7 +39,6 @@ describe('AdminUserService', async () => {
       );
 
       expect(app.prisma.user.count).toHaveBeenCalledWith({ where: expect.any(Object) });
-      expect(app.prisma.$transaction).toHaveBeenCalledTimes(1);
     });
 
     it('should return users and total', async () => {
@@ -56,7 +55,10 @@ describe('AdminUserService', async () => {
       ];
       const total = 1;
 
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([users, total]);
+      vi.mocked(app.prisma.user.findMany).mockResolvedValueOnce(
+        users as Awaited<ReturnType<typeof app.prisma.user.findMany>>
+      );
+      vi.mocked(app.prisma.user.count).mockResolvedValueOnce(total);
 
       const result = await service.getUsers(query);
 

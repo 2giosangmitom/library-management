@@ -1,20 +1,12 @@
-import { Prisma } from '@/generated/prisma/client';
+import { Prisma, PrismaClient } from '@/generated/prisma/client';
 import type { Static } from 'typebox';
 import { GetUsersSchema } from './schemas';
 
 export default class AdminUserService {
-  private static instance: AdminUserService;
-  private fastify: FastifyTypeBox;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox): AdminUserService {
-    if (!AdminUserService.instance) {
-      AdminUserService.instance = new AdminUserService(fastify);
-    }
-    return AdminUserService.instance;
+  public constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
   }
 
   public async getUsers(query: Static<typeof GetUsersSchema.querystring> & { page: number; limit: number }) {
@@ -32,8 +24,8 @@ export default class AdminUserService {
       filters.role = query.role;
     }
 
-    const [users, total] = await this.fastify.prisma.$transaction([
-      this.fastify.prisma.user.findMany({
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
         where: filters,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
@@ -46,7 +38,7 @@ export default class AdminUserService {
           updated_at: true
         }
       }),
-      this.fastify.prisma.user.count({ where: filters })
+      this.prisma.user.count({ where: filters })
     ]);
 
     return { users, total };

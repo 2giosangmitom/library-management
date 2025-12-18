@@ -2,21 +2,10 @@ import AdminUserService from './services';
 import { GetUsersSchema } from './schemas';
 
 export default class AdminUserController {
-  private static instance: AdminUserController;
   private adminUserService: AdminUserService;
 
-  private constructor(fastify: FastifyTypeBox, adminUserService: AdminUserService) {
+  public constructor({ adminUserService }: { adminUserService: AdminUserService }) {
     this.adminUserService = adminUserService;
-  }
-
-  public static getInstance(
-    fastify: FastifyTypeBox,
-    adminUserService = AdminUserService.getInstance(fastify)
-  ): AdminUserController {
-    if (!AdminUserController.instance) {
-      AdminUserController.instance = new AdminUserController(fastify, adminUserService);
-    }
-    return AdminUserController.instance;
   }
 
   public async getUsers(

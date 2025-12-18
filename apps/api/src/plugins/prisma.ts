@@ -13,6 +13,7 @@ export default fp(
     const prisma = new PrismaClient({ adapter });
     fastify.decorate('prisma', prisma);
 
+    // Register Prisma client in DI container
     diContainer.register({
       prisma: asValue(prisma)
     });
