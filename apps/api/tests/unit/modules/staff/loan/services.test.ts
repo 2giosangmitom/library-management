@@ -75,6 +75,19 @@ describe('StaffLoanService', async () => {
       );
     });
 
+    it('should rethrow unknown errors', async () => {
+      const data = {
+        user_id: faker.string.uuid(),
+        book_clone_id: faker.string.uuid(),
+        loan_date: faker.date.past().toISOString(),
+        due_date: faker.date.soon().toISOString()
+      };
+
+      vi.mocked(app.prisma.loan.create).mockRejectedValueOnce(new Error('Unknown error'));
+
+      await expect(service.createLoan(data)).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Unknown error]`);
+    });
+
     it('should return created loan on success', async () => {
       const data = {
         user_id: faker.string.uuid(),
