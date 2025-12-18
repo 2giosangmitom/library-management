@@ -2,6 +2,8 @@ import { PrismaClient } from '@/generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import fp from 'fastify-plugin';
 import type { envType } from '@/config/envSchema';
+import { asValue } from 'awilix';
+import { diContainer } from '@fastify/awilix';
 
 export default fp(
   (fastify: FastifyTypeBox, opts: envType) => {
@@ -11,12 +13,17 @@ export default fp(
     const prisma = new PrismaClient({ adapter });
     fastify.decorate('prisma', prisma);
 
+    diContainer.register({
+      prisma: asValue(prisma)
+    });
+
     fastify.addHook('onClose', async () => {
       await prisma.$disconnect();
     });
   },
   {
-    name: 'Prisma'
+    name: 'Prisma',
+    dependencies: ['Awilix']
   }
 );
 

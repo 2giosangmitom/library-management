@@ -1,23 +1,16 @@
-import AuthService from './services';
 import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './schemas';
 import { refreshTokenExpiration } from '@/constants';
 import { nanoid } from 'nanoid';
+import type AuthService from './services';
+import type { PrismaClient } from '@/generated/prisma/client';
 
 export default class AuthController {
-  private static instance: AuthController;
   private authService: AuthService;
-  private fastify: FastifyTypeBox;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox, authService: AuthService) {
-    this.fastify = fastify;
+  public constructor({ authService, prisma }: { authService: AuthService; prisma: PrismaClient }) {
     this.authService = authService;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox, authService = AuthService.getInstance(fastify)): AuthController {
-    if (!AuthController.instance) {
-      AuthController.instance = new AuthController(fastify, authService);
-    }
-    return AuthController.instance;
+    this.prisma = prisma;
   }
 
   public async signUp(
@@ -88,7 +81,7 @@ export default class AuthController {
       const data = await req.jwtVerify<RefreshToken>({ onlyCookie: true });
 
       const newAccessTokenJwtId = nanoid();
-      const { role } = await this.fastify.prisma.user.findUniqueOrThrow({
+      const { role } = await this.prisma.user.findUniqueOrThrow({
         where: { user_id: data.sub },
         select: { role: true }
       });

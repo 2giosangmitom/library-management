@@ -4,10 +4,11 @@ import { faker } from '@faker-js/faker';
 import { buildMockFastify } from '../../helpers/mockFastify';
 import { HttpError } from '@fastify/sensible';
 import * as hashUtils from '@/utils/hash';
+import { JWTUtils } from '@/utils/jwt';
 
 describe('AuthService', async () => {
   const app = await buildMockFastify();
-  const authService = AuthService.getInstance(app);
+  const authService = new AuthService({ jwtUtils: JWTUtils.getInstance(app.redis), prisma: app.prisma });
 
   afterEach(() => {
     vi.restoreAllMocks();
@@ -168,14 +169,6 @@ describe('AuthService', async () => {
       expect(result).toHaveProperty('user', fakeUser);
       expect(result).toHaveProperty('accessTokenJwtId');
       expect(result).toHaveProperty('refreshTokenJwtId');
-    });
-  });
-
-  describe('getInstance', () => {
-    it('should return the same instance on multiple calls', () => {
-      const instance1 = AuthService.getInstance(app);
-      const instance2 = AuthService.getInstance(app);
-      expect(instance1).toBe(instance2);
     });
   });
 });

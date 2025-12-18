@@ -3,12 +3,17 @@ import { fastifyJwt } from '@fastify/jwt';
 import { JWTUtils } from '@/utils/jwt';
 import fp from 'fastify-plugin';
 import { accessTokenExpiration } from '@/constants';
+import { asValue } from 'awilix';
+import { diContainer } from '@fastify/awilix';
 
 export default fp(
   async (fastify: FastifyTypeBox, opts: envType) => {
     fastify.log.debug('Registering JWT plugin');
 
     const jwtUtils = JWTUtils.getInstance(fastify.redis);
+    diContainer.register({
+      jwtUtils: asValue(jwtUtils)
+    });
 
     await fastify.register(fastifyJwt, {
       secret: opts.JWT_SECRET,
@@ -26,6 +31,6 @@ export default fp(
   },
   {
     name: 'JWT',
-    dependencies: ['Redis', 'Cookie']
+    dependencies: ['Redis', 'Cookie', 'Awilix']
   }
 );

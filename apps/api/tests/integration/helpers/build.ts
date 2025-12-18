@@ -9,6 +9,7 @@ import jwtPlugin from '@/plugins/jwt';
 import sensible from '@/plugins/sensible';
 import cookie from '@/plugins/cookie';
 import auth from '@/plugins/auth';
+import awilix from '@/plugins/awilix';
 
 import authRoutes from '@/modules/auth/routes';
 import authHooks from '@/modules/auth/autohooks';
@@ -36,6 +37,7 @@ export async function build(): Promise<FastifyTypeBox> {
   const config = configService.env;
 
   // Register plugins
+  await app.register(awilix);
   await app.register(prismaPlugin, config);
   await app.register(redisPlugin, config);
   await app.register(auth);

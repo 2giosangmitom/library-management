@@ -1,39 +1,33 @@
+import type { PrismaClient } from '@/generated/prisma/client';
 import { Role } from '@/generated/prisma/enums';
 import { generateHash, verifyHash } from '@/utils/hash';
 import { JWTUtils } from '@/utils/jwt';
 import { nanoid } from 'nanoid';
+import { httpErrors } from '@fastify/sensible';
 
 export default class AuthService {
-  private static instance: AuthService;
-  private fastify: FastifyTypeBox;
   private jwtUtils: JWTUtils;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-    this.jwtUtils = JWTUtils.getInstance(fastify.redis);
-  }
-
-  public static getInstance(fastify: FastifyTypeBox): AuthService {
-    if (!AuthService.instance) {
-      AuthService.instance = new AuthService(fastify);
-    }
-    return AuthService.instance;
+  public constructor({ jwtUtils, prisma }: { jwtUtils: JWTUtils; prisma: PrismaClient }) {
+    this.jwtUtils = jwtUtils;
+    this.prisma = prisma;
   }
 
   public async createUserAccount(data: { email: string; password: string; fullName: string; role: Role }) {
     const { email, password, fullName, role } = data;
 
     // Check if email already exists
-    const existingUser = await this.fastify.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findUnique({
       where: { email }
     });
     if (existingUser) {
-      throw this.fastify.httpErrors.conflict('Email is already in use');
+      throw httpErrors.conflict('Email is already in use');
     }
 
     const { hash, salt } = await generateHash(password);
 
-    const user = await this.fastify.prisma.user.create({
+    const user = await this.prisma.user.create({
       omit: { password_hash: true, salt: true },
       data: {
         email,
@@ -51,10 +45,10 @@ export default class AuthService {
     const { email, password } = data;
 
     // Validate email
-    const user = await this.fastify.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { email }
     });
-    const invalidCredentialsError = this.fastify.httpErrors.unauthorized('Invalid credentials');
+    const invalidCredentialsError = httpErrors.unauthorized('Invalid credentials');
 
     if (!user) {
       throw invalidCredentialsError;

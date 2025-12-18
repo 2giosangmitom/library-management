@@ -4,6 +4,7 @@ import sensible from '@/plugins/sensible';
 import auth from '@/plugins/auth';
 import jwt from '@/plugins/jwt';
 import cookie from '@/plugins/cookie';
+import awilix from '@/plugins/awilix';
 import { type envType } from '@/config/envSchema';
 import fp from 'fastify-plugin';
 
@@ -100,6 +101,9 @@ export async function buildMockFastify() {
   // Mock sensible plugin
   await app.register(sensible);
   vi.mockObject(app.httpErrors, { spy: true });
+
+  // Register Awilix plugin
+  await app.register(awilix);
 
   // Register auth plugin
   await app.register(auth);

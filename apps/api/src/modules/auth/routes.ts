@@ -2,7 +2,7 @@ import AuthController from './controllers';
 import { RefreshTokenSchema, SignInSchema, SignOutSchema, SignUpSchema } from './schemas';
 
 export default function authRoutes(fastify: FastifyTypeBox) {
-  const authController = AuthController.getInstance(fastify);
+  const authController = fastify.diContainer.resolve<AuthController>('authController');
 
   fastify.post('/signup', { schema: SignUpSchema }, authController.signUp.bind(authController));
   fastify.post('/signin', { schema: SignInSchema }, authController.signIn.bind(authController));
