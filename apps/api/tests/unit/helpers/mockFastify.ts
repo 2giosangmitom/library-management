@@ -17,7 +17,8 @@ export async function buildMockFastify() {
       findUnique: vi.fn(),
       create: vi.fn(),
       findMany: vi.fn(),
-      count: vi.fn()
+      count: vi.fn(),
+      update: vi.fn()
     },
     author: {
       create: vi.fn(),

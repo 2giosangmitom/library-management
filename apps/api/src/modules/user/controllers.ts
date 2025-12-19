@@ -1,5 +1,5 @@
 import type UserService from './services';
-import type { GetMeSchema } from './schemas';
+import type { GetMeSchema, ChangePasswordSchema } from './schemas';
 
 export default class UserController {
   private userService: UserService;
@@ -24,6 +24,24 @@ export default class UserController {
         created_at: data.created_at.toISOString(),
         updated_at: data.updated_at.toISOString()
       }
+    });
+  }
+
+  public async changePassword(
+    req: FastifyRequestTypeBox<typeof ChangePasswordSchema>,
+    reply: FastifyReplyTypeBox<typeof ChangePasswordSchema>
+  ) {
+    if (!req.user) {
+      throw new Error('User not authenticated');
+    }
+
+    const user = req.user as AccessToken;
+    const { current_password, new_password } = req.body;
+
+    await this.userService.changePassword(user.sub, current_password, new_password);
+
+    return reply.status(200).send({
+      message: 'Password changed successfully'
     });
   }
 }
