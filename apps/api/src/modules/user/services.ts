@@ -1,69 +1,30 @@
-import { Prisma, Role } from '@/generated/prisma/client';
+import type { PrismaClient } from '@/generated/prisma/client';
+import { httpErrors } from '@fastify/sensible';
 
 export default class UserService {
-  private static instance: UserService;
-  private fastify: FastifyTypeBox;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
+  public constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
   }
 
-  public static getInstance(fastify: FastifyTypeBox): UserService {
-    if (!UserService.instance) {
-      UserService.instance = new UserService(fastify);
-    }
-    return UserService.instance;
-  }
+  public async getUserById(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { user_id: userId },
+      select: {
+        user_id: true,
+        name: true,
+        email: true,
+        role: true,
+        created_at: true,
+        updated_at: true
+      }
+    });
 
-  public async findUsers(
-    paginationOpts: {
-      page: number;
-      limit: number;
-    } = { page: 1, limit: 10 },
-    filterOpts?: Partial<{ email: string; name: string; role: Role }>,
-    sortOpts?: Prisma.UserFindManyArgs['orderBy']
-  ) {
-    const { page, limit } = paginationOpts;
-    const where: Prisma.UserWhereInput = {};
-
-    if (filterOpts) {
-      if (filterOpts.email) {
-        where.email = { contains: filterOpts.email, mode: 'insensitive' };
-      }
-      if (filterOpts.name) {
-        where.name = { contains: filterOpts.name, mode: 'insensitive' };
-      }
-      if (filterOpts.role) {
-        where.role = filterOpts.role;
-      }
+    if (!user) {
+      throw httpErrors.notFound('User not found');
     }
 
-    const [users, total] = await this.fastify.prisma.$transaction([
-      this.fastify.prisma.user.findMany({
-        where,
-        orderBy: sortOpts,
-        skip: (page - 1) * limit,
-        take: limit,
-        select: {
-          user_id: true,
-          email: true,
-          name: true,
-          role: true,
-          created_at: true,
-          updated_at: true
-        }
-      }),
-      this.fastify.prisma.user.count({ where })
-    ]);
-
-    return {
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      },
-      data: users
-    };
+    return user;
   }
 }
