@@ -366,4 +366,68 @@ describe('StaffBookCloneService', async () => {
       );
     });
   });
+
+  describe('getBookClones', () => {
+    it('should apply filters correctly', async () => {
+      const query = {
+        page: 1,
+        limit: 10,
+        book_id: faker.string.uuid(),
+        location_id: faker.string.alphanumeric(10),
+        condition: BookCondition.NEW,
+        barcode: faker.string.alphanumeric(10),
+        is_available: true
+      };
+
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0]);
+
+      await service.getBookClones(query);
+
+      expect(app.prisma.book_Clone.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            book_id: query.book_id,
+            location_id: query.location_id,
+            condition: query.condition,
+            barcode: query.barcode,
+            OR: [{ loan: { is: null } }, { loan: { is: { status: 'RETURNED' } } }]
+          }
+        })
+      );
+    });
+
+    it('should handle is_available: false filter', async () => {
+      const query = {
+        page: 1,
+        limit: 10,
+        is_available: false
+      };
+
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0]);
+
+      await service.getBookClones(query);
+
+      expect(app.prisma.book_Clone.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            loan: { is: { status: { not: 'RETURNED' } } }
+          }
+        })
+      );
+    });
+
+    it('should handle query with no filters', async () => {
+      const query = { page: 1, limit: 10 };
+
+      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0]);
+
+      await service.getBookClones(query);
+
+      expect(app.prisma.book_Clone.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {}
+        })
+      );
+    });
+  });
 });
