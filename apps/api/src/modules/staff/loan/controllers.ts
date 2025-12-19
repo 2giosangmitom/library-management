@@ -1,22 +1,11 @@
-import StaffLoanService from './services';
+import type StaffLoanService from './services';
 import { CreateLoanSchema } from './schemas';
 
 export default class StaffLoanController {
-  private static instance: StaffLoanController;
   private staffLoanService: StaffLoanService;
 
-  private constructor(fastify: FastifyTypeBox, staffLoanService: StaffLoanService) {
+  public constructor({ staffLoanService }: { staffLoanService: StaffLoanService }) {
     this.staffLoanService = staffLoanService;
-  }
-
-  public static getInstance(
-    fastify: FastifyTypeBox,
-    staffLoanService = StaffLoanService.getInstance(fastify)
-  ): StaffLoanController {
-    if (!StaffLoanController.instance) {
-      StaffLoanController.instance = new StaffLoanController(fastify, staffLoanService);
-    }
-    return StaffLoanController.instance;
   }
 
   public async createLoan(

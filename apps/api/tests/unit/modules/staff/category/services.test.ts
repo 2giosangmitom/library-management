@@ -5,7 +5,7 @@ import { Prisma } from '@/generated/prisma/client';
 
 describe('StaffCategoryService', async () => {
   const app = await buildMockFastify();
-  const service = StaffCategoryService.getInstance(app);
+  const service = new StaffCategoryService({ prisma: app.prisma });
 
   afterEach(() => {
     vi.restoreAllMocks();

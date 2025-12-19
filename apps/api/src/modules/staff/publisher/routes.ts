@@ -2,7 +2,7 @@ import StaffPublisherController from './controllers';
 import { CreatePublisherSchema, DeletePublisherSchema, UpdatePublisherSchema, GetPublishersSchema } from './schemas';
 
 export default function staffPublisherRoutes(fastify: FastifyTypeBox) {
-  const controller = StaffPublisherController.getInstance(fastify);
+  const controller = fastify.diContainer.resolve<StaffPublisherController>('staffPublisherController');
 
   fastify.get('/', { schema: GetPublishersSchema }, controller.getPublishers.bind(controller));
   fastify.post('/', { schema: CreatePublisherSchema }, controller.createPublisher.bind(controller));

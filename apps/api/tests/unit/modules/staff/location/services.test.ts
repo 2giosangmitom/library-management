@@ -4,17 +4,16 @@ import { buildMockFastify } from '../../../helpers/mockFastify';
 
 describe('StaffLocationService', async () => {
   const app = await buildMockFastify();
-  const staffLocationService = StaffLocationService.getInstance(app);
+  const staffLocationService = new StaffLocationService({ prisma: app.prisma });
 
   afterEach(() => {
     vi.clearAllMocks();
   });
 
-  describe('getInstance', () => {
-    it('should return the same instance on multiple calls', () => {
-      const instance1 = StaffLocationService.getInstance(app);
-      const instance2 = StaffLocationService.getInstance(app);
-      expect(instance1).toBe(instance2);
+  describe('constructor injection', () => {
+    it('should create an instance with injected prisma', () => {
+      const service = new StaffLocationService({ prisma: app.prisma });
+      expect(service).toBeInstanceOf(StaffLocationService);
     });
   });
 

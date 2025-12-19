@@ -1,20 +1,14 @@
+import type { PrismaClient } from '@/generated/prisma/client';
 import { BookCondition, Prisma } from '@/generated/prisma/client';
 import type { Static } from 'typebox';
 import { GetBookClonesSchema } from './schemas';
+import { httpErrors } from '@fastify/sensible';
 
 export default class StaffBookCloneService {
-  private static instance: StaffBookCloneService;
-  private fastify: FastifyTypeBox;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox): StaffBookCloneService {
-    if (!StaffBookCloneService.instance) {
-      StaffBookCloneService.instance = new StaffBookCloneService(fastify);
-    }
-    return StaffBookCloneService.instance;
+  public constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
   }
 
   public async createBookClone(data: {
@@ -24,7 +18,7 @@ export default class StaffBookCloneService {
     condition: BookCondition;
   }) {
     try {
-      const createdBookClone = await this.fastify.prisma.book_Clone.create({
+      const createdBookClone = await this.prisma.book_Clone.create({
         data: {
           book_id: data.book_id,
           location_id: data.location_id,
@@ -37,10 +31,10 @@ export default class StaffBookCloneService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw this.fastify.httpErrors.conflict('Book clone with the given barcode already exists.');
+          throw httpErrors.conflict('Book clone with the given barcode already exists.');
         }
         if (error.code === 'P2003') {
-          throw this.fastify.httpErrors.badRequest('Invalid book_id or location_id provided.');
+          throw httpErrors.badRequest('Invalid book_id or location_id provided.');
         }
       }
       throw error;
@@ -49,7 +43,7 @@ export default class StaffBookCloneService {
 
   public async deleteBookClone(book_clone_id: string) {
     try {
-      const deleted = await this.fastify.prisma.book_Clone.delete({
+      const deleted = await this.prisma.book_Clone.delete({
         select: { book_clone_id: true, barcode: true },
         where: { book_clone_id }
       });
@@ -58,7 +52,7 @@ export default class StaffBookCloneService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw this.fastify.httpErrors.notFound('Book clone with the given ID does not exist.');
+          throw httpErrors.notFound('Book clone with the given ID does not exist.');
         }
       }
       throw error;
@@ -75,7 +69,7 @@ export default class StaffBookCloneService {
     }
   ) {
     try {
-      const updated = await this.fastify.prisma.book_Clone.update({
+      const updated = await this.prisma.book_Clone.update({
         where: { book_clone_id },
         data
       });
@@ -85,11 +79,11 @@ export default class StaffBookCloneService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
           case 'P2025':
-            throw this.fastify.httpErrors.notFound('Book clone with the given ID does not exist.');
+            throw httpErrors.notFound('Book clone with the given ID does not exist.');
           case 'P2002':
-            throw this.fastify.httpErrors.conflict('Book clone with the given barcode already exists.');
+            throw httpErrors.conflict('Book clone with the given barcode already exists.');
           case 'P2003':
-            throw this.fastify.httpErrors.badRequest('Invalid book_id or location_id provided.');
+            throw httpErrors.badRequest('Invalid book_id or location_id provided.');
         }
       }
       throw error;
@@ -119,8 +113,8 @@ export default class StaffBookCloneService {
       }
     }
 
-    const [bookClones, total] = await this.fastify.prisma.$transaction([
-      this.fastify.prisma.book_Clone.findMany({
+    const [bookClones, total] = await this.prisma.$transaction([
+      this.prisma.book_Clone.findMany({
         where: filters,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
@@ -137,7 +131,7 @@ export default class StaffBookCloneService {
           }
         }
       }),
-      this.fastify.prisma.book_Clone.count({ where: filters })
+      this.prisma.book_Clone.count({ where: filters })
     ]);
 
     return { bookClones, total };

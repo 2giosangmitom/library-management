@@ -1,30 +1,24 @@
+import type { PrismaClient } from '@/generated/prisma/client';
 import { Prisma } from '@/generated/prisma/client';
 import type { Static } from 'typebox';
 import { GetPublishersSchema } from './schemas';
+import { httpErrors } from '@fastify/sensible';
 
 export default class StaffPublisherService {
-  private static instance: StaffPublisherService;
-  private fastify: FastifyTypeBox;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox): StaffPublisherService {
-    if (!StaffPublisherService.instance) {
-      StaffPublisherService.instance = new StaffPublisherService(fastify);
-    }
-    return StaffPublisherService.instance;
+  public constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
   }
 
   public async createPublisher(data: { name: string; website: string; slug: string }) {
     try {
-      const created = await this.fastify.prisma.publisher.create({ data: { ...data } });
+      const created = await this.prisma.publisher.create({ data: { ...data } });
       return created;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw this.fastify.httpErrors.conflict('Publisher with the given slug already exists.');
+          throw httpErrors.conflict('Publisher with the given slug already exists.');
         }
       }
       throw error;
@@ -33,7 +27,7 @@ export default class StaffPublisherService {
 
   public async deletePublisher(publisher_id: string) {
     try {
-      const deleted = await this.fastify.prisma.publisher.delete({
+      const deleted = await this.prisma.publisher.delete({
         select: { publisher_id: true, name: true },
         where: { publisher_id }
       });
@@ -41,7 +35,7 @@ export default class StaffPublisherService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw this.fastify.httpErrors.notFound('Publisher with the given ID does not exist.');
+          throw httpErrors.notFound('Publisher with the given ID does not exist.');
         }
       }
       throw error;
@@ -50,7 +44,7 @@ export default class StaffPublisherService {
 
   public async updatePublisher(publisher_id: string, data: { name: string; website: string; slug: string }) {
     try {
-      const updated = await this.fastify.prisma.publisher.update({
+      const updated = await this.prisma.publisher.update({
         where: { publisher_id },
         data: { ...data }
       });
@@ -60,9 +54,9 @@ export default class StaffPublisherService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
           case 'P2025':
-            throw this.fastify.httpErrors.notFound('Publisher with the given ID does not exist.');
+            throw httpErrors.notFound('Publisher with the given ID does not exist.');
           case 'P2002':
-            throw this.fastify.httpErrors.conflict('Publisher with the given slug already exists.');
+            throw httpErrors.conflict('Publisher with the given slug already exists.');
         }
       }
       throw error;
@@ -82,8 +76,8 @@ export default class StaffPublisherService {
       filters.slug = { contains: query.slug, mode: 'insensitive' };
     }
 
-    const [publishers, total] = await this.fastify.prisma.$transaction([
-      this.fastify.prisma.publisher.findMany({
+    const [publishers, total] = await this.prisma.$transaction([
+      this.prisma.publisher.findMany({
         where: filters,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
@@ -97,7 +91,7 @@ export default class StaffPublisherService {
           updated_at: true
         }
       }),
-      this.fastify.prisma.publisher.count({ where: filters })
+      this.prisma.publisher.count({ where: filters })
     ]);
 
     return { publishers, total };

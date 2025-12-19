@@ -2,7 +2,7 @@ import StaffBookController from './controllers';
 import { CreateBookSchema, DeleteBookSchema, UpdateBookSchema, GetBooksSchema } from './schemas';
 
 export default function staffBookRoutes(fastify: FastifyTypeBox) {
-  const staffBookController = StaffBookController.getInstance(fastify);
+  const staffBookController = fastify.diContainer.resolve<StaffBookController>('staffBookController');
 
   fastify.get('/', { schema: GetBooksSchema }, staffBookController.getBooks.bind(staffBookController));
   fastify.post('/', { schema: CreateBookSchema }, staffBookController.createBook.bind(staffBookController));

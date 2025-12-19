@@ -21,13 +21,20 @@ import adminHooks from '@/modules/admin/autohooks';
 import adminUserRoutes from '@/modules/admin/user/routes';
 import adminUserHooks from '@/modules/admin/user/autohooks';
 import staffAuthorRoutes from '@/modules/staff/author/routes';
+import staffAuthorHooks from '@/modules/staff/author/autohooks';
 import staffCategoryRoutes from '@/modules/staff/category/routes';
+import staffCategoryHooks from '@/modules/staff/category/autohooks';
 import staffHooks from '@/modules/staff/autohooks';
 import staffPublisherRoutes from '@/modules/staff/publisher/routes';
+import staffPublisherHooks from '@/modules/staff/publisher/autohooks';
 import staffBookRoutes from '@/modules/staff/book/routes';
+import staffBookHooks from '@/modules/staff/book/autohooks';
 import staffBookCloneRoutes from '@/modules/staff/book_clone/routes';
+import staffBookCloneHooks from '@/modules/staff/book_clone/autohooks';
 import staffLocationRoutes from '@/modules/staff/location/routes';
+import staffLocationHooks from '@/modules/staff/location/autohooks';
 import staffLoanRoutes from '@/modules/staff/loan/routes';
+import staffLoanHooks from '@/modules/staff/loan/autohooks';
 
 export async function build(): Promise<FastifyTypeBox> {
   const app = fastify().withTypeProvider<TypeBoxTypeProvider>().setValidatorCompiler(TypeBoxValidatorCompiler);
@@ -96,6 +103,7 @@ export async function build(): Promise<FastifyTypeBox> {
 
           staffInstance.register(
             (instance) => {
+              instance.register(fp(staffAuthorHooks));
               instance.register(fp(staffAuthorRoutes));
             },
             { prefix: '/author' }
@@ -103,6 +111,7 @@ export async function build(): Promise<FastifyTypeBox> {
 
           staffInstance.register(
             (instance) => {
+              instance.register(fp(staffCategoryHooks));
               instance.register(fp(staffCategoryRoutes));
             },
             { prefix: '/category' }
@@ -110,6 +119,7 @@ export async function build(): Promise<FastifyTypeBox> {
 
           staffInstance.register(
             (instance) => {
+              instance.register(fp(staffPublisherHooks));
               instance.register(fp(staffPublisherRoutes));
             },
             { prefix: '/publisher' }
@@ -117,6 +127,7 @@ export async function build(): Promise<FastifyTypeBox> {
 
           staffInstance.register(
             (instance) => {
+              instance.register(fp(staffBookHooks));
               instance.register(fp(staffBookRoutes));
             },
             { prefix: '/book' }
@@ -124,6 +135,7 @@ export async function build(): Promise<FastifyTypeBox> {
 
           staffInstance.register(
             (instance) => {
+              instance.register(fp(staffBookCloneHooks));
               instance.register(fp(staffBookCloneRoutes));
             },
             { prefix: '/book_clone' }
@@ -131,6 +143,7 @@ export async function build(): Promise<FastifyTypeBox> {
 
           staffInstance.register(
             (instance) => {
+              instance.register(fp(staffLocationHooks));
               instance.register(fp(staffLocationRoutes));
             },
             { prefix: '/location' }
@@ -138,6 +151,7 @@ export async function build(): Promise<FastifyTypeBox> {
 
           staffInstance.register(
             (instance) => {
+              instance.register(fp(staffLoanHooks));
               instance.register(fp(staffLoanRoutes));
             },
             { prefix: '/loan' }

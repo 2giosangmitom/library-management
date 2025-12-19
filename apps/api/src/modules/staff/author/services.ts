@@ -1,18 +1,12 @@
+import type { PrismaClient } from '@/generated/prisma/client';
 import { Prisma } from '@/generated/prisma/client';
+import { httpErrors } from '@fastify/sensible';
 
 export default class StaffAuthorService {
-  private static instance: StaffAuthorService;
-  private fastify: FastifyTypeBox;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox): StaffAuthorService {
-    if (!StaffAuthorService.instance) {
-      StaffAuthorService.instance = new StaffAuthorService(fastify);
-    }
-    return StaffAuthorService.instance;
+  public constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
   }
 
   public async createAuthor(data: {
@@ -25,7 +19,7 @@ export default class StaffAuthorService {
     slug: string;
   }) {
     try {
-      const createdAuthor = await this.fastify.prisma.author.create({
+      const createdAuthor = await this.prisma.author.create({
         data: {
           ...data
         }
@@ -35,7 +29,7 @@ export default class StaffAuthorService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw this.fastify.httpErrors.conflict('Author with the given slug already exists.');
+          throw httpErrors.conflict('Author with the given slug already exists.');
         }
       }
       throw error;
@@ -44,7 +38,7 @@ export default class StaffAuthorService {
 
   public async deleteAuthor(author_id: string) {
     try {
-      const deletedAuthor = await this.fastify.prisma.author.delete({
+      const deletedAuthor = await this.prisma.author.delete({
         select: { author_id: true, name: true },
         where: { author_id }
       });
@@ -53,7 +47,7 @@ export default class StaffAuthorService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw this.fastify.httpErrors.notFound('Author with the given ID does not exist.');
+          throw httpErrors.notFound('Author with the given ID does not exist.');
         }
       }
       throw error;
@@ -73,7 +67,7 @@ export default class StaffAuthorService {
     }
   ) {
     try {
-      const updatedAuthor = await this.fastify.prisma.author.update({
+      const updatedAuthor = await this.prisma.author.update({
         where: { author_id },
         data: {
           ...data
@@ -85,9 +79,9 @@ export default class StaffAuthorService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
           case 'P2025':
-            throw this.fastify.httpErrors.notFound('Author with the given ID does not exist.');
+            throw httpErrors.notFound('Author with the given ID does not exist.');
           case 'P2002':
-            throw this.fastify.httpErrors.conflict('Author with the given slug already exists.');
+            throw httpErrors.conflict('Author with the given slug already exists.');
         }
       }
       throw error;
@@ -141,8 +135,8 @@ export default class StaffAuthorService {
       { author_id: 'asc' }
     ];
 
-    const [authors, total] = await this.fastify.prisma.$transaction([
-      this.fastify.prisma.author.findMany({
+    const [authors, total] = await this.prisma.$transaction([
+      this.prisma.author.findMany({
         where,
         orderBy,
         skip: (page - 1) * limit,
@@ -161,7 +155,7 @@ export default class StaffAuthorService {
           updated_at: true
         }
       }),
-      this.fastify.prisma.author.count({ where })
+      this.prisma.author.count({ where })
     ]);
 
     const totalPages = total === 0 ? 0 : Math.ceil(total / limit);

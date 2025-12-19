@@ -1,23 +1,17 @@
+import type { PrismaClient } from '@/generated/prisma/client';
 import { Prisma } from '@/generated/prisma/client';
+import { httpErrors } from '@fastify/sensible';
 
 export default class StaffCategoryService {
-  private static instance: StaffCategoryService;
-  private fastify: FastifyTypeBox;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox): StaffCategoryService {
-    if (!StaffCategoryService.instance) {
-      StaffCategoryService.instance = new StaffCategoryService(fastify);
-    }
-    return StaffCategoryService.instance;
+  public constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
   }
 
   public async createCategory(data: { name: string; slug: string }) {
     try {
-      const created = await this.fastify.prisma.category.create({
+      const created = await this.prisma.category.create({
         data: {
           ...data
         }
@@ -27,7 +21,7 @@ export default class StaffCategoryService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw this.fastify.httpErrors.conflict('Category with the given slug already exists.');
+          throw httpErrors.conflict('Category with the given slug already exists.');
         }
       }
       throw error;
@@ -36,7 +30,7 @@ export default class StaffCategoryService {
 
   public async deleteCategory(category_id: string) {
     try {
-      const deleted = await this.fastify.prisma.category.delete({
+      const deleted = await this.prisma.category.delete({
         where: { category_id },
         select: { category_id: true, name: true }
       });
@@ -45,7 +39,7 @@ export default class StaffCategoryService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw this.fastify.httpErrors.notFound('Category with the given ID does not exist.');
+          throw httpErrors.notFound('Category with the given ID does not exist.');
         }
       }
       throw error;
@@ -54,7 +48,7 @@ export default class StaffCategoryService {
 
   public async updateCategory(category_id: string, data: { name?: string; slug?: string }) {
     try {
-      const updated = await this.fastify.prisma.category.update({
+      const updated = await this.prisma.category.update({
         where: { category_id },
         data: {
           ...data
@@ -65,10 +59,10 @@ export default class StaffCategoryService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw this.fastify.httpErrors.notFound('Category with the given ID does not exist.');
+          throw httpErrors.notFound('Category with the given ID does not exist.');
         }
         if (error.code === 'P2002') {
-          throw this.fastify.httpErrors.conflict('Category with the given slug already exists.');
+          throw httpErrors.conflict('Category with the given slug already exists.');
         }
       }
       throw error;
@@ -88,8 +82,8 @@ export default class StaffCategoryService {
 
     const where: Prisma.CategoryWhereInput = andFilters.length > 0 ? { AND: andFilters } : {};
 
-    const [categories, total] = await this.fastify.prisma.$transaction([
-      this.fastify.prisma.category.findMany({
+    const [categories, total] = await this.prisma.$transaction([
+      this.prisma.category.findMany({
         where,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
@@ -107,7 +101,7 @@ export default class StaffCategoryService {
           updated_at: true
         }
       }),
-      this.fastify.prisma.category.count({ where })
+      this.prisma.category.count({ where })
     ]);
 
     return { categories, total };

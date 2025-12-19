@@ -5,7 +5,7 @@ import { Prisma } from '@/generated/prisma/client';
 
 describe('StaffAuthorService', async () => {
   const app = await buildMockFastify();
-  const staffAuthorService = StaffAuthorService.getInstance(app);
+  const staffAuthorService = new StaffAuthorService({ prisma: app.prisma });
 
   afterEach(() => {
     vi.restoreAllMocks();
@@ -391,14 +391,6 @@ describe('StaffAuthorService', async () => {
         },
         data: []
       });
-    });
-  });
-
-  describe('getInstance', () => {
-    it('should return the same instance', () => {
-      const instance1 = StaffAuthorService.getInstance(app);
-      const instance2 = StaffAuthorService.getInstance(app);
-      expect(instance1).toBe(instance2);
     });
   });
 });

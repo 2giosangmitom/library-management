@@ -1,22 +1,12 @@
 import { CreateBookSchema, DeleteBookSchema, UpdateBookSchema, GetBooksSchema } from './schemas';
-import StaffBookService from './services';
+import type StaffBookService from './services';
 import { Prisma } from '@/generated/prisma/client';
 
 export default class StaffBookController {
-  private static instance: StaffBookController;
   private staffBookService: StaffBookService;
-  private fastify: FastifyTypeBox;
 
-  private constructor(fastify: FastifyTypeBox, staffBookService: StaffBookService) {
-    this.fastify = fastify;
+  public constructor({ staffBookService }: { staffBookService: StaffBookService }) {
     this.staffBookService = staffBookService;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox, staffBookService = StaffBookService.getInstance(fastify)) {
-    if (!StaffBookController.instance) {
-      StaffBookController.instance = new StaffBookController(fastify, staffBookService);
-    }
-    return StaffBookController.instance;
   }
 
   public async createBook(

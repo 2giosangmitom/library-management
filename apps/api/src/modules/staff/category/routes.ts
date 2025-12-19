@@ -2,7 +2,7 @@ import StaffCategoryController from './controllers';
 import { CreateCategorySchema, DeleteCategorySchema, GetCategoriesSchema, UpdateCategorySchema } from './schemas';
 
 export default function staffCategoryRoutes(fastify: FastifyTypeBox) {
-  const controller = StaffCategoryController.getInstance(fastify);
+  const controller = fastify.diContainer.resolve<StaffCategoryController>('staffCategoryController');
 
   fastify.get('/', { schema: GetCategoriesSchema }, controller.getCategories.bind(controller));
   fastify.post('/', { schema: CreateCategorySchema }, controller.createCategory.bind(controller));

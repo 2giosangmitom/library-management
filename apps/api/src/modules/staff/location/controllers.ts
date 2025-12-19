@@ -1,24 +1,11 @@
 import { AddLocationSchema, DeleteLocationSchema, UpdateLocationSchema, GetLocationsSchema } from './schemas';
-import StaffLocationService from './services';
+import type StaffLocationService from './services';
 
 export default class StaffLocationController {
-  private static instance: StaffLocationController;
   private staffLocationService: StaffLocationService;
-  private fastify: FastifyTypeBox;
 
-  private constructor(fastify: FastifyTypeBox, staffLocationService: StaffLocationService) {
-    this.fastify = fastify;
+  public constructor({ staffLocationService }: { staffLocationService: StaffLocationService }) {
     this.staffLocationService = staffLocationService;
-  }
-
-  public static getInstance(
-    fastify: FastifyTypeBox,
-    staffLocationService = StaffLocationService.getInstance(fastify)
-  ): StaffLocationController {
-    if (!StaffLocationController.instance) {
-      StaffLocationController.instance = new StaffLocationController(fastify, staffLocationService);
-    }
-    return StaffLocationController.instance;
   }
 
   public async addLocation(

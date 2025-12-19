@@ -1,24 +1,11 @@
 import { CreateBookCloneSchema, DeleteBookCloneSchema, GetBookClonesSchema, UpdateBookCloneSchema } from './schemas';
-import StaffBookCloneService from './services';
+import type StaffBookCloneService from './services';
 
 export default class StaffBookCloneController {
-  private static instance: StaffBookCloneController;
   private staffBookCloneService: StaffBookCloneService;
-  private fastify: FastifyTypeBox;
 
-  private constructor(fastify: FastifyTypeBox, staffBookCloneService: StaffBookCloneService) {
-    this.fastify = fastify;
+  public constructor({ staffBookCloneService }: { staffBookCloneService: StaffBookCloneService }) {
     this.staffBookCloneService = staffBookCloneService;
-  }
-
-  public static getInstance(
-    fastify: FastifyTypeBox,
-    staffBookCloneService = StaffBookCloneService.getInstance(fastify)
-  ): StaffBookCloneController {
-    if (!StaffBookCloneController.instance) {
-      StaffBookCloneController.instance = new StaffBookCloneController(fastify, staffBookCloneService);
-    }
-    return StaffBookCloneController.instance;
   }
 
   public async createBookClone(

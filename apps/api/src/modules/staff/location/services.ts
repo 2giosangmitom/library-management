@@ -1,20 +1,14 @@
+import type { PrismaClient } from '@/generated/prisma/client';
 import { Prisma } from '@/generated/prisma/client';
 import type { Static } from 'typebox';
 import { GetLocationsSchema } from './schemas';
+import { httpErrors } from '@fastify/sensible';
 
 export default class StaffLocationService {
-  private static instance: StaffLocationService;
-  private fastify: FastifyTypeBox;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox): StaffLocationService {
-    if (!StaffLocationService.instance) {
-      StaffLocationService.instance = new StaffLocationService(fastify);
-    }
-    return StaffLocationService.instance;
+  public constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
   }
 
   public calculateLocationId(data: { room: string; floor: number; shelf: number; row: number }) {
@@ -25,7 +19,7 @@ export default class StaffLocationService {
     try {
       const location_id = this.calculateLocationId(data);
 
-      const newLocation = await this.fastify.prisma.location.create({
+      const newLocation = await this.prisma.location.create({
         data: { location_id, room: data.room, floor: data.floor, shelf: data.shelf, row: data.row }
       });
 
@@ -33,7 +27,7 @@ export default class StaffLocationService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw this.fastify.httpErrors.conflict('Location with the same ID already exists.');
+          throw httpErrors.conflict('Location with the same ID already exists.');
         }
       }
       throw error;
@@ -42,7 +36,7 @@ export default class StaffLocationService {
 
   public async deleteLocation(location_id: string) {
     try {
-      const deletedLocation = await this.fastify.prisma.location.delete({
+      const deletedLocation = await this.prisma.location.delete({
         select: { location_id: true, room: true, floor: true, shelf: true, row: true },
         where: { location_id }
       });
@@ -51,7 +45,7 @@ export default class StaffLocationService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw this.fastify.httpErrors.notFound('Location with the given ID does not exist.');
+          throw httpErrors.notFound('Location with the given ID does not exist.');
         }
       }
       throw error;
@@ -62,7 +56,7 @@ export default class StaffLocationService {
     try {
       const new_location_id = this.calculateLocationId(data);
 
-      const updatedLocation = await this.fastify.prisma.location.update({
+      const updatedLocation = await this.prisma.location.update({
         where: { location_id },
         data: {
           location_id: new_location_id,
@@ -78,9 +72,9 @@ export default class StaffLocationService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
           case 'P2025':
-            throw this.fastify.httpErrors.notFound('Location with the given ID does not exist.');
+            throw httpErrors.notFound('Location with the given ID does not exist.');
           case 'P2002':
-            throw this.fastify.httpErrors.conflict('Location with the same ID already exists.');
+            throw httpErrors.conflict('Location with the same ID already exists.');
         }
       }
       throw error;
@@ -103,8 +97,8 @@ export default class StaffLocationService {
       filters.row = query.row;
     }
 
-    const [locations, total] = await this.fastify.prisma.$transaction([
-      this.fastify.prisma.location.findMany({
+    const [locations, total] = await this.prisma.$transaction([
+      this.prisma.location.findMany({
         where: filters,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
@@ -118,7 +112,7 @@ export default class StaffLocationService {
           updated_at: true
         }
       }),
-      this.fastify.prisma.location.count({ where: filters })
+      this.prisma.location.count({ where: filters })
     ]);
 
     return { locations, total };

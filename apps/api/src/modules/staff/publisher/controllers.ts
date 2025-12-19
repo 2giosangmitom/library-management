@@ -1,24 +1,11 @@
 import { CreatePublisherSchema, DeletePublisherSchema, UpdatePublisherSchema, GetPublishersSchema } from './schemas';
-import StaffPublisherService from './services';
+import type StaffPublisherService from './services';
 
 export default class StaffPublisherController {
-  private static instance: StaffPublisherController;
   private staffPublisherService: StaffPublisherService;
-  private fastify: FastifyTypeBox;
 
-  private constructor(fastify: FastifyTypeBox, staffPublisherService: StaffPublisherService) {
-    this.fastify = fastify;
+  public constructor({ staffPublisherService }: { staffPublisherService: StaffPublisherService }) {
     this.staffPublisherService = staffPublisherService;
-  }
-
-  public static getInstance(
-    fastify: FastifyTypeBox,
-    staffPublisherService = StaffPublisherService.getInstance(fastify)
-  ): StaffPublisherController {
-    if (!StaffPublisherController.instance) {
-      StaffPublisherController.instance = new StaffPublisherController(fastify, staffPublisherService);
-    }
-    return StaffPublisherController.instance;
   }
 
   public async createPublisher(

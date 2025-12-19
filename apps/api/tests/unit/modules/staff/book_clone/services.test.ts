@@ -5,7 +5,7 @@ import { BookCondition, Prisma } from '@/generated/prisma/client';
 
 describe('StaffBookCloneService', async () => {
   const app = await buildMockFastify();
-  const service = StaffBookCloneService.getInstance(app);
+  const service = new StaffBookCloneService({ prisma: app.prisma });
 
   afterEach(() => {
     vi.restoreAllMocks();
@@ -364,14 +364,6 @@ describe('StaffBookCloneService', async () => {
           updated_at: expect.any(Date)
         })
       );
-    });
-  });
-
-  describe('getInstance', () => {
-    it('should return the same instance', () => {
-      const instance1 = StaffBookCloneService.getInstance(app);
-      const instance2 = StaffBookCloneService.getInstance(app);
-      expect(instance1).toBe(instance2);
     });
   });
 });

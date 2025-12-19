@@ -2,7 +2,7 @@ import StaffBookCloneController from './controllers';
 import { CreateBookCloneSchema, DeleteBookCloneSchema, GetBookClonesSchema, UpdateBookCloneSchema } from './schemas';
 
 export default function staffBookCloneRoutes(fastify: FastifyTypeBox) {
-  const staffBookCloneController = StaffBookCloneController.getInstance(fastify);
+  const staffBookCloneController = fastify.diContainer.resolve<StaffBookCloneController>('staffBookCloneController');
 
   fastify.get(
     '/',

@@ -1,13 +1,10 @@
 import { CreateAuthorSchema, DeleteAuthorSchema, GetAuthorsSchema, UpdateAuthorSchema } from './schemas';
-import StaffAuthorService from './services';
+import type StaffAuthorService from './services';
 
 export default class StaffAuthorController {
-  private static instance: StaffAuthorController;
   private staffAuthorService: StaffAuthorService;
-  private fastify: FastifyTypeBox;
 
-  private constructor(fastify: FastifyTypeBox, staffAuthorService: StaffAuthorService) {
-    this.fastify = fastify;
+  public constructor({ staffAuthorService }: { staffAuthorService: StaffAuthorService }) {
     this.staffAuthorService = staffAuthorService;
   }
 
@@ -63,16 +60,6 @@ export default class StaffAuthorController {
         items: authors.map((author) => this.formatAuthor(author))
       }
     });
-  }
-
-  public static getInstance(
-    fastify: FastifyTypeBox,
-    staffAuthorService = StaffAuthorService.getInstance(fastify)
-  ): StaffAuthorController {
-    if (!StaffAuthorController.instance) {
-      StaffAuthorController.instance = new StaffAuthorController(fastify, staffAuthorService);
-    }
-    return StaffAuthorController.instance;
   }
 
   public async createAuthor(

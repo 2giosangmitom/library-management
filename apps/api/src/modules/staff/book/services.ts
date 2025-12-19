@@ -1,20 +1,14 @@
+import type { PrismaClient } from '@/generated/prisma/client';
 import { Prisma } from '@/generated/prisma/client';
 import type { Static } from 'typebox';
 import { GetBooksSchema } from './schemas';
+import { httpErrors } from '@fastify/sensible';
 
 export default class StaffBookService {
-  private static instance: StaffBookService;
-  private fastify: FastifyTypeBox;
+  private prisma: PrismaClient;
 
-  private constructor(fastify: FastifyTypeBox) {
-    this.fastify = fastify;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox): StaffBookService {
-    if (!StaffBookService.instance) {
-      StaffBookService.instance = new StaffBookService(fastify);
-    }
-    return StaffBookService.instance;
+  public constructor({ prisma }: { prisma: PrismaClient }) {
+    this.prisma = prisma;
   }
 
   public async createBook(data: {
@@ -27,7 +21,7 @@ export default class StaffBookService {
     categories?: string[];
   }) {
     try {
-      const createdBook = await this.fastify.prisma.book.create({
+      const createdBook = await this.prisma.book.create({
         data: {
           title: data.title,
           description: data.description,
@@ -55,7 +49,7 @@ export default class StaffBookService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
-          throw this.fastify.httpErrors.conflict('Book with the given ISBN already exists.');
+          throw httpErrors.conflict('Book with the given ISBN already exists.');
         }
       }
       throw error;
@@ -64,7 +58,7 @@ export default class StaffBookService {
 
   public async deleteBook(book_id: string) {
     try {
-      const deleted = await this.fastify.prisma.book.delete({
+      const deleted = await this.prisma.book.delete({
         select: { book_id: true, title: true },
         where: { book_id }
       });
@@ -73,7 +67,7 @@ export default class StaffBookService {
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2025') {
-          throw this.fastify.httpErrors.notFound('Book with the given ID does not exist.');
+          throw httpErrors.notFound('Book with the given ID does not exist.');
         }
       }
       throw error;
@@ -93,7 +87,7 @@ export default class StaffBookService {
     }
   ) {
     try {
-      const updatedBook = await this.fastify.prisma.book.update({
+      const updatedBook = await this.prisma.book.update({
         include: {
           authors: { select: { author_id: true } },
           categories: { select: { category_id: true } }
@@ -125,9 +119,9 @@ export default class StaffBookService {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         switch (error.code) {
           case 'P2025':
-            throw this.fastify.httpErrors.notFound('Book with the given ID does not exist.');
+            throw httpErrors.notFound('Book with the given ID does not exist.');
           case 'P2002':
-            throw this.fastify.httpErrors.conflict('Book with the given ISBN already exists.');
+            throw httpErrors.conflict('Book with the given ISBN already exists.');
         }
       }
       throw error;
@@ -147,8 +141,8 @@ export default class StaffBookService {
       filters.publisher_id = query.publisher_id;
     }
 
-    const [books, total] = await this.fastify.prisma.$transaction([
-      this.fastify.prisma.book.findMany({
+    const [books, total] = await this.prisma.$transaction([
+      this.prisma.book.findMany({
         where: filters,
         skip: (query.page - 1) * query.limit,
         take: query.limit,
@@ -166,7 +160,7 @@ export default class StaffBookService {
           categories: { select: { category_id: true } }
         }
       }),
-      this.fastify.prisma.book.count({ where: filters })
+      this.prisma.book.count({ where: filters })
     ]);
 
     return { books, total };

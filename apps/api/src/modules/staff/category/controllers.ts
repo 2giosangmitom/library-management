@@ -1,21 +1,11 @@
-import StaffCategoryService from './services';
+import type StaffCategoryService from './services';
 import { CreateCategorySchema, DeleteCategorySchema, GetCategoriesSchema, UpdateCategorySchema } from './schemas';
 
 export default class StaffCategoryController {
-  private static instance: StaffCategoryController;
   private categoryService: StaffCategoryService;
-  private fastify: FastifyTypeBox;
 
-  private constructor(fastify: FastifyTypeBox, categoryService: StaffCategoryService) {
-    this.fastify = fastify;
-    this.categoryService = categoryService;
-  }
-
-  public static getInstance(fastify: FastifyTypeBox, categoryService = StaffCategoryService.getInstance(fastify)) {
-    if (!StaffCategoryController.instance) {
-      StaffCategoryController.instance = new StaffCategoryController(fastify, categoryService);
-    }
-    return StaffCategoryController.instance;
+  public constructor({ staffCategoryService }: { staffCategoryService: StaffCategoryService }) {
+    this.categoryService = staffCategoryService;
   }
 
   public async createCategory(
