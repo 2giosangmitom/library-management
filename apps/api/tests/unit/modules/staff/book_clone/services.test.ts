@@ -379,7 +379,8 @@ describe('StaffBookCloneService', async () => {
         is_available: true
       };
 
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0]);
+      vi.mocked(app.prisma.book_Clone.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.book_Clone.count).mockResolvedValueOnce(0);
 
       await service.getBookClones(query);
 
@@ -403,7 +404,8 @@ describe('StaffBookCloneService', async () => {
         is_available: false
       };
 
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0]);
+      vi.mocked(app.prisma.book_Clone.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.book_Clone.count).mockResolvedValueOnce(0);
 
       await service.getBookClones(query);
 
@@ -419,7 +421,8 @@ describe('StaffBookCloneService', async () => {
     it('should handle query with no filters', async () => {
       const query = { page: 1, limit: 10 };
 
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0]);
+      vi.mocked(app.prisma.book_Clone.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.book_Clone.count).mockResolvedValueOnce(0);
 
       await service.getBookClones(query);
 

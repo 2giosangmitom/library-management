@@ -301,12 +301,16 @@ describe('StaffPublisherService', async () => {
       );
     });
 
-    it('should use transaction to fetch publishers and count', async () => {
+    it('should fetch publishers and count', async () => {
       const query = { page: 1, limit: 10, name: undefined, website: undefined, slug: undefined };
+
+      vi.mocked(app.prisma.publisher.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.publisher.count).mockResolvedValueOnce(0);
 
       await service.getPublishers(query);
 
-      expect(app.prisma.$transaction).toHaveBeenCalled();
+      expect(app.prisma.publisher.findMany).toHaveBeenCalled();
+      expect(app.prisma.publisher.count).toHaveBeenCalledWith({ where: {} });
     });
 
     it('should return publishers and total count', async () => {
@@ -322,7 +326,8 @@ describe('StaffPublisherService', async () => {
         }
       ];
 
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([mockPublishers, 1] as [typeof mockPublishers, number]);
+      vi.mocked(app.prisma.publisher.findMany).mockResolvedValueOnce(mockPublishers);
+      vi.mocked(app.prisma.publisher.count).mockResolvedValueOnce(1);
 
       const query = { page: 1, limit: 10, name: undefined, website: undefined, slug: undefined };
       const result = await service.getPublishers(query);
@@ -334,7 +339,8 @@ describe('StaffPublisherService', async () => {
     });
 
     it('should handle empty results', async () => {
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0] as [never[], number]);
+      vi.mocked(app.prisma.publisher.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.publisher.count).mockResolvedValueOnce(0);
 
       const query = { page: 1, limit: 10, name: undefined, website: undefined, slug: undefined };
       const result = await service.getPublishers(query);

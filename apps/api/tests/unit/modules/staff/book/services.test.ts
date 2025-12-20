@@ -364,12 +364,16 @@ describe('StaffBookService', async () => {
       );
     });
 
-    it('should use transaction to fetch books and count', async () => {
+    it('should fetch books and count', async () => {
       const query = { page: 1, limit: 10, title: undefined, isbn: undefined, publisher_id: undefined };
+
+      vi.mocked(app.prisma.book.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.book.count).mockResolvedValueOnce(0);
 
       await service.getBooks(query);
 
-      expect(app.prisma.$transaction).toHaveBeenCalled();
+      expect(app.prisma.book.findMany).toHaveBeenCalled();
+      expect(app.prisma.book.count).toHaveBeenCalledWith({ where: {} });
     });
 
     it('should return books and total count', async () => {
@@ -389,7 +393,8 @@ describe('StaffBookService', async () => {
         }
       ];
 
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([mockBooks, 1] as [typeof mockBooks, number]);
+      vi.mocked(app.prisma.book.findMany).mockResolvedValueOnce(mockBooks);
+      vi.mocked(app.prisma.book.count).mockResolvedValueOnce(1);
 
       const query = { page: 1, limit: 10, title: undefined, isbn: undefined, publisher_id: undefined };
       const result = await service.getBooks(query);
@@ -401,7 +406,8 @@ describe('StaffBookService', async () => {
     });
 
     it('should handle empty results', async () => {
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0] as [never[], number]);
+      vi.mocked(app.prisma.book.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.book.count).mockResolvedValueOnce(0);
 
       const query = { page: 1, limit: 10, title: undefined, isbn: undefined, publisher_id: undefined };
       const result = await service.getBooks(query);

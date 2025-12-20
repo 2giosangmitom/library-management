@@ -323,7 +323,6 @@ describe('StaffAuthorService', async () => {
         { sortBy: 'updated_at', order: 'desc' }
       );
 
-      expect(app.prisma.$transaction).toHaveBeenCalledTimes(1);
       expect(app.prisma.author.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: {

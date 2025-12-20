@@ -113,7 +113,7 @@ export default class StaffBookCloneService {
       }
     }
 
-    const [bookClones, total] = await this.prisma.$transaction([
+    const [bookClones, total] = await Promise.all([
       this.prisma.book_Clone.findMany({
         where: filters,
         skip: (query.page - 1) * query.limit,

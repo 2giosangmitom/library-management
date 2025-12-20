@@ -135,7 +135,7 @@ export default class StaffAuthorService {
       { author_id: 'asc' }
     ];
 
-    const [authors, total] = await this.prisma.$transaction([
+    const [authors, total] = await Promise.all([
       this.prisma.author.findMany({
         where,
         orderBy,

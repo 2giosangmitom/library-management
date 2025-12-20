@@ -82,7 +82,7 @@ export default class StaffCategoryService {
 
     const where: Prisma.CategoryWhereInput = andFilters.length > 0 ? { AND: andFilters } : {};
 
-    const [categories, total] = await this.prisma.$transaction([
+    const [categories, total] = await Promise.all([
       this.prisma.category.findMany({
         where,
         skip: (query.page - 1) * query.limit,

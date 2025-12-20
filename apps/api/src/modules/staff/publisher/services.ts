@@ -76,7 +76,7 @@ export default class StaffPublisherService {
       filters.slug = { contains: query.slug, mode: 'insensitive' };
     }
 
-    const [publishers, total] = await this.prisma.$transaction([
+    const [publishers, total] = await Promise.all([
       this.prisma.publisher.findMany({
         where: filters,
         skip: (query.page - 1) * query.limit,

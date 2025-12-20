@@ -141,7 +141,7 @@ export default class StaffBookService {
       filters.publisher_id = query.publisher_id;
     }
 
-    const [books, total] = await this.prisma.$transaction([
+    const [books, total] = await Promise.all([
       this.prisma.book.findMany({
         where: filters,
         skip: (query.page - 1) * query.limit,

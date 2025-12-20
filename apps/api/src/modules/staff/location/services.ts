@@ -97,7 +97,7 @@ export default class StaffLocationService {
       filters.row = query.row;
     }
 
-    const [locations, total] = await this.prisma.$transaction([
+    const [locations, total] = await Promise.all([
       this.prisma.location.findMany({
         where: filters,
         skip: (query.page - 1) * query.limit,

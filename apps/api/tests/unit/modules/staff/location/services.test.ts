@@ -301,12 +301,16 @@ describe('StaffLocationService', async () => {
       );
     });
 
-    it('should use transaction to fetch locations and count', async () => {
+    it('should fetch locations and count', async () => {
       const query = { page: 1, limit: 10, room: undefined, floor: undefined, shelf: undefined, row: undefined };
+
+      vi.mocked(app.prisma.location.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.location.count).mockResolvedValueOnce(0);
 
       await staffLocationService.getLocations(query);
 
-      expect(app.prisma.$transaction).toHaveBeenCalled();
+      expect(app.prisma.location.findMany).toHaveBeenCalled();
+      expect(app.prisma.location.count).toHaveBeenCalledWith({ where: {} });
     });
 
     it('should return locations and total count', async () => {
@@ -322,7 +326,8 @@ describe('StaffLocationService', async () => {
         }
       ];
 
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([mockLocations, 1] as [typeof mockLocations, number]);
+      vi.mocked(app.prisma.location.findMany).mockResolvedValueOnce(mockLocations);
+      vi.mocked(app.prisma.location.count).mockResolvedValueOnce(1);
 
       const query = { page: 1, limit: 10, room: undefined, floor: undefined, shelf: undefined, row: undefined };
       const result = await staffLocationService.getLocations(query);
@@ -334,7 +339,8 @@ describe('StaffLocationService', async () => {
     });
 
     it('should handle empty results', async () => {
-      vi.mocked(app.prisma.$transaction).mockResolvedValueOnce([[], 0] as [never[], number]);
+      vi.mocked(app.prisma.location.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.location.count).mockResolvedValueOnce(0);
 
       const query = { page: 1, limit: 10, room: undefined, floor: undefined, shelf: undefined, row: undefined };
       const result = await staffLocationService.getLocations(query);
