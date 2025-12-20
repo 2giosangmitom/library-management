@@ -63,3 +63,22 @@ export const UpdateLoanSchema = {
     500: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;
+
+export const DeleteLoanSchema = {
+  summary: 'Delete a loan',
+  description: 'Remove a loan record for a book clone.',
+  params: Type.Object({
+    loan_id: Type.String({ format: 'uuid' })
+  }),
+  security: [{ JWT: [] }],
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      data: LoanDataSchema
+    }),
+    400: { $ref: 'HttpError' },
+    403: { $ref: 'HttpError' },
+    404: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
+  }
+} as const satisfies FastifySchema;

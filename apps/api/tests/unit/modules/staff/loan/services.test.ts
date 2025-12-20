@@ -227,4 +227,57 @@ describe('StaffLoanService', async () => {
       expect(result).toEqual(mockLoan);
     });
   });
+
+  describe('deleteLoan', () => {
+    it('should call prisma.loan.delete with correct id', async () => {
+      const loan_id = faker.string.uuid();
+
+      await service.deleteLoan(loan_id);
+
+      expect(app.prisma.loan.delete).toHaveBeenCalledWith({ where: { loan_id } });
+    });
+
+    it('should return deleted loan on success', async () => {
+      const loan_id = faker.string.uuid();
+      const mockLoan = {
+        loan_id,
+        user_id: faker.string.uuid(),
+        book_clone_id: faker.string.uuid(),
+        loan_date: faker.date.past(),
+        due_date: faker.date.soon(),
+        return_date: null,
+        status: LoanStatus.BORROWED,
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      } as unknown as Awaited<ReturnType<typeof app.prisma.loan.delete>>;
+
+      vi.mocked(app.prisma.loan.delete).mockResolvedValueOnce(mockLoan);
+
+      const result = await service.deleteLoan(loan_id);
+
+      expect(result).toEqual(mockLoan);
+    });
+
+    it('should throw not found error if loan does not exist', async () => {
+      const loan_id = faker.string.uuid();
+
+      vi.mocked(app.prisma.loan.delete).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(service.deleteLoan(loan_id)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[NotFoundError: Loan with the given ID does not exist.]`
+      );
+    });
+
+    it('should rethrow unknown errors', async () => {
+      const loan_id = faker.string.uuid();
+      vi.mocked(app.prisma.loan.delete).mockRejectedValueOnce(new Error('Unknown error'));
+
+      await expect(service.deleteLoan(loan_id)).rejects.toThrowError('Unknown error');
+    });
+  });
 });

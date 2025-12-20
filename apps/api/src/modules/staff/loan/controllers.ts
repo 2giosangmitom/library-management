@@ -1,6 +1,5 @@
 import type StaffLoanService from './services';
-import { CreateLoanSchema } from './schemas';
-import { UpdateLoanSchema } from './schemas';
+import { CreateLoanSchema, UpdateLoanSchema, DeleteLoanSchema } from './schemas';
 
 export default class StaffLoanController {
   private staffLoanService: StaffLoanService;
@@ -44,6 +43,26 @@ export default class StaffLoanController {
         return_date: updated.return_date ? updated.return_date.toISOString() : null,
         created_at: updated.created_at.toISOString(),
         updated_at: updated.updated_at.toISOString()
+      }
+    });
+  }
+
+  public async deleteLoan(
+    req: FastifyRequestTypeBox<typeof DeleteLoanSchema>,
+    reply: FastifyReplyTypeBox<typeof DeleteLoanSchema>
+  ) {
+    const { loan_id } = req.params;
+    const deleted = await this.staffLoanService.deleteLoan(loan_id);
+
+    return reply.status(200).send({
+      message: 'Loan deleted successfully',
+      data: {
+        ...deleted,
+        loan_date: deleted.loan_date.toISOString(),
+        due_date: deleted.due_date.toISOString(),
+        return_date: deleted.return_date ? deleted.return_date.toISOString() : null,
+        created_at: deleted.created_at.toISOString(),
+        updated_at: deleted.updated_at.toISOString()
       }
     });
   }

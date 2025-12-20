@@ -77,4 +77,21 @@ export default class StaffLoanService {
       throw error;
     }
   }
+
+  public async deleteLoan(loan_id: string) {
+    try {
+      const deleted = await this.prisma.loan.delete({
+        where: { loan_id }
+      });
+
+      return deleted;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw httpErrors.notFound('Loan with the given ID does not exist.');
+        }
+      }
+      throw error;
+    }
+  }
 }
