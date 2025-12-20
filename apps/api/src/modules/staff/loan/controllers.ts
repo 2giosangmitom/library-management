@@ -1,5 +1,5 @@
 import type StaffLoanService from './services';
-import { CreateLoanSchema, UpdateLoanSchema, DeleteLoanSchema } from './schemas';
+import { CreateLoanSchema, UpdateLoanSchema, DeleteLoanSchema, GetLoansSchema } from './schemas';
 
 export default class StaffLoanController {
   private staffLoanService: StaffLoanService;
@@ -64,6 +64,34 @@ export default class StaffLoanController {
         created_at: deleted.created_at.toISOString(),
         updated_at: deleted.updated_at.toISOString()
       }
+    });
+  }
+
+  public async getLoans(
+    req: FastifyRequestTypeBox<typeof GetLoansSchema>,
+    reply: FastifyReplyTypeBox<typeof GetLoansSchema>
+  ) {
+    const { loans, total } = await this.staffLoanService.getLoans({
+      page: req.query.page ?? 1,
+      limit: req.query.limit ?? 100,
+      search: req.query.search,
+      status: req.query.status,
+      user_id: req.query.user_id
+    });
+
+    const totalPages = Math.ceil(total / (req.query.limit ?? 100));
+
+    return reply.status(200).send({
+      message: 'Loans retrieved successfully',
+      meta: { totalPages },
+      data: loans.map((loan) => ({
+        ...loan,
+        loan_date: loan.loan_date.toISOString(),
+        due_date: loan.due_date.toISOString(),
+        return_date: loan.return_date ? loan.return_date.toISOString() : null,
+        created_at: loan.created_at.toISOString(),
+        updated_at: loan.updated_at.toISOString()
+      }))
     });
   }
 }

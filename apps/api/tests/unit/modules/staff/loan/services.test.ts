@@ -280,4 +280,79 @@ describe('StaffLoanService', async () => {
       await expect(service.deleteLoan(loan_id)).rejects.toThrowError('Unknown error');
     });
   });
+
+  describe('getLoans', () => {
+    it('should apply status and user_id filters and pagination', async () => {
+      const query = { page: 2, limit: 20, status: 'BORROWED' as const, user_id: faker.string.uuid() };
+
+      vi.mocked(app.prisma.loan.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.loan.count).mockResolvedValueOnce(0);
+
+      await service.getLoans(query);
+
+      expect(app.prisma.loan.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { status: 'BORROWED', user_id: query.user_id },
+          skip: 20,
+          take: 20
+        })
+      );
+      expect(app.prisma.loan.count).toHaveBeenCalledWith(
+        expect.objectContaining({ where: { status: 'BORROWED', user_id: query.user_id } })
+      );
+    });
+
+    it('should apply search across user email and book clone barcode', async () => {
+      const query = { page: 1, limit: 10, search: 'john' };
+
+      vi.mocked(app.prisma.loan.findMany).mockResolvedValueOnce([]);
+      vi.mocked(app.prisma.loan.count).mockResolvedValueOnce(0);
+
+      await service.getLoans(query);
+
+      const [findArgs] = vi.mocked(app.prisma.loan.findMany).mock.calls.at(-1) ?? [];
+      expect(findArgs).toMatchObject({
+        where: {
+          OR: [
+            { user: { is: { email: { contains: 'john', mode: 'insensitive' } } } },
+            { book_clone: { is: { barcode: { contains: 'john', mode: 'insensitive' } } } }
+          ]
+        },
+        skip: 0,
+        take: 10
+      });
+    });
+
+    it('should return loans and total', async () => {
+      const loans: Array<{
+        loan_id: string;
+        user_id: string;
+        book_clone_id: string;
+        loan_date: Date;
+        due_date: Date;
+        return_date: Date | null;
+        status: 'BORROWED' | 'RETURNED' | 'OVERDUE';
+        created_at: Date;
+        updated_at: Date;
+      }> = [
+        {
+          loan_id: faker.string.uuid(),
+          user_id: faker.string.uuid(),
+          book_clone_id: faker.string.uuid(),
+          loan_date: faker.date.past(),
+          due_date: faker.date.soon(),
+          return_date: null,
+          status: 'BORROWED',
+          created_at: new Date(),
+          updated_at: new Date()
+        }
+      ];
+
+      vi.mocked(app.prisma.loan.findMany).mockResolvedValueOnce(loans);
+      vi.mocked(app.prisma.loan.count).mockResolvedValueOnce(1);
+
+      const result = await service.getLoans({ page: 1, limit: 10 });
+      expect(result).toEqual({ loans, total: 1 });
+    });
+  });
 });

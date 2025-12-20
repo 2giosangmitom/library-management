@@ -94,4 +94,45 @@ export default class StaffLoanService {
       throw error;
     }
   }
+
+  public async getLoans(query: {
+    page: number;
+    limit: number;
+    search?: string;
+    status?: LoanStatus;
+    user_id?: string;
+  }) {
+    const filters: Prisma.LoanWhereInput = {};
+
+    if (query.status) {
+      filters.status = query.status;
+    }
+
+    if (query.user_id) {
+      filters.user_id = query.user_id;
+    }
+
+    const orSearch: Prisma.LoanWhereInput[] = [];
+    if (query.search && query.search.trim().length > 0) {
+      orSearch.push({ user: { is: { email: { contains: query.search, mode: 'insensitive' } } } });
+      orSearch.push({ book_clone: { is: { barcode: { contains: query.search, mode: 'insensitive' } } } });
+    }
+
+    const where: Prisma.LoanWhereInput = {
+      ...filters,
+      ...(orSearch.length > 0 ? { OR: orSearch } : {})
+    };
+
+    const [loans, total] = await Promise.all([
+      this.prisma.loan.findMany({
+        where,
+        skip: (query.page - 1) * query.limit,
+        take: query.limit,
+        orderBy: [{ created_at: 'desc' }, { loan_id: 'asc' }]
+      }),
+      this.prisma.loan.count({ where })
+    ]);
+
+    return { loans, total };
+  }
 }

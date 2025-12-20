@@ -82,3 +82,27 @@ export const DeleteLoanSchema = {
     500: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;
+
+export const GetLoansSchema = {
+  summary: 'Get all loans',
+  description: 'Retrieve loans with pagination, optional search and status filter.',
+  security: [{ JWT: [] }],
+  querystring: Type.Object({
+    page: Type.Optional(Type.Number({ minimum: 1 })),
+    limit: Type.Optional(Type.Number({ minimum: 1, maximum: 100 })),
+    search: Type.Optional(Type.String()),
+    status: Type.Optional(Type.Enum(LoanStatus)),
+    user_id: Type.Optional(Type.String({ format: 'uuid' }))
+  }),
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      meta: Type.Object({
+        totalPages: Type.Number()
+      }),
+      data: Type.Array(LoanDataSchema)
+    }),
+    403: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
+  }
+} as const satisfies FastifySchema;

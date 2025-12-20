@@ -68,7 +68,9 @@ export async function buildMockFastify() {
     loan: {
       create: vi.fn(),
       update: vi.fn(),
-      delete: vi.fn()
+      delete: vi.fn(),
+      findMany: vi.fn(),
+      count: vi.fn()
     },
     $transaction: vi
       .fn()
