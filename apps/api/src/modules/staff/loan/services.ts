@@ -1,5 +1,6 @@
 import type { PrismaClient } from '@/generated/prisma/client';
 import { Prisma } from '@/generated/prisma/client';
+import { LoanStatus } from '@/generated/prisma/enums';
 import { httpErrors } from '@fastify/sensible';
 
 export default class StaffLoanService {
@@ -28,6 +29,49 @@ export default class StaffLoanService {
             throw httpErrors.conflict('Loan already exists for the given book clone.');
           case 'P2003':
             throw httpErrors.badRequest('Invalid user_id or book_clone_id.');
+        }
+      }
+      throw error;
+    }
+  }
+
+  public async updateLoan(
+    loan_id: string,
+    data: { loan_date?: string; due_date?: string; return_date?: string | null; status?: LoanStatus }
+  ) {
+    const updateData: Prisma.LoanUpdateInput = {};
+
+    if (data.loan_date) {
+      updateData.loan_date = new Date(data.loan_date);
+    }
+
+    if (data.due_date) {
+      updateData.due_date = new Date(data.due_date);
+    }
+
+    if (data.return_date !== undefined) {
+      updateData.return_date = data.return_date ? new Date(data.return_date) : null;
+    }
+
+    if (data.status) {
+      updateData.status = data.status;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      throw httpErrors.badRequest('No update fields provided.');
+    }
+
+    try {
+      const loan = await this.prisma.loan.update({
+        where: { loan_id },
+        data: updateData
+      });
+
+      return loan;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2025') {
+          throw httpErrors.notFound('Loan with the given ID does not exist.');
         }
       }
       throw error;

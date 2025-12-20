@@ -2,6 +2,7 @@ import StaffLoanService from '@/modules/staff/loan/services';
 import { buildMockFastify } from '../../../helpers/mockFastify';
 import { faker } from '@faker-js/faker';
 import { Prisma } from '@/generated/prisma/client';
+import { LoanStatus } from '@/generated/prisma/enums';
 
 describe('StaffLoanService', async () => {
   const app = await buildMockFastify();
@@ -122,6 +123,108 @@ describe('StaffLoanService', async () => {
           updated_at: expect.any(Date)
         })
       );
+    });
+  });
+
+  describe('updateLoan', () => {
+    it('should call prisma.loan.update with correct data', async () => {
+      const loan_id = faker.string.uuid();
+      const data = {
+        loan_date: faker.date.recent().toISOString(),
+        due_date: faker.date.soon().toISOString(),
+        return_date: faker.date.recent().toISOString(),
+        status: LoanStatus.RETURNED
+      };
+
+      await service.updateLoan(loan_id, data);
+
+      expect(app.prisma.loan.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { loan_id },
+          data: {
+            loan_date: new Date(data.loan_date),
+            due_date: new Date(data.due_date),
+            return_date: new Date(data.return_date),
+            status: data.status
+          }
+        })
+      );
+    });
+
+    it('should handle null return_date', async () => {
+      const loan_id = faker.string.uuid();
+      const data = {
+        return_date: null,
+        status: LoanStatus.BORROWED
+      };
+
+      await service.updateLoan(loan_id, data);
+
+      expect(app.prisma.loan.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ return_date: null })
+        })
+      );
+    });
+
+    it('should throw bad request when no fields provided', async () => {
+      const loan_id = faker.string.uuid();
+
+      await expect(service.updateLoan(loan_id, {})).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[BadRequestError: No update fields provided.]`
+      );
+      expect(app.prisma.loan.update).not.toHaveBeenCalled();
+    });
+
+    it('should throw not found error if loan does not exist', async () => {
+      const loan_id = faker.string.uuid();
+      const data = { status: LoanStatus.OVERDUE };
+
+      vi.mocked(app.prisma.loan.update).mockRejectedValueOnce(
+        new Prisma.PrismaClientKnownRequestError('Record not found', {
+          code: 'P2025',
+          clientVersion: Prisma.prismaVersion.client
+        })
+      );
+
+      await expect(service.updateLoan(loan_id, data)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[NotFoundError: Loan with the given ID does not exist.]`
+      );
+    });
+
+    it('should rethrow unknown errors', async () => {
+      const loan_id = faker.string.uuid();
+      const data = { status: LoanStatus.BORROWED };
+
+      vi.mocked(app.prisma.loan.update).mockRejectedValueOnce(new Error('Unknown error'));
+
+      await expect(service.updateLoan(loan_id, data)).rejects.toThrowError('Unknown error');
+    });
+
+    it('should return updated loan on success', async () => {
+      const loan_id = faker.string.uuid();
+      const data = {
+        status: LoanStatus.RETURNED,
+        return_date: faker.date.recent().toISOString()
+      };
+
+      const mockLoan = {
+        loan_id,
+        user_id: faker.string.uuid(),
+        book_clone_id: faker.string.uuid(),
+        loan_date: faker.date.past(),
+        due_date: faker.date.soon(),
+        return_date: new Date(data.return_date),
+        status: LoanStatus.RETURNED,
+        created_at: faker.date.anytime(),
+        updated_at: faker.date.anytime()
+      } as unknown as Awaited<ReturnType<typeof app.prisma.loan.update>>;
+
+      vi.mocked(app.prisma.loan.update).mockResolvedValueOnce(mockLoan);
+
+      const result = await service.updateLoan(loan_id, data);
+
+      expect(result).toEqual(mockLoan);
     });
   });
 });

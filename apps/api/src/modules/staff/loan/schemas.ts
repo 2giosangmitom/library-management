@@ -35,3 +35,31 @@ export const CreateLoanSchema = {
     500: { $ref: 'HttpError' }
   }
 } as const satisfies FastifySchema;
+
+export const UpdateLoanSchema = {
+  summary: 'Update a loan',
+  description: 'Update loan status, due date, or return date.',
+  params: Type.Object({
+    loan_id: Type.String({ format: 'uuid' })
+  }),
+  body: Type.Object(
+    {
+      loan_date: Type.Optional(Type.String({ format: 'date-time' })),
+      due_date: Type.Optional(Type.String({ format: 'date-time' })),
+      return_date: Type.Optional(Type.Union([Type.String({ format: 'date-time' }), Type.Null()])),
+      status: Type.Optional(Type.Enum(LoanStatus))
+    },
+    { additionalProperties: false, minProperties: 1 }
+  ),
+  security: [{ JWT: [] }],
+  response: {
+    200: Type.Object({
+      message: Type.String(),
+      data: LoanDataSchema
+    }),
+    400: { $ref: 'HttpError' },
+    403: { $ref: 'HttpError' },
+    404: { $ref: 'HttpError' },
+    500: { $ref: 'HttpError' }
+  }
+} as const satisfies FastifySchema;
