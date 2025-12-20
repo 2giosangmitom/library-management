@@ -14,15 +14,22 @@ export default fp(
           version: '1.0.0'
         },
         tags: [
-          { name: 'Auth', description: 'Authentication related endpoints' },
-          { name: 'User', description: 'User management endpoints' },
-          { name: 'Book', description: 'Book management endpoints' },
-          { name: 'Loan', description: 'Book loan management endpoints' },
-          { name: 'Author', description: 'Author management endpoints' },
-          { name: 'Category', description: 'Book category management endpoints' },
-          { name: 'Rating', description: 'Book rating endpoints' },
-          { name: 'Publisher', description: 'Publisher management endpoints' },
-          { name: 'Staff', description: 'Staff related endpoints' }
+          { name: 'Auth', description: 'Sign up, sign in, refresh, and sign out flows' },
+          { name: 'User', description: 'Authenticated user profile and password management' },
+          { name: 'Author', description: 'Public author lookup by slug' },
+          { name: 'Book', description: 'Public book catalog access' },
+          { name: 'Category', description: 'Public category listing' },
+          { name: 'Publisher', description: 'Public publisher lookup by slug' },
+          { name: 'Rating', description: 'Public book rating endpoints' },
+          { name: 'Loan', description: 'Public-facing loan-related operations (if any)' },
+          { name: 'Admin', description: 'Admin-only management endpoints' },
+          { name: 'Staff/Author', description: 'Staff CRUD and search for authors' },
+          { name: 'Staff/Book', description: 'Staff CRUD and listing for books' },
+          { name: 'Staff/BookClone', description: 'Staff CRUD and availability management for book copies' },
+          { name: 'Staff/Category', description: 'Staff CRUD and listing for categories' },
+          { name: 'Staff/Publisher', description: 'Staff CRUD and listing for publishers' },
+          { name: 'Staff/Loan', description: 'Staff loan creation and tracking' },
+          { name: 'Staff/Location', description: 'Staff management of library locations' }
         ],
         components: {
           securitySchemes: {
