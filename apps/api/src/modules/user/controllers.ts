@@ -9,10 +9,6 @@ export default class UserController {
   }
 
   public async getMe(req: FastifyRequestTypeBox<typeof GetMeSchema>, reply: FastifyReplyTypeBox<typeof GetMeSchema>) {
-    if (!req.user) {
-      throw new Error('User not authenticated');
-    }
-
     const user = req.user as AccessToken;
 
     const data = await this.userService.getUserById(user.sub);
@@ -31,10 +27,6 @@ export default class UserController {
     req: FastifyRequestTypeBox<typeof ChangePasswordSchema>,
     reply: FastifyReplyTypeBox<typeof ChangePasswordSchema>
   ) {
-    if (!req.user) {
-      throw new Error('User not authenticated');
-    }
-
     const user = req.user as AccessToken;
     const { current_password, new_password } = req.body;
 
