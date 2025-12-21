@@ -22,7 +22,7 @@ async function main() {
   });
 
   app.listen({
-    port: parseInt(process.env.FASTIFY_PORT ?? '3000'),
+    port: parseInt(process.env.FASTIFY_PORT ?? '8080'),
     host: process.env.FASTIFY_HOST ?? '127.0.0.1'
   });
 
