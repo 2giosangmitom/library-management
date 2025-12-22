@@ -4,28 +4,21 @@ import { Form, Input, Button, notification, type FormProps } from 'antd';
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
+import { openNotificationWithIcon } from '@/utils/notification';
 
+// Type for form fields
 type FieldType = {
   fullName: string;
   email: string;
   password: string;
 };
 
-type NotificationType = 'success' | 'info' | 'warning' | 'error';
-
 export default function SignUp() {
   const [loading, setLoading] = useState<boolean>(false);
   const [api, contextHolder] = notification.useNotification();
   const [form] = Form.useForm<FieldType>();
 
-  const openNotificationWithIcon = (type: NotificationType, title: string, description: string) => {
-    api[type]({
-      title,
-      description,
-      placement: 'bottomRight'
-    });
-  };
-
+  // Handle form submission
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
       setLoading(true);
@@ -43,13 +36,13 @@ export default function SignUp() {
       const data = await response.json();
 
       if (!response.ok) {
-        openNotificationWithIcon('error', 'Failure', data.message);
+        openNotificationWithIcon(api, 'error', 'Failure', data.message);
       } else {
-        openNotificationWithIcon('success', 'Success', data.message);
+        openNotificationWithIcon(api, 'success', 'Success', data.message);
       }
     } catch (error) {
       console.error('Error during sign up:', error);
-      openNotificationWithIcon('error', 'Error', 'An unexpected error occurred. Please try again later.');
+      openNotificationWithIcon(api, 'error', 'Error', 'An unexpected error occurred. Please try again later.');
     } finally {
       form.resetFields();
       setLoading(false);
