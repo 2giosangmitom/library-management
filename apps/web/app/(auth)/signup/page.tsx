@@ -56,7 +56,13 @@ export default function SignUp() {
       <h1 className="text-4xl font-bold mb-6">Create your account</h1>
       <p className="mb-6">Join BookWise today and unlock a world of academic resources at your fingertips.</p>
 
-      <Form layout="vertical" name="signup_form" onFinish={onFinish} form={form} autoComplete="off">
+      <Form
+        layout="vertical"
+        name="signup_form"
+        onFinish={onFinish}
+        form={form}
+        autoComplete="off"
+        validateTrigger="onBlur">
         <Form.Item<FieldType>
           label="Full Name"
           name="fullName"
@@ -67,7 +73,10 @@ export default function SignUp() {
         <Form.Item<FieldType>
           label="Email"
           name="email"
-          rules={[{ required: true, message: 'Please input your email!' }]}>
+          rules={[
+            { required: true, message: 'Please input your email!' },
+            { type: 'email', message: 'Invalid email format' }
+          ]}>
           <Input prefix={<MailOutlined />} placeholder="Your email" disabled={loading} />
         </Form.Item>
 

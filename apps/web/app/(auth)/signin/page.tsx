@@ -55,11 +55,20 @@ export default function SignIn() {
       <h1 className="text-4xl font-bold mb-6">Welcome back</h1>
       <p className="mb-6">Sign in to your BookWise account to access your library and bookmarks.</p>
 
-      <Form layout="vertical" name="signin_form" onFinish={onFinish} form={form} autoComplete="off">
+      <Form
+        layout="vertical"
+        name="signin_form"
+        onFinish={onFinish}
+        form={form}
+        autoComplete="off"
+        validateTrigger="onBlur">
         <Form.Item<FieldType>
           label="Email"
           name="email"
-          rules={[{ required: true, message: 'Please input your email!' }]}>
+          rules={[
+            { required: true, message: 'Please input your email!' },
+            { type: 'email', message: 'Invalid email format' }
+          ]}>
           <Input prefix={<MailOutlined />} placeholder="Your email" disabled={loading} />
         </Form.Item>
 
