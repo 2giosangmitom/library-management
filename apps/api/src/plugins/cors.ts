@@ -8,7 +8,8 @@ export default fp(
 
     await fastify.register(fastifyCors, {
       origin: opts.CORS_ORIGINS?.split(',') ?? [],
-      methods: opts.CORS_METHODS?.split(',') ?? []
+      methods: opts.CORS_METHODS?.split(',') ?? [],
+      credentials: true
     });
   },
   {

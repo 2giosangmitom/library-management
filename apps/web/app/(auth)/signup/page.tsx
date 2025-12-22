@@ -31,7 +31,8 @@ export default function SignUp() {
         body: JSON.stringify(values),
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        credentials: 'include'
       });
       const data = await response.json();
 
