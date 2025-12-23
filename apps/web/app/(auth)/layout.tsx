@@ -5,7 +5,7 @@ export default function AuthLayout({
 }>) {
   return (
     <div className="flex justify-between min-h-screen">
-      <div className="bg-[url('/images/auth-bg.png')] bg-cover bg-center inset-0 pt-10 pl-10 w-1/2 relative before:absolute before:left-0 before:top-0 before:w-full before:h-full before:bg-gray-900/80 hidden md:block">
+      <div className="bg-[url('/images/library-with-books.jpg')] bg-cover bg-center inset-0 pt-10 pl-10 w-1/2 relative before:absolute before:left-0 before:top-0 before:w-full before:h-full before:bg-gray-900/80 hidden md:block">
         <div className="absolute flex gap-x-4 z-10">
           <div className="bg-blue-600 shadow-xl p-2 rounded-lg">
             {/* eslint-disable-next-line @next/next/no-img-element */}
