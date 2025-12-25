@@ -5,6 +5,7 @@ import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
 import { openNotificationWithIcon } from '@/utils/notification';
+import { API_BASE_URL } from '@/lib/constants';
 
 // Type for form fields
 type FieldType = {
@@ -22,11 +23,7 @@ export default function SignUpForm() {
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
       setLoading(true);
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!baseUrl) {
-        throw new Error('No API url provided');
-      }
-      const response = await fetch(`${baseUrl}/auth/signup`, {
+      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
         method: 'POST',
         body: JSON.stringify(values),
         headers: {
