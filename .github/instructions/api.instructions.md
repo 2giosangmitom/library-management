@@ -598,17 +598,17 @@ pnpm lint
 
 ## Common Pitfalls
 
-❌ **Don't** use Singleton pattern - use Awilix DI instead
-❌ **Don't** inject entire `FastifyTypeBox` instance into services
-❌ **Don't** use `this.fastify.httpErrors` - import `httpErrors` directly from `@fastify/sensible`
-❌ **Don't** forget to bind controller methods in routes
-❌ **Don't** forget to register services/controllers in `autohooks.ts`
-❌ **Don't** put business logic in controllers
-❌ **Don't** access database directly in controllers  
-❌ **Don't** return errors manually - always throw
-❌ **Don't** use `satisfies` without `as const` in schemas
-❌ **Don't** forget to handle null/undefined from Prisma queries
-❌ **Don't** import services/controllers without `type` keyword (causes circular deps)
+- **Don't** use Singleton pattern - use Awilix DI instead
+- **Don't** inject entire `FastifyTypeBox` instance into services
+- **Don't** use `this.fastify.httpErrors` - import `httpErrors` directly from `@fastify/sensible`
+- **Don't** forget to bind controller methods in routes
+- **Don't** forget to register services/controllers in `autohooks.ts`
+- **Don't** put business logic in controllers
+- **Don't** access database directly in controllers
+- **Don't** return errors manually - always throw
+- **Don't** use `satisfies` without `as const` in schemas
+- **Don't** forget to handle null/undefined from Prisma queries
+- **Don't** import services/controllers without `type` keyword (causes circular deps)
 
 ## Running Tests
 
