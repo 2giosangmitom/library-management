@@ -4,8 +4,10 @@ import { Form, Input, Button, notification, type FormProps } from 'antd';
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
 import NextLink from 'next/link';
 import { useState } from 'react';
+import axios from 'axios';
 import { openNotificationWithIcon } from '@/utils/notification';
-import { API_BASE_URL } from '@/lib/constants';
+import { signUp } from '@/lib/api/auth';
+import { SignUpResponse } from '@/lib/api/types';
 
 // Type for form fields
 type FieldType = {
@@ -23,24 +25,17 @@ export default function SignUpForm() {
   const onFinish: FormProps<FieldType>['onFinish'] = async (values) => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/auth/signup`, {
-        method: 'POST',
-        body: JSON.stringify(values),
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include'
-      });
-      const data = await response.json();
+      const response = await signUp(values);
 
-      if (!response.ok) {
-        openNotificationWithIcon(api, 'error', 'Failure', data.message);
-      } else {
-        openNotificationWithIcon(api, 'success', 'Success', data.message);
-      }
+      openNotificationWithIcon(api, 'success', 'Success', response.data.message);
     } catch (error) {
       console.error('Error during sign up:', error);
-      openNotificationWithIcon(api, 'error', 'Error', 'An unexpected error occurred. Please try again later.');
+
+      if (axios.isAxiosError<SignUpResponse>(error) && error.response) {
+        openNotificationWithIcon(api, 'error', 'Error', error.response.data.message);
+      } else {
+        openNotificationWithIcon(api, 'error', 'Error', 'An unexpected error occurred. Please try again later.');
+      }
     } finally {
       form.resetFields();
       setLoading(false);
